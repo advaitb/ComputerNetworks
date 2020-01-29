@@ -17,6 +17,7 @@ int main( int argc, char* argv[]){
 	char* hostname;
 	char* clear_servers[4] = {"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
 	uint32_t port, size, count;
+	
 	/*
 	 *need 5 arguments
 	 */
@@ -33,6 +34,22 @@ int main( int argc, char* argv[]){
 	/*
 	 *check for correctness of commandline arguments
 	 */
+	uint8_t i;
+	uint8_t cnt = 0;
+	for(i=0; i < 4; i++){
+		if(strcmp(hostname,clear_servers[i]) == 0){
+			printf("Hostname verfied to be: %s\n",hostname);
+			break;
+		}
+		else{
+			cnt++;
+		}
+	}
+	if(cnt == 4){
+		printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+		exit(1);
+	}
+
 	if(port < 18000 || port > 18200){
 		printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
 		exit(1);
@@ -50,7 +67,12 @@ int main( int argc, char* argv[]){
 		exit(1);
 	}
 
+	/*
+	 * establish connection
+	 */	
 	
+	
+
 
 	return 0;
 
