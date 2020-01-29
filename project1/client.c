@@ -11,16 +11,12 @@
 
 int main( int argc, char* argv[]){
 
-	/*
- 	* vars to store command line arguments
- 	*/
+	/* vars to store command line arguments */
 	char* hostname;
 	char* clear_servers[4] = {"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
 	uint32_t port, size, count;
 	
-	/*
-	 *need 5 arguments
-	 */
+	/* need 5 arguments */
 	if(argc !=  5){
 		printf("Not enough arguments!\n");
 		exit(1);
@@ -31,9 +27,7 @@ int main( int argc, char* argv[]){
 	size = atoi(argv[3]);
 	count = atoi(argv[4]);
 
-	/*
-	 *check for correctness of commandline arguments
-	 */
+	/* check for correctness of commandline arguments */
 	uint8_t i;
 	uint8_t cnt = 0;
 	for(i=0; i < 4; i++){
@@ -67,13 +61,61 @@ int main( int argc, char* argv[]){
 		exit(1);
 	}
 
-	/*
-	 * establish connection
-	 */	
+	/* establish connection based on sample code provided in class */	
 	
+	/* our client socket */
+  	int sock;
+
+  	/* variables for identifying the server */
+  	unsigned int server_addr;
+  	struct sockaddr_in sin;
+  	struct addrinfo *getaddrinfo_result, hints;
+
+  	/* convert server domain name to IP address */
+  	memset(&hints, 0, sizeof(struct addrinfo));
+  	hints.ai_family = AF_INET; /* indicates we want IPv4 */	
 	
+	/* make buffers to send and recieve data, these buffers are bounded by user provided size */
+	char* receive_buff, send_buff;
+	
+	/* intitialize mem */
+	receive_buff = malloc(size);
+	send_buff = malloc(size);
+
+	/* check if allocated */
+	if((!receive_buff) || (!send_buff)){
+		perror("Error allocating one/both the buffers");
+		abort();	
+	}
+	
+	/* get server address */
+	if (getaddrinfo(hostname, NULL, &hints, &getaddrinfo_result) == 0) {
+    		server_addr = (unsigned int) ((struct sockaddr_in *) (getaddrinfo_result->ai_addr))->sin_addr.s_addr;
+    		freeaddrinfo(getaddrinfo_result);
+  	}	
+
+	/* create socket */
+  	if ((sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    	{
+      		perror ("Error opening TCP socket");
+      		abort ();
+    	}
+
+	/* fill in the server's address */
+  	memset (&sin, 0, sizeof (sin));
+  	sin.sin_family = AF_INET;
+  	sin.sin_addr.s_addr = server_addr;
+  	sin.sin_port = htons(port);
+
+	/* finally time to connect */
+	if (connect(sock, (struct sockaddr *) &sin, sizeof (sin)) < 0)
+    	{	
+      		perror("Error connection to server failed");
+      		abort();
+    	}
 
 
+	/* return */
 	return 0;
 
 }
