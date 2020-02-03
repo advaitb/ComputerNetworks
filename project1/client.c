@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -76,11 +77,12 @@ int main( int argc, char* argv[]){
   	hints.ai_family = AF_INET; /* indicates we want IPv4 */	
 	
 	/* make buffers to send and recieve data, these buffers are bounded by user provided size */
-	char* receive_buff, send_buff;
+	char* receive_buff;
+	char* send_buff;
 	
-	/* intitialize mem */
-	receive_buff = malloc(size);
-	send_buff = malloc(size);
+	/* intitialize mem to size -  10 bytes */
+	receive_buff = (char*) malloc(size);
+	send_buff = (char*) malloc(size);
 
 	/* check if allocated */
 	if((!receive_buff) || (!send_buff)){
@@ -98,7 +100,7 @@ int main( int argc, char* argv[]){
   	if ((sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     	{
       		perror ("Error opening TCP socket");
-      		abort ();
+      		abort();
     	}
 
 	/* fill in the server's address */
@@ -114,9 +116,19 @@ int main( int argc, char* argv[]){
       		abort();
     	}
 
+	
+	/* get time of day */
+	struct timeval tv;
+	struct timezone tz;
+	/* variables to save sec, usec. Should take 4 bytes each */
+	int tv_sec,tv_usec;
+	if(gettimeofday(&tv,&tz) == 0){
+		int tv_sec = tv.tv_sec;
+		int tv_usec = tv.tv_usec;
+	}
 
 	/* return */
 	return 0;
 
 }
-
+	
