@@ -15,8 +15,7 @@ int main( int argc, char* argv[]){
 	/* vars to store command line arguments */
 	char* hostname;
 	char* clear_servers[4] = {"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
-	uint32_t port, size, count;
-	
+	unsigned short port, size, count;
 	/* need 5 arguments */
 	if(argc !=  5){
 		printf("Not enough arguments!\n");
@@ -61,7 +60,11 @@ int main( int argc, char* argv[]){
 		printf("Params checked [OK]\n");
 		exit(1);
 	}
+	
 
+	char* msg = "Hello, this is client";
+	
+	
 	/* establish connection based on sample code provided in class */	
 	
 	/* our client socket */
@@ -120,13 +123,34 @@ int main( int argc, char* argv[]){
 	/* get time of day */
 	struct timeval tv;
 	struct timezone tz;
+	
 	/* variables to save sec, usec. Should take 4 bytes each */
 	int tv_sec,tv_usec;
 	if(gettimeofday(&tv,&tz) == 0){
-		int tv_sec = tv.tv_sec;
-		int tv_usec = tv.tv_usec;
-	}
+		tv_sec = (int)tv.tv_sec;
+		tv_usec = (int)tv.tv_usec;
+ 	}
+	
+	printf("%l",tv_sec);
+	printf("%l",tv_usec);
 
+	
+	
+	
+	
+	/* 
+	
+	memcpy all the bytes in send buffer in the right order 
+	memcpy(&send_buff,(char*) &size, sizeof(unsigned short));
+	memcpy(&send_buff+2,(char*) &tv_sec, sizeof(int));
+	memcpy(&send_buff+6,(char*) &tv_usec, sizeof(int));
+	strcpy(send_buff+10,msg);
+ 	
+
+	printf("%c\n", send_buff[0]);
+	
+	*/
+	
 	/* return */
 	return 0;
 
