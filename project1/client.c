@@ -14,7 +14,7 @@ int main( int argc, char* argv[]){
 
 	/* vars to store command line arguments */
 	char* hostname;
-	char* clear_servers[4] = {"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
+	const char* clear_servers[4] = {"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
 	unsigned short port, size, count;
 	/* need 5 arguments */
 	if(argc !=  5){
@@ -62,7 +62,7 @@ int main( int argc, char* argv[]){
 	}
 	
 
-	char* msg = "Hello, this is client";
+	const char* msg = "Hello, this is client";
 	
 	
 	/* establish connection based on sample code provided in class */	
@@ -131,9 +131,7 @@ int main( int argc, char* argv[]){
 		tv_usec = (int)tv.tv_usec;
  	}
 	
-	printf("%l",tv_sec);
-	printf("%l",tv_usec);
-
+	printf("%d\n",tv_sec);
 	
 	
 	
