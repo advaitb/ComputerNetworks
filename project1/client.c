@@ -70,7 +70,8 @@ int main( int argc, char* argv[]){
   	struct addrinfo *getaddrinfo_result, hints;
   	/* convert server domain name to IP address */
   	memset(&hints, 0, sizeof(struct addrinfo));
-  	hints.ai_family = AF_INET; /* indicates we want IPv4 */	
+	/* indicates we want IPv4 */	
+  	hints.ai_family = AF_INET; 
 	/* make buffers to send and recieve data, these buffers are bounded by user provided size */
 	char* receive_buff;
 	char* send_buff;
@@ -106,6 +107,7 @@ int main( int argc, char* argv[]){
     	}
 	/* get time of day */
 	struct timeval tv;
+	/* 2D array to store timing, count - iteration, 0 - sec diff, 1 - usec  diff */ 
 	int timings[count][2];
 	/* send message count number of times */
 	while (count != 0){
@@ -136,9 +138,12 @@ int main( int argc, char* argv[]){
 		/* decrement */
 		count--;
 	}
+	/* close connection and free memory */
+	close(sock);
+	free(send_buff);
+	free(receive_buff);
 
-	/* temp testing till all timings are not calculated */
-	exit(0);
+
 
 	/* -------------- NEEDS TO BE COPIED BELOW (END) ---------------- */
 
