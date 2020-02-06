@@ -25,7 +25,7 @@ int main( int argc, char* argv[]){
 	port = atoi(argv[2]);
 	size = atoi(argv[3]);
 	count = atoi(argv[4]);
-	/* check for correctness of commandline arguments */
+	/* check for correctness of command line arguments */
 	uint8_t i;
 	uint8_t cnt = 0;
 	for(i=0; i < 4; i++){
@@ -108,7 +108,7 @@ int main( int argc, char* argv[]){
 	/* get time of day */
 	struct timeval tv;
 	/* 2D array to store timing, count - iteration, 0 - sec diff, 1 - usec  diff */ 
-	int timings[count][2];
+	float timings[count];
 	/* send message count number of times */
 	while (count != 0){
 		/* variables to save sec, usec. Should take 4 bytes each */
@@ -126,15 +126,20 @@ int main( int argc, char* argv[]){
 		send(sock,send_buff,size,0);
 		/* receive message from server */
         	int recv_cnt = recv(sock, receive_buff, size, 0);
+		/* couldn't receive */
+		if (recv_cnt < 0){
+			perror("Error receiving failure");
+			abort();
+		}
 		/* retrieve the bytes from the server */
 		rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
 		rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
-		/* calculate latency */ 
-		int sec_diff = rtv_sec - stv_sec;
-		int usec_diff = rtv_sec - stv_sec;	
+		/* calculate latency in millisecs */ 
+		float sec_diff = (rtv_sec - stv_sec)*1000;
+		float usec_diff = (rtv_sec - stv_sec)/1000;	
 		/* note latency */
-		timings[count-1][0] = sec_diff;
-		timings[count-1][1] = usec_diff;
+		timings[count-1] = sec_diff+usec_diff;
+		print("Latency observed in iteration %i is %.3f",count,timings[count-1]);
 		/* decrement */
 		count--;
 	}
@@ -142,10 +147,10 @@ int main( int argc, char* argv[]){
 	close(sock);
 	free(send_buff);
 	free(receive_buff);
+	
+	
 
 
-
-	/* -------------- NEEDS TO BE COPIED BELOW (END) ---------------- */
 
 	
 	
