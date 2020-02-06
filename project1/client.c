@@ -60,7 +60,7 @@ int main( int argc, char* argv[]){
 		printf("Params checked [OK]\n");
 	}
 	
-
+	/* the message we are sending across */
 	const char* msg = "Hello, this is client";
 	
 	
@@ -86,30 +86,31 @@ int main( int argc, char* argv[]){
 	receive_buff = (char*) malloc(size);
 	send_buff = (char*) malloc(size);
 
-
-		/* get time of day */
+	/* get time of day */
 	struct timeval tv;
-	struct timezone tz;
 	
 	/* variables to save sec, usec. Should take 4 bytes each */
-	int tv_sec,tv_usec;
+	int stv_sec,stv_usec,rtv_sec,rtv_usec;
 	if(gettimeofday(&tv,NULL) == 0){
-		tv_sec = (int)tv.tv_sec;
-		tv_usec = (int)tv.tv_usec;
+		stv_sec = (int)tv.tv_sec;
+		stv_usec = (int)tv.tv_usec;
  	}
 	
-	//printf("%d\n",tv_sec);
+	/* Assign bytes accordingly */
+	*(char*)(send_buff) = (char) size;
+ 	*(int*)(send_buff+2) = htonl(stv_sec);
+ 	*(int*)(send_buff+6) = htonl(stv_usec);
+	strcpy(send_buff+10,msg);
 	
-	/* memcpy all the bytes in send buffer in the right order */ 
-	//memcpy(&send_buff,(char*) &size, sizeof(unsigned short));
-	//memcpy(&send_buff+2,(char*) &tv_sec, sizeof(int));
-	//memcpy(&send_buff+6,(char*) &tv_usec, sizeof(int));
-	//strcpy(send_buff+10,msg);
- 	*(char*)(send_buff) = (char) size;
- 	*(int*)(send_buff+2) = tv_sec;
- 	*(int*)(send_buff+6) = tv_usec;
- 	*(char*)(send_buff+10) = msg;
-	//printf("%c\n", send_buff[0]);
+	/* send message to server */
+	send(sock,send_buffer,size,0);
+	
+	/* receive message from server */
+	recv_cnt = recv(sock, receive_buff, size, 0);
+
+	/* Retrieve the bytes from the client */
+	/* TODO: */
+
 	exit(0);
 
 	/* check if allocated */
