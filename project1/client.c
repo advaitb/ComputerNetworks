@@ -113,7 +113,8 @@ int main( int argc, char* argv[]){
 	/* send message count number of times */
 	while (count != 0){
 		/* variables to save sec, usec. Should take 4 bytes each */
-		int stv_sec,stv_usec,rtv_sec,rtv_usec;
+		// int stv_sec,stv_usec,rtv_sec,rtv_usec;
+		int stv_sec,stv_usec,tv_sec,tv_usec;
 		if(gettimeofday(&tv,NULL) == 0){
 			stv_sec = (int)tv.tv_sec;
 			stv_usec = (int)tv.tv_usec;
@@ -125,23 +126,47 @@ int main( int argc, char* argv[]){
  		*(int*)(send_buff+6) = htonl(stv_usec);
 		strcpy(send_buff+10, msg);
 		/* send message to server */
-		printf("send message\n");
+		printf("\nsend message\n");
 		send(sock,send_buff,size,0);
 		/* receive message from server */
-        	int recv_cnt = recv(sock, receive_buff, size, 0);
+        int recv_cnt = recv(sock, receive_buff, size, 0);
+		int size = (int) ntohs(*(int *)(receive_buff));
+		printf("size is %d\n", size);
+		printf("receive count is %d\n", recv_cnt);
+		printf("message is %s\n", receive_buff+10);
+
+        while (size != recv_cnt)
+        {
+        	printf("Still transmitting, re-try receiving\n");
+	        recv_cnt = recv(sock, receive_buff, size, 0);
+			size = (int) ntohs(*(int *)(receive_buff));
+			printf("size is %d\n", size);
+			printf("receive count is %d\n", recv_cnt);
+			printf("message is %s\n", receive_buff+10);
+        }
+
 		/* couldn't receive */
 		if (recv_cnt < 0){
 			perror("Error receiving failure");
 			abort();
 		}
 		/* retrieve the bytes from the server */
-		rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
-		rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
+		// rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
+		// rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
+		
+		/* Get current time */
+		if(gettimeofday(&tv,NULL) == 0){
+			tv_sec = (int)tv.tv_sec;
+			tv_usec = (int)tv.tv_usec;
+ 		}
 		/* calculate latency in millisecs */ 
-		float sec_diff = (rtv_sec - stv_sec)*1000;
-		float usec_diff = (rtv_sec - stv_sec)/1000;	
+		float sec_diff = (tv_sec - stv_sec)*1000;
+		// float usec_diff = (tv_sec - stv_sec)/1000;	
+		float usec_diff = (tv_usec - stv_usec);	
 		/* note latency */
 		timings[count-1] = sec_diff+usec_diff;
+		printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
+		printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
 		printf("Latency observed in iteration %i is %.3f\n",count,timings[count-1]);
 		/* decrement */
 		count--;

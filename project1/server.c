@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   int count;
 
   /* numeric value received */
-  int num;
+  // int num;
 
   /* linked list for keeping track of connected sockets */
   struct node head;
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
         /* we have data from a client */
         
         count = recv(current->socket, buf, BUF_LEN, 0);
-        printf("receiving..\n");
+        printf("\nreceiving..\n");
         // for (int i = 0; i < count; i++)
         //   printf("%d, ", buf[i]);
         printf("\n");
@@ -296,18 +296,34 @@ int main(int argc, char **argv) {
                          followed by that many bytes holding a numeric value */
           printf("buf[0] is %d, count is %d\n", buf[0], count);
           int size = (int) ntohs(*(int *)(buf));
-          printf("size is %d", size);
-          if (buf[0] != count) {
+          printf("size is %d\n", size);
+          if (size != count) {
                         /* we got only a part of a message, we won't handle this in
                            this simple example */
             printf("Message incomplete, something is still being transmitted\n");
             return 0;
           } else {
-            printf("buf[0] is %d\n", buf[0]);
-            
+            printf("data is %s\n", buf+10);
+            // Send the same message back to client.
+            // strcpy(send_buff+10, msg);
+            count = send(current->socket, buf, size, 0);
+            if (count < 0) {
+              if (errno == EAGAIN) {
+                /* we are trying to dump too much data down the socket,
+                   it cannot take more for the time being 
+                   will have to go back to select and wait til select
+                   tells us the socket is ready for writing
+                */
+              } else {
+                /* something else is wrong */
+              }
+            }
+            printf("%d bytes were sent\n", count);
+
+
                         /* a complete message is received, print it out */
-            printf("Received the number \"%d\". Client IP address is: %s\n",
-             num, inet_ntoa(current->client_addr.sin_addr));
+            // printf("Received the number \"%d\". Client IP address is: %s\n",
+             // num, inet_ntoa(current->client_addr.sin_addr));
           }
         }
       }
