@@ -267,6 +267,10 @@ int main(int argc, char **argv) {
         /* we have data from a client */
         
         count = recv(current->socket, buf, BUF_LEN, 0);
+        printf("receiving..\n");
+        // for (int i = 0; i < count; i++)
+        //   printf("%d, ", buf[i]);
+        printf("\n");
         if (count <= 0) {
           /* something is wrong */
           if (count == 0) {
@@ -290,39 +294,17 @@ int main(int argc, char **argv) {
           /* in this case, we expect a message where the first byte
                          stores the number of bytes used to encode a number, 
                          followed by that many bytes holding a numeric value */
-          if (buf[0]+1 != count) {
+          printf("buf[0] is %d, count is %d\n", buf[0], count);
+          int size = (int) ntohs(*(int *)(buf));
+          printf("size is %d", size);
+          if (buf[0] != count) {
                         /* we got only a part of a message, we won't handle this in
                            this simple example */
             printf("Message incomplete, something is still being transmitted\n");
             return 0;
           } else {
-            switch(buf[0]) {
-            case 1:
-              /* note the type casting here forces signed extension
-                 to preserve the signedness of the value */
-              /* note also the use of parentheses for pointer 
-                 dereferencing is critical here */
-              num = (char) *(char *)(buf+1);
-              break;
-            case 2:
-              /* note the type casting here forces signed extension
-                 to preserve the signedness of the value */
-              /* note also the use of parentheses for pointer 
-                 dereferencing is critical here */
-              /* note for 16 bit integers, byte ordering matters */
-              num = (short) ntohs(*(short *)(buf+1));
-              break;
-            case 4:
-              /* note the type casting here forces signed extension
-                 to preserve the signedness of the value */
-              /* note also the use of parentheses for pointer 
-                 dereferencing is critical here */
-              /* note for 32 bit integers, byte ordering matters */
-              num = (int) ntohl(*(int *)(buf+1));
-              break;
-            default:
-              break;
-            }
+            printf("buf[0] is %d\n", buf[0]);
+            
                         /* a complete message is received, print it out */
             printf("Received the number \"%d\". Client IP address is: %s\n",
              num, inet_ntoa(current->client_addr.sin_addr));

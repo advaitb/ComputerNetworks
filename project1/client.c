@@ -37,15 +37,15 @@ int main( int argc, char* argv[]){
 			cnt++;
 		}
 	}
-	if(cnt == 4){
-		printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
-		exit(1);
-	}
-	if(port < 18000 || port > 18200){
-		printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
-		exit(1);
-	}
-	else if(size < 10 || size > 65535){
+	// if(cnt == 4){
+	// 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+	// 	exit(1);
+	// }
+	// if(port < 18000 || port > 18200){
+	// 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
+	// 	exit(1);
+	// }
+	/*else */if(size < 10 || size > 65535){
 		printf("Error: message size should be within 10 and 65535 but received %d\n", size);
 		exit(1);
 	}
@@ -100,6 +100,7 @@ int main( int argc, char* argv[]){
   	sin.sin_addr.s_addr = server_addr;
   	sin.sin_port = htons(port);
 	/* finally time to connect */
+	printf("address: %s\n", inet_ntoa(sin.sin_addr));
 	if (connect(sock, (struct sockaddr *) &sin, sizeof (sin)) < 0)
     	{	
       		perror("Error connection to server failed");
@@ -118,11 +119,13 @@ int main( int argc, char* argv[]){
 			stv_usec = (int)tv.tv_usec;
  		}
 		/* Assign bytes accordingly */
-		*(char*)(send_buff) = (char) size;
+		// *(char*)(send_buff) = (char) size;
+		*(short*)(send_buff) = htons(size);
  		*(int*)(send_buff+2) = htonl(stv_sec);
  		*(int*)(send_buff+6) = htonl(stv_usec);
 		strcpy(send_buff+10, msg);
 		/* send message to server */
+		printf("send message\n");
 		send(sock,send_buff,size,0);
 		/* receive message from server */
         	int recv_cnt = recv(sock, receive_buff, size, 0);
@@ -139,7 +142,7 @@ int main( int argc, char* argv[]){
 		float usec_diff = (rtv_sec - stv_sec)/1000;	
 		/* note latency */
 		timings[count-1] = sec_diff+usec_diff;
-		print("Latency observed in iteration %i is %.3f",count,timings[count-1]);
+		printf("Latency observed in iteration %i is %.3f\n",count,timings[count-1]);
 		/* decrement */
 		count--;
 	}
