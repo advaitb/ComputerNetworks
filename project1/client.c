@@ -58,7 +58,6 @@ int main( int argc, char* argv[]){
 	}
 	else{
 		printf("Params checked [OK]\n");
-		exit(1);
 	}
 	
 
@@ -86,6 +85,32 @@ int main( int argc, char* argv[]){
 	/* intitialize mem to size -  10 bytes */
 	receive_buff = (char*) malloc(size);
 	send_buff = (char*) malloc(size);
+
+
+		/* get time of day */
+	struct timeval tv;
+	struct timezone tz;
+	
+	/* variables to save sec, usec. Should take 4 bytes each */
+	int tv_sec,tv_usec;
+	if(gettimeofday(&tv,NULL) == 0){
+		tv_sec = (int)tv.tv_sec;
+		tv_usec = (int)tv.tv_usec;
+ 	}
+	
+	//printf("%d\n",tv_sec);
+	
+	/* memcpy all the bytes in send buffer in the right order */ 
+	//memcpy(&send_buff,(char*) &size, sizeof(unsigned short));
+	//memcpy(&send_buff+2,(char*) &tv_sec, sizeof(int));
+	//memcpy(&send_buff+6,(char*) &tv_usec, sizeof(int));
+	//strcpy(send_buff+10,msg);
+ 	*(char*)(send_buff) = (char) size;
+ 	*(int*)(send_buff+2) = tv_sec;
+ 	*(int*)(send_buff+6) = tv_usec;
+ 	*(char*)(send_buff+10) = msg;
+	//printf("%c\n", send_buff[0]);
+	exit(0);
 
 	/* check if allocated */
 	if((!receive_buff) || (!send_buff)){
@@ -120,34 +145,8 @@ int main( int argc, char* argv[]){
     	}
 
 	
-	/* get time of day */
-	struct timeval tv;
-	struct timezone tz;
-	
-	/* variables to save sec, usec. Should take 4 bytes each */
-	int tv_sec,tv_usec;
-	if(gettimeofday(&tv,&tz) == 0){
-		tv_sec = (int)tv.tv_sec;
-		tv_usec = (int)tv.tv_usec;
- 	}
-	
-	printf("%d\n",tv_sec);
-	
-	
-	
-	
-	/* 
-	
-	memcpy all the bytes in send buffer in the right order 
-	memcpy(&send_buff,(char*) &size, sizeof(unsigned short));
-	memcpy(&send_buff+2,(char*) &tv_sec, sizeof(int));
-	memcpy(&send_buff+6,(char*) &tv_usec, sizeof(int));
-	strcpy(send_buff+10,msg);
- 	
 
-	printf("%c\n", send_buff[0]);
 	
-	*/
 	
 	/* return */
 	return 0;

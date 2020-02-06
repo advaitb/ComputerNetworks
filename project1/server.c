@@ -50,7 +50,7 @@ void add(struct node *head, int socket, struct sockaddr_in addr) {
   new_node->socket = socket;
   new_node->client_addr = addr;
   new_node->pending_data = 0;
-  new_node->msg = ; //TODO
+  // new_node->msg = ; //TODO
   new_node->next = head->next;
   head->next = new_node;
 }
