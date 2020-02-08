@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
   /* a buffer to read data */
   char *buf;
-  int BUF_LEN = 1000;
+  int BUF_LEN = 11000;
 
   buf = (char *)malloc(BUF_LEN);
 
@@ -297,12 +297,12 @@ int main(int argc, char **argv) {
           printf("buf[0] is %d, count is %d\n", buf[0], count);
           int size = (int) ntohs(*(int *)(buf));
           printf("size is %d\n", size);
-          if (size != count) {
-                        /* we got only a part of a message, we won't handle this in
-                           this simple example */
+          while (size != count) {
+            /* we got only a part of a message */
             printf("Message incomplete, something is still being transmitted\n");
-            return 0;
-          } else {
+            count = recv(current->socket, buf, BUF_LEN, 0);
+            size = (int) ntohs(*(int *)(buf));
+          }
             printf("data is %s\n", buf+10);
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
                         /* a complete message is received, print it out */
             // printf("Received the number \"%d\". Client IP address is: %s\n",
              // num, inet_ntoa(current->client_addr.sin_addr));
-          }
+
         }
       }
     }
