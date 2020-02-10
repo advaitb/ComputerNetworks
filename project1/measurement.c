@@ -113,7 +113,7 @@ int main( int argc, char* argv[]){
 	/* 2D array to store timing, count - iteration, 0 - sec diff, 1 - usec  diff */ 
 	float timings[count];
 	/* send message count number of times */
-	int i = 0;
+	unsigned short i = 0;
 	size = 11;
 	while (i < count){
 		strcpy(msg+i, increment_msg);
@@ -171,26 +171,33 @@ int main( int argc, char* argv[]){
 		// float usec_diff = (tv_sec - stv_sec)/1000;	
 		float usec_diff = (tv_usec - stv_usec);	
 		/* note latency */
-		timings[count-1] = sec_diff+usec_diff;
+		timings[i] = sec_diff+usec_diff;
 		printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
 		printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
-		printf("Latency observed in iteration %i is %.3f\n",i,timings[count-1]);
+		printf("Latency observed in iteration %i is %.3f\n",i,timings[i]);
 		/* increment message size*/
 		printf("message: %s\n", msg);
 		i++;
 		size++;
 	}
+	printf("close connection\n");
 	/* close connection and free memory */
 	close(sock);
 	free(send_buff);
 	free(receive_buff);
-	
-	
+	   
+	/* Write timings into file */
+	printf("write timings\n");
+	FILE *fp;
 
+    fp = fopen("./test.txt", "w");
+    for (unsigned short j = 0; j < count; j++)
+    {
+    	fprintf(fp, "%.3f,", timings[j]);
+    }
+    fprintf(fp, "\n");
+    fclose(fp);
 
-
-	
-	
 	/* return */
 	return 0;
 
