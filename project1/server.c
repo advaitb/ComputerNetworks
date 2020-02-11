@@ -338,6 +338,10 @@ int main(int argc, char **argv) {
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
 
+            /* Check for Bad Request Error */
+
+
+            // 
             strcpy(filename, root_directory);
 
             strcat(filename, relpath);
@@ -350,11 +354,9 @@ int main(int argc, char **argv) {
               strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
 
               perror("Error");
-              // exit(1);
             }
             else
             {
-              
               printf("File open succeeded.\n");
               fseek(fp, 0, SEEK_END);
               lSize = ftell(fp);
