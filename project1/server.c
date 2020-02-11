@@ -63,6 +63,15 @@ void add(struct node *head, int socket, struct sockaddr_in addr) {
 /* simple server, takes one parameter, the server port number */
 int main(int argc, char **argv) {
 
+  if (argc == 3 || argc > 4)
+  {
+    printf("Incorrect number of arguments\n");
+  }
+  char *mode = argv[2];
+  char *root_directory = argv[3];
+  char *relpath;
+  char delim[] = " ";
+
   /* socket and option variables */
   int sock, new_sock, max;
   int optval = 1;
@@ -84,9 +93,13 @@ int main(int argc, char **argv) {
 
   /* a silly message */
   char *message = "Welcome! COMP/ELEC 429 Students!\n";
-
+  char *msg;
   /* number of bytes sent/received */
   int count;
+
+  FILE *fp;
+  char str[1000];
+  char* filename;
 
   /* numeric value received */
   // int num;
@@ -242,7 +255,9 @@ int main(int argc, char **argv) {
            but here for simplicity, let's say we are just
                  sending whatever is in the buffer buf
                */
-        buf = current->msg;
+        buf = current->msg;        
+
+
         count = send(current->socket, buf, BUF_LEN, MSG_DONTWAIT);
         if (count < 0) {
           if (errno == EAGAIN) {
@@ -306,6 +321,45 @@ int main(int argc, char **argv) {
             printf("data is %s\n", buf+10);
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
+
+            // Look for file in Directory
+            // Populate RelPath
+            // strcpy(relpath, buf+5, );
+            msg = "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n";
+            char *html;
+            char *s2 = strdup(buf+4);
+            relpath = strtok(s2, " ");
+            strcpy(filename, root_directory);
+            strcat(filename, relpath);
+
+            fp = fopen(filename, "r");
+            if (fp == NULL)
+            {
+              printf("Could not open file %s", filename);
+              exit(1);
+            }
+            else
+            {
+              fseek(fp, 0, SEEK_END);
+              fseek(fp, 0, SEEK_SET);
+              html = malloc(ftell(fp));
+              if (html){
+                fread(html, 1, ftell(fp), fp);
+              }
+              fclose(fp);
+            }
+            
+            strcat(msg, html);
+            free(html);
+
+            
+            // Send Message
+
+
+
+            
+            // ********************************
+            //
             count = send(current->socket, buf, size, 0);
             if (count < 0) {
               if (errno == EAGAIN) {
