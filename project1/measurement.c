@@ -193,7 +193,7 @@ int main( int argc, char* argv[]){
 
 	/* Write timings into file */
 	printf("write timings\n");
-	FILE *fp;
+	FILE *fp = malloc(10000);
 
     fp = fopen("./test.txt", "w");
     for (int k = 0; k < 10; k++)
