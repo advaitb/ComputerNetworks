@@ -343,33 +343,41 @@ int main(int argc, char **argv) {
             strcat(filename, relpath);
 
             fp = fopen(filename, "r");
+            
             if (fp == NULL)
             {
+              msg = (char*)malloc(54 * sizeof(char));
+              strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
+
               perror("Error");
-              exit(1);
+              // exit(1);
             }
             else
             {
+              
               printf("File open succeeded.\n");
               fseek(fp, 0, SEEK_END);
               lSize = ftell(fp);
               rewind(fp);
               html = (char *)malloc(lSize* sizeof(char));
               
+              msg = (char*)malloc((lSize + 47) * sizeof(char));
+              strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
+
               if (html){
                 result = fread(html, 1, lSize, fp);
                 if (result != lSize){
                   printf("reading error\n");
                   exit(3);
                 }
+              strcat(msg, html);
+              free(html);
+
               }
               fclose(fp);
             }
             printf("size of html %ld\n", lSize);
-            msg = (char*)malloc((lSize + 47) * sizeof(char));
-            strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
-            strcat(msg, html);
-            free(html);
+            
             fp = NULL;
             // Send Message
             count = send(current->socket, msg, strlen(msg), 0);
