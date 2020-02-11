@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
   char *mode = argv[2];
   char *root_directory = argv[3];
   char *relpath;
-  char delim[] = " ";
+  // char delim[] = " ";
 
   /* socket and option variables */
   int sock, new_sock, max;
@@ -92,15 +92,17 @@ int main(int argc, char **argv) {
   int select_retval;
 
   /* a silly message */
-  char *message = "Welcome! COMP/ELEC 429 Students!\n";
+  // char *message = "Welcome! COMP/ELEC 429 Students!\n";
   char *msg;
   /* number of bytes sent/received */
   int count;
 
   FILE *fp = NULL;
   fp = malloc(1000);
+  long lSize;
+  size_t result;
 
-  char str[1000];
+  // char str[1000];
   char* filename;
   filename = (char *)malloc(sizeof(char) * 1024);
 
@@ -332,51 +334,55 @@ int main(int argc, char **argv) {
 
           if (strcmp(mode, "www") == 0)
           {
+            printf("Mode is WWW\n");
             
-            msg = "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n";
             char *html;
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
 
-            // strcpy(filename, "//f");
             strcpy(filename, root_directory);
 
             strcat(filename, relpath);
-            // strcat(filename, "\n");
 
-            fp = fopen("../../Desktop/html", "r");
-            
+            fp = fopen(filename, "r");
             if (fp == NULL)
             {
-              perror(filename);
-              // printf("Could not open file %s\n", filename);
+              perror("Error");
               exit(1);
             }
             else
             {
-              printf("hello");
+              printf("File open succeeded.\n");
               fseek(fp, 0, SEEK_END);
-              fseek(fp, 0, SEEK_SET);
-              html = malloc(ftell(fp));
+              lSize = ftell(fp);
+              rewind(fp);
+              html = (char *)malloc(lSize* sizeof(char));
+              
               if (html){
-                fread(html, 1, ftell(fp), fp);
+                result = fread(html, 1, lSize, fp);
+                if (result != lSize){
+                  printf("reading error\n");
+                  exit(3);
+                }
               }
               fclose(fp);
             }
-            
+            printf("size of html %ld\n", lSize);
+            msg = (char*)malloc((lSize + 47) * sizeof(char));
+            strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
             strcat(msg, html);
             free(html);
-
+            fp = NULL;
             // Send Message
             count = send(current->socket, msg, strlen(msg), 0);
-
+            close(current->socket);
+            dump(&head, current->socket);
+            free(msg);
           }
           else
           {
             count = send(current->socket, buf, size, 0);
           }
-          
-            
             // ********************************
             // count = send(current->socket, buf, size, 0);
             if (count < 0) {
@@ -391,12 +397,6 @@ int main(int argc, char **argv) {
               }
             }
             printf("%d bytes were sent\n", count);
-
-
-                        /* a complete message is received, print it out */
-            // printf("Received the number \"%d\". Client IP address is: %s\n",
-             // num, inet_ntoa(current->client_addr.sin_addr));
-
         }
       }
     }
