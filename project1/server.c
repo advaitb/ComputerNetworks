@@ -91,8 +91,6 @@ int main(int argc, char **argv) {
   struct timeval time_out;
   int select_retval;
 
-  /* a silly message */
-  // char *message = "Welcome! COMP/ELEC 429 Students!\n";
   char *msg;
   /* number of bytes sent/received */
   int count;
