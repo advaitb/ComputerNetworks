@@ -97,9 +97,12 @@ int main(int argc, char **argv) {
   /* number of bytes sent/received */
   int count;
 
-  FILE *fp;
+  FILE *fp = NULL;
+  fp = malloc(1000);
+
   char str[1000];
   char* filename;
+  filename = (char *)malloc(sizeof(char) * 1024);
 
   /* numeric value received */
   // int num;
@@ -234,7 +237,7 @@ int main(int argc, char **argv) {
 
         /* let's send a message to the client just for fun */
         // count = send(new_sock, message, strlen(message)+1, 0);
-        // if (count < 0)
+        // if (count < 0)filename
         // {
         //   perror("error sending message to client");
         //   abort();
@@ -312,34 +315,46 @@ int main(int argc, char **argv) {
           printf("buf[0] is %d, count is %d\n", buf[0], count);
           int size = (int) ntohs(*(int *)(buf));
           printf("size is %d\n", size);
-          while (size != count) {
-            /* we got only a part of a message */
-            printf("Message incomplete, something is still being transmitted\n");
-            count = recv(current->socket, buf, BUF_LEN, 0);
-            size = (int) ntohs(*(int *)(buf));
-          }
-            printf("data is %s\n", buf+10);
+
+          printf("%s\n", buf);
+          
+          
+          
+          // while (size != count) {
+          //   /* we got only a part of a message */
+          //   printf("Message incomplete, something is still being transmitted\n");
+          //   count = recv(current->socket, buf, BUF_LEN, 0);
+          //   size = (int) ntohs(*(int *)(buf));
+          // }
+            // printf("data is %s\n", buf+10);
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
 
-            // Look for file in Directory
-            // Populate RelPath
-            // strcpy(relpath, buf+5, );
+          if (strcmp(mode, "www") == 0)
+          {
+            
             msg = "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n";
             char *html;
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
-            strcpy(filename, root_directory);
-            strcat(filename, relpath);
 
-            fp = fopen(filename, "r");
+            // strcpy(filename, "//f");
+            strcpy(filename, root_directory);
+
+            strcat(filename, relpath);
+            // strcat(filename, "\n");
+
+            fp = fopen("../../Desktop/html", "r");
+            
             if (fp == NULL)
             {
-              printf("Could not open file %s", filename);
+              perror(filename);
+              // printf("Could not open file %s\n", filename);
               exit(1);
             }
             else
             {
+              printf("hello");
               fseek(fp, 0, SEEK_END);
               fseek(fp, 0, SEEK_SET);
               html = malloc(ftell(fp));
@@ -352,15 +367,18 @@ int main(int argc, char **argv) {
             strcat(msg, html);
             free(html);
 
-            
             // Send Message
+            count = send(current->socket, msg, strlen(msg), 0);
 
-
-
+          }
+          else
+          {
+            count = send(current->socket, buf, size, 0);
+          }
+          
             
             // ********************************
-            //
-            count = send(current->socket, buf, size, 0);
+            // count = send(current->socket, buf, size, 0);
             if (count < 0) {
               if (errno == EAGAIN) {
                 /* we are trying to dump too much data down the socket,
