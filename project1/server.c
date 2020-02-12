@@ -306,12 +306,12 @@ int main(int argc, char **argv) {
           //
 	  //
 	     //send(current->socket, message,sizeof(message),0);
-	     printf("Count is %i",count);
 	     tempcount = recv(current->socket,buf+count, size-count,0);
 	     if(tempcount == -1){
-		     abort();
+		     continue;
 	     }
 	     count += tempcount;
+	     printf("Count is %i\n",count);
 	     //size = (int) ntohs(*(int*) (buf)); 
 	  }
 	 
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
 	    while (count < size){
 		tempcount = send(current->socket,buf+count,size-count,0);
 		if(tempcount == -1){
-			abort();
+			continue;
 		}
 		count += tempcount;
 	    }
