@@ -127,29 +127,44 @@ int main( int argc, char* argv[]){
 		strcpy(send_buff+10, msg);
 		/* send message to server */
 		printf("\nsend message\n");
-		send(sock,send_buff,size,0);
+	int send_cnt = send(sock,send_buff,size,0);
+	int temp_cnt = send_cnt;
+	while (send_cnt < size){
+		temp_cnt = send(sock,send_buff+send_cnt,size-send_cnt,0);
+		if (temp_cnt == -1){
+			abort();
+		}
+		send_cnt += temp_cnt;
+	}
+
 		/* receive message from server */
         int recv_cnt = recv(sock, receive_buff, size, 0);
-		int size = (int) ntohs(*(int *)(receive_buff));
-		printf("size is %d\n", size);
-		printf("receive count is %d\n", recv_cnt);
-		printf("message is %s\n", receive_buff+10);
-
-        while (size != recv_cnt)
+	int size = (int) ntohs(*(int *)(receive_buff));
+	printf("size is %d\n", size);
+	printf("receive count is %d\n", recv_cnt);
+	printf("message is %s\n", receive_buff+10);
+        while (recv_cnt < size)
         {
-        	printf("Still transmitting, re-try receiving\n");
+        	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
+		if (temp_cnt == -1){
+			abort();
+		}
+		recv_cnt += temp_cnt;
+		/*
+		printf("Still transmitting, re-try receiving\n");
 	        recv_cnt = recv(sock, receive_buff, size, 0);
 			size = (int) ntohs(*(int *)(receive_buff));
 			printf("size is %d\n", size);
 			printf("receive count is %d\n", recv_cnt);
 			printf("message is %s\n", receive_buff+10);
-        }
+        	*/
+	}
 
 		/* couldn't receive */
-		if (recv_cnt < 0){
-			perror("Error receiving failure");
-			abort();
-		}
+		//if (recv_cnt < 0){
+		//	perror("Error receiving failure");
+		//	abort();
+		//}
 		/* retrieve the bytes from the server */
 		// rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
 		// rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
