@@ -128,13 +128,17 @@ int main( int argc, char* argv[]){
 		/* send message to server */
 		printf("\nsend message\n");
 	int send_cnt = send(sock,send_buff,size,0);
+	printf("Send count %d\n", send_cnt);
 	int temp_cnt = send_cnt;
 	while (send_cnt < size){
 		temp_cnt = send(sock,send_buff+send_cnt,size-send_cnt,0);
 		if (temp_cnt == -1){
-			abort();
+			// abort();
+			printf("Error sending\n");
+			continue;
 		}
 		send_cnt += temp_cnt;
+		printf("Send count %d\n", send_cnt);
 	}
 
 		/* receive message from server */
@@ -147,7 +151,8 @@ int main( int argc, char* argv[]){
         {
         	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
 		if (temp_cnt == -1){
-			abort();
+			printf("Error recving\n");
+			// abort();
 		}
 		recv_cnt += temp_cnt;
 		/*
