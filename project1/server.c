@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
 	  int size = (int) ntohs(*(int *)(buf));
           printf("size is %d\n", size);
 	  int tempcount = 0;
-	  while  (size != count) {
+	  while  (count < size) {
             /* we got only a part of a message */
           //  printf("Message incomplete, something is still being transmitted\n");
           //  count = recv(current->socket, buf, BUF_LEN, 0);
@@ -306,12 +306,12 @@ int main(int argc, char **argv) {
           //
 	  //
 	     //send(current->socket, message,sizeof(message),0);
-	     printf("Count is %i",count);
 	     tempcount = recv(current->socket,buf+count, size-count,0);
 	     if(tempcount == -1){
-		     break;
+		     continue;
 	     }
 	     count += tempcount;
+	     printf("Count is %i\n",count);
 	     //size = (int) ntohs(*(int*) (buf)); 
 	  }
 	 
@@ -319,17 +319,29 @@ int main(int argc, char **argv) {
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
             count = send(current->socket, buf, size, 0);
-            if (count < 0) {
+            
+	    while (count < size){
+		tempcount = send(current->socket,buf+count,size-count,0);
+		if(tempcount == -1){
+			continue;
+		}
+		count += tempcount;
+	    }
+	    
+	    
+	    /*
+	    if (count < 0) {
               if (errno == EAGAIN) {
-                /* we are trying to dump too much data down the socket,
+                 we are trying to dump too much data down the socket,
                    it cannot take more for the time being 
                    will have to go back to select and wait til select
                    tells us the socket is ready for writing
-                */
+                
               } else {
-                /* something else is wrong */
+                something else is wrong 
               }
             }
+	    */
             printf("%d bytes were sent\n", count);
 
 
