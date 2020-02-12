@@ -28,7 +28,8 @@ int main( int argc, char* argv[]){
 	/* check for correctness of command line arguments */
 	// uint8_t i;
 	uint8_t cnt = 0;
-	for(uint8_t i=0; i < 4; i++){
+	uint8_t i;
+	for( i=0; i < 4; i++){
 		if(strcmp(hostname,clear_servers[i]) == 0){
 			printf("Hostname verfied to be: %s\n",hostname);
 			break;
@@ -113,11 +114,12 @@ int main( int argc, char* argv[]){
 	/* 2D array to store timing, count - iteration, 0 - sec diff, 1 - usec  diff */ 
 	float timings[10][count];
 	/* send message count number of times */
-	unsigned short i = 0;
+	unsigned short m  = 0;
 	size = 11;
-	for (uint8_t k = 0; k < 10; k++)
+	uint8_t k;
+	for ( k = 0; k < 10; k++)
 	{
-		while (i < count){
+		while (m < count){
 			strcpy(msg+i, increment_msg);
 			/* variables to save sec, usec. Should take 4 bytes each */
 			// int stv_sec,stv_usec,rtv_sec,rtv_usec;
@@ -173,16 +175,16 @@ int main( int argc, char* argv[]){
 			// float usec_diff = (tv_sec - stv_sec)/1000;	
 			float usec_diff = (tv_usec - stv_usec);	
 			/* note latency */
-			timings[k][i] = sec_diff+usec_diff;
+			timings[k][m] = sec_diff+usec_diff;
 			printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
 			printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
-			printf("Latency observed in iteration %i is %.3f\n",i,timings[k][i]);
+			printf("Latency observed in iteration %i is %.3f\n",m,timings[k][m]);
 			/* increment message size*/
 			printf("message: %s\n", msg);
-			i++;
+			m++;
 			size++;
 		}
-		i = 0;
+		m = 0;
 		size = 11;
 	}
 	printf("close connection\n");
@@ -196,11 +198,13 @@ int main( int argc, char* argv[]){
 	FILE *fp = malloc(10000);
 
     fp = fopen("./test.txt", "w");
-    for (int k = 0; k < 10; k++)
+    int c;
+    unsigned short j;
+    for (c = 0; c < 10; c++)
     {
-	    for (unsigned short j = 0; j < count; j++)
+	    for ( j = 0; j < count; j++)
 	    {
-	    	fprintf(fp, "%.3f,", timings[k][j]);
+	    	fprintf(fp, "%.3f,", timings[c][j]);
 	    }
 	    fprintf(fp, "\n");
 	}
