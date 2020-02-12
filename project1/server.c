@@ -294,15 +294,27 @@ int main(int argc, char **argv) {
           /* in this case, we expect a message where the first byte
                          stores the number of bytes used to encode a number, 
                          followed by that many bytes holding a numeric value */
-          printf("buf[0] is %d, count is %d\n", buf[0], count);
-          int size = (int) ntohs(*(int *)(buf));
+          printf("count is %d\n", count);
+	  int size = (int) ntohs(*(int *)(buf));
           printf("size is %d\n", size);
-          while (size != count) {
+	  int tempcount = 0;
+	  while  (size != count) {
             /* we got only a part of a message */
-            printf("Message incomplete, something is still being transmitted\n");
-            count = recv(current->socket, buf, BUF_LEN, 0);
-            size = (int) ntohs(*(int *)(buf));
-          }
+          //  printf("Message incomplete, something is still being transmitted\n");
+          //  count = recv(current->socket, buf, BUF_LEN, 0);
+	  //  int size = (int) ntohs(*(int *)(buf));
+          //
+	  //
+	     //send(current->socket, message,sizeof(message),0);
+	     printf("Count is %i",count);
+	     tempcount = recv(current->socket,buf+count, size-count,0);
+	     if(tempcount == -1){
+		     break;
+	     }
+	     count += tempcount;
+	     //size = (int) ntohs(*(int*) (buf)); 
+	  }
+	 
             printf("data is %s\n", buf+10);
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
