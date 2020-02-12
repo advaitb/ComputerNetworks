@@ -118,8 +118,8 @@ int main( int argc, char* argv[]){
 	unsigned short m  = 0;
 	size = 10;
 	uint8_t k;
-	int step_size = floor((10000 - 10) / count);
-	for ( k = 0; k < num_runs; k++)
+	int step_size  = (int) ((10000 - 10) / count);
+        for ( k = 0; k < num_runs; k++)
 	{
 		while (m < count){
 			// strcpy(msg+i, increment_msg);
