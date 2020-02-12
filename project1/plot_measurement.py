@@ -16,11 +16,21 @@ timings = read_file("./test.txt")
 # print(timings[490:491])
 
 
+# plt.figure()
+# x = np.linspace(1, len(timings), len(timings))*10 + 10
+# # print(x)
+# print(np.shape(x), np.shape(timings))
+# print(timings)
+# plt.plot(x, timings)
+# plt.axis([0, len(timings)*10 + 20, 0, 10])
+# plt.show()
 plt.figure()
-x = np.linspace(1, len(timings), len(timings))*10 + 10
+x = np.linspace(10, 10000, len(timings))
 # print(x)
 print(np.shape(x), np.shape(timings))
-print(timings)
+# for t in timings:
+#     if t > 6000 or t < 3000:
+#         print(t)
 plt.plot(x, timings)
-plt.axis([0, len(timings)*10 + 20, 0, 10])
+plt.axis([0, 10000, 0, 6])
 plt.show()

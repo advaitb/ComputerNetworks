@@ -134,7 +134,7 @@ int main( int argc, char* argv[]){
 		temp_cnt = send(sock,send_buff+send_cnt,size-send_cnt,0);
 		if (temp_cnt == -1){
 			// abort();
-			printf("Error sending\n");
+			// printf("Error sending\n");
 			continue;
 		}
 		send_cnt += temp_cnt;
@@ -151,7 +151,8 @@ int main( int argc, char* argv[]){
         {
         	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
 		if (temp_cnt == -1){
-			printf("Error recving\n");
+			// printf("Error recving\n");
+			continue;
 			// abort();
 		}
 		recv_cnt += temp_cnt;
