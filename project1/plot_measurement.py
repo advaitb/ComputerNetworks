@@ -7,6 +7,7 @@ def read_file(filename):
         for line in file:
             time = line.split(",")
             time = time[:-1]
+            print(len(time))
             timings.append([float(t) for t in time])
     # return np.array([float(t) for t in time])
     return np.average(np.array(timings), axis=0)
@@ -16,9 +17,10 @@ timings = read_file("./test.txt")
 
 
 plt.figure()
-x = np.linspace(1, len(timings), len(timings)) + 10
+x = np.linspace(1, len(timings), len(timings))*10 + 10
 # print(x)
-# print(np.shape(x), np.shape(timings))
-plt.plot(x[0::10], timings[0::10])
-plt.axis([0, len(timings) + 20, 0, 400])
+print(np.shape(x), np.shape(timings))
+print(timings)
+plt.plot(x, timings)
+plt.axis([0, len(timings)*10 + 20, 0, 10])
 plt.show()
