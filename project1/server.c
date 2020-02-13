@@ -260,6 +260,7 @@ int main(int argc, char **argv) {
                tells us the socket is ready for writing
             */
           } else {
+            printf("Error, message not sent.");
             /* something else is wrong */
           }
         }
@@ -305,8 +306,7 @@ int main(int argc, char **argv) {
 
 
           // Receive differently based on if www or PingPong
-          
-          // If pingpong
+          // If PingPong
           if (mode == NULL || strcmp(mode, "www") != 0)
           {
             printf("count is %d\n", count);
@@ -340,12 +340,10 @@ int main(int argc, char **argv) {
           {
             /* Mode is www */
             printf("Mode is WWW\n");
-            // while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
-            // {
 
             bool comp = false;
             int tempcount = 0;
-            while (comp != 1)
+            while (comp == false)
             {
               for (size_t i = 0; i < strlen(buf); i++)
               {
@@ -360,27 +358,26 @@ int main(int argc, char **argv) {
                 continue;
             }
                        
-            // }
             char *html;
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
 
             /* Check for Bad Request Error */
+            // Get and HTTP
+            
+
 
 
             // 
 
             strcpy(filename, root_directory);
-
             strcat(filename, relpath);
-
             fp = fopen(filename, "r");
             
             if (fp == NULL)
             {
               msg = (char*)malloc(54 * sizeof(char));
               strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
-
               perror("Error");
             }
             else
@@ -397,6 +394,10 @@ int main(int argc, char **argv) {
               if (html){
                 result = fread(html, 1, lSize, fp);
                 if (result != lSize){
+
+                  // Internal Error
+
+                  // 
                   printf("reading error\n");
                   exit(3);
                 }
@@ -412,12 +413,14 @@ int main(int argc, char **argv) {
             // Send Message
             count = send(current->socket, msg, strlen(msg), 0);
 
-
-            // Need to send for a while loop
-
-
-
-            // ************************************
+            while (count < strlen(msg) * sizeof(char))
+            {
+              tempcount = send(current->socket, buf+count, (strlen(msg)*sizeof(char))-count, 0);
+              if (tempcount == -1)
+                continue;
+            
+              count += tempcount;
+            }
 
             close(current->socket);
             dump(&head, current->socket);
