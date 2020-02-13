@@ -283,11 +283,10 @@ int main(int argc, char **argv) {
 
       if (FD_ISSET(current->socket, &read_set)) {
         /* we have data from a client */
-        
+        // Receive Data once
         count = recv(current->socket, buf, BUF_LEN, 0);
         printf("\nreceiving..\n");
-        // for (int i = 0; i < count; i++)
-        //   printf("%d, ", buf[i]);
+        
         printf("\n");
         if (count <= 0) {
           /* something is wrong */
@@ -313,10 +312,38 @@ int main(int argc, char **argv) {
                          stores the number of bytes used to encode a number, 
                          followed by that many bytes holding a numeric value */
           printf("buf[0] is %d, count is %d\n", buf[0], count);
+
           int size = (int) ntohs(*(int *)(buf));
           printf("size is %d\n", size);
 
-          printf("%s\n", buf);
+
+          // Receive differently based on if www or PingPong
+          // If Ping Pong
+          if (mode != "www")
+          {
+            int tempcount = 0;
+            while (count < size)
+            {
+              tempcount = recv(current->socket, buf+count, size-count, 0);
+              if (tempcount == -1)
+                continue;
+              count += tempcount;
+              printf("Count is %i\n", count);
+            }
+
+            printf("data is %s\n", buf+10);
+          }
+          else
+          {
+            /* Mode is www */
+
+            while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
+            {
+
+            }
+          }
+          
+          
           
           
           
@@ -383,6 +410,14 @@ int main(int argc, char **argv) {
             fp = NULL;
             // Send Message
             count = send(current->socket, msg, strlen(msg), 0);
+
+
+            // Need to send for a while look
+
+
+
+            // ************************************
+
             close(current->socket);
             dump(&head, current->socket);
             free(msg);
@@ -390,6 +425,12 @@ int main(int argc, char **argv) {
           else
           {
             count = send(current->socket, buf, size, 0);
+            while (count < size){
+              tempcount = send(current->socket, buf+count, size-count, 0);
+              if (tempcount == -1)
+                continue;
+              count += tempcount;
+            }
           }
             // ********************************
             // count = send(current->socket, buf, size, 0);
