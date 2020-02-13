@@ -63,14 +63,16 @@ void add(struct node *head, int socket, struct sockaddr_in addr) {
 /* simple server, takes one parameter, the server port number */
 int main(int argc, char **argv) {
 
+
   if (argc == 3 || argc > 4)
   {
     printf("Incorrect number of arguments\n");
+    exit(0);
   }
+ 
   char *mode = argv[2];
   char *root_directory = argv[3];
   char *relpath;
-  // char delim[] = " ";
 
   /* socket and option variables */
   int sock, new_sock, max;
@@ -156,7 +158,6 @@ int main(int argc, char **argv) {
      check for ready socket to send more data */
   while (1)
     {
-
       /* set up the file descriptor bit map that select should be watching */
       FD_ZERO (&read_set); /* clear everything */
       FD_ZERO (&write_set); /* clear everything */
@@ -230,14 +231,6 @@ int main(int argc, char **argv) {
 
         /* remember this client connection in our linked list */
         add(&head, new_sock, addr);
-
-        /* let's send a message to the client just for fun */
-        // count = send(new_sock, message, strlen(message)+1, 0);
-        // if (count < 0)filename
-        // {
-        //   perror("error sending message to client");
-        //   abort();
-        // }
       }
 
     /* check other connected sockets, see if there is
@@ -307,28 +300,42 @@ int main(int argc, char **argv) {
           /* in this case, we expect a message where the first byte
                          stores the number of bytes used to encode a number, 
                          followed by that many bytes holding a numeric value */
-          printf("buf[0] is %d, count is %d\n", buf[0], count);
-
-          int size = (int) ntohs(*(int *)(buf));
-          printf("size is %d\n", size);
+          
 
 
           // Receive differently based on if www or PingPong
-          int tempcount = 0;
+          
           // If pingpong
-          if (strcmp(mode, "www") != 0)
+          if (mode == NULL || strcmp(mode, "www") != 0)
           {
-            
+            printf("count is %d\n", count);
+            int size = (int) ntohs(*(int *)(buf));
+            printf("size is %d\n", size);
+            int tempcount = 0;
             while (count < size)
             {
               tempcount = recv(current->socket, buf+count, size-count, 0);
-              if (tempcount == -1)
+              if (tempcount == -1){
                 continue;
+              }
+                
               count += tempcount;
               printf("Count is %i\n", count);
             }
 
             printf("data is %s\n", buf+10);
+
+            // Ping Pong Mode
+            count = send(current->socket, buf, size, 0);
+            while (count < size)
+            {
+              tempcount = send(current->socket, buf+count, size-count, 0);
+              if (tempcount == -1)
+                continue;
+            
+              count += tempcount;
+            }
+
           }
           else
           {
@@ -338,25 +345,6 @@ int main(int argc, char **argv) {
             // {
 
             // }
-          }
-          
-          
-          
-          
-          
-          // while (size != count) {
-          //   /* we got only a part of a message */
-          //   printf("Message incomplete, something is still being transmitted\n");
-          //   count = recv(current->socket, buf, BUF_LEN, 0);
-          //   size = (int) ntohs(*(int *)(buf));
-          // }
-            // printf("data is %s\n", buf+10);
-            // Send the same message back to client.
-            // strcpy(send_buff+10, msg);
-
-          if (strcmp(mode, "www") == 0)
-          {
-            
             char *html;
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
@@ -365,6 +353,7 @@ int main(int argc, char **argv) {
 
 
             // 
+
             strcpy(filename, root_directory);
 
             strcat(filename, relpath);
@@ -418,16 +407,82 @@ int main(int argc, char **argv) {
             dump(&head, current->socket);
             free(msg);
           }
-          else
-          {
-            // Ping Pong Mode
-            count = send(current->socket, buf, size, 0);
-            while (count < size){
-              tempcount = send(current->socket, buf+count, size-count, 0);
-              if (tempcount == -1)
-                continue;
-              count += tempcount;
-            }
+          
+
+          // if (strcmp(mode, "www") == 0)
+          // {
+          //   char *html;
+          //   char *s2 = strdup(buf+4);
+          //   relpath = strtok(s2, " ");
+
+          //   /* Check for Bad Request Error */
+
+
+          //   // 
+
+          //   strcpy(filename, root_directory);
+
+          //   strcat(filename, relpath);
+
+          //   fp = fopen(filename, "r");
+            
+          //   if (fp == NULL)
+          //   {
+          //     msg = (char*)malloc(54 * sizeof(char));
+          //     strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
+
+          //     perror("Error");
+          //   }
+          //   else
+          //   {
+          //     printf("File open succeeded.\n");
+          //     fseek(fp, 0, SEEK_END);
+          //     lSize = ftell(fp);
+          //     rewind(fp);
+          //     html = (char *)malloc(lSize* sizeof(char));
+              
+          //     msg = (char*)malloc((lSize + 47) * sizeof(char));
+          //     strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
+
+          //     if (html){
+          //       result = fread(html, 1, lSize, fp);
+          //       if (result != lSize){
+          //         printf("reading error\n");
+          //         exit(3);
+          //       }
+          //     strcat(msg, html);
+          //     free(html);
+
+          //     }
+          //     fclose(fp);
+          //   }
+          //   printf("size of html %ld\n", lSize);
+            
+          //   fp = NULL;
+          //   // Send Message
+          //   count = send(current->socket, msg, strlen(msg), 0);
+
+
+          //   // Need to send for a while loop
+
+
+
+          //   // ************************************
+
+          //   close(current->socket);
+          //   dump(&head, current->socket);
+          //   free(msg);
+          // }
+          // else
+          // {
+          //   // Ping Pong Mode
+          //   count = send(current->socket, buf, size, 0);
+          //   while (count < size){
+          //     tempcount = send(current->socket, buf+count, size-count, 0);
+          //     if (tempcount == -1)
+          //       continue;
+          //     count += tempcount;
+          //   }
           }
             // ********************************
             // count = send(current->socket, buf, size, 0);
@@ -448,4 +503,4 @@ int main(int argc, char **argv) {
     }
   }
     }
-}
+    
