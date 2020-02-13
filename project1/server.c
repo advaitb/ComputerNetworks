@@ -323,8 +323,6 @@ int main(int argc, char **argv) {
               printf("Count is %i\n", count);
             }
 
-            printf("data is %s\n", buf+10);
-
             // Ping Pong Mode
             count = send(current->socket, buf, size, 0);
             while (count < size)
