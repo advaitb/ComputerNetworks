@@ -345,7 +345,8 @@ int main(int argc, char **argv) {
             int tempcount = 0;
             while (comp == false)
             {
-              for (size_t i = 0; i < strlen(buf); i++)
+              size_t i;
+              for (i = 0; i < strlen(buf); i++)
               {
                 if (buf[i] == '\r' && buf[i+1] == '\n' && buf[i+2] == '\r' && buf[i+3] == '\n')
                 {
@@ -364,7 +365,7 @@ int main(int argc, char **argv) {
 
             /* Check for Bad Request Error */
             // Get and HTTP
-            
+
 
 
 
