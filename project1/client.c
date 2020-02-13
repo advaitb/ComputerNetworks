@@ -162,7 +162,7 @@ int main( int argc, char* argv[]){
 		tv_usec = (int)tv.tv_usec;
  	}
 	/* calculate latency in millisecs */ 
-	float sec_diff = (tv_sec - stv_sec)*1000;
+	float sec_diff = (tv_sec - stv_sec)*1000.00;
 	// float usec_diff = (tv_sec - stv_sec)/1000;	
 	float usec_diff = (tv_usec - stv_usec)/1000.00;	
 	/* note latency */
