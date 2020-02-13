@@ -100,12 +100,8 @@ int main(int argc, char **argv) {
   long lSize;
   size_t result;
 
-  // char str[1000];
   char* filename;
   filename = (char *)malloc(sizeof(char) * 1024);
-
-  /* numeric value received */
-  // int num;
 
   /* linked list for keeping track of connected sockets */
   struct node head;
@@ -113,7 +109,7 @@ int main(int argc, char **argv) {
 
   /* a buffer to read data */
   char *buf;
-  int BUF_LEN = 11000;
+  int BUF_LEN = 65535;
 
   buf = (char *)malloc(BUF_LEN);
 
@@ -318,10 +314,11 @@ int main(int argc, char **argv) {
 
 
           // Receive differently based on if www or PingPong
-          // If Ping Pong
-          if (mode != "www")
+          int tempcount = 0;
+          // If pingpong
+          if (strcmp(mode, "www") != 0)
           {
-            int tempcount = 0;
+            
             while (count < size)
             {
               tempcount = recv(current->socket, buf+count, size-count, 0);
@@ -336,11 +333,11 @@ int main(int argc, char **argv) {
           else
           {
             /* Mode is www */
+            printf("Mode is WWW\n");
+            // while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
+            // {
 
-            while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
-            {
-
-            }
+            // }
           }
           
           
@@ -359,7 +356,6 @@ int main(int argc, char **argv) {
 
           if (strcmp(mode, "www") == 0)
           {
-            printf("Mode is WWW\n");
             
             char *html;
             char *s2 = strdup(buf+4);
@@ -412,7 +408,7 @@ int main(int argc, char **argv) {
             count = send(current->socket, msg, strlen(msg), 0);
 
 
-            // Need to send for a while look
+            // Need to send for a while loop
 
 
 
@@ -424,6 +420,7 @@ int main(int argc, char **argv) {
           }
           else
           {
+            // Ping Pong Mode
             count = send(current->socket, buf, size, 0);
             while (count < size){
               tempcount = send(current->socket, buf+count, size-count, 0);
