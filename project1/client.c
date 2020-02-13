@@ -164,7 +164,7 @@ int main( int argc, char* argv[]){
 	/* calculate latency in millisecs */ 
 	float sec_diff = (tv_sec - stv_sec)*1000;
 	// float usec_diff = (tv_sec - stv_sec)/1000;	
-	float usec_diff = (tv_usec - stv_usec)/1000;	
+	float usec_diff = (tv_usec - stv_usec)/1000.00;	
 	/* note latency */
 	timings[count-1] = sec_diff+usec_diff;
 	printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
