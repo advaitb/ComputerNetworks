@@ -318,7 +318,6 @@ int main(int argc, char **argv) {
               if (tempcount == -1){
                 continue;
               }
-                
               count += tempcount;
               printf("Count is %i\n", count);
             }
@@ -335,7 +334,6 @@ int main(int argc, char **argv) {
             
               count += tempcount;
             }
-
           }
           else
           {
@@ -344,6 +342,23 @@ int main(int argc, char **argv) {
             // while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
             // {
 
+            int comp = 0;
+            int tempcount = 0;
+            while (comp != 1)
+            {
+              for (size_t i = 0; i < strlen(buf); i++)
+              {
+                if (buf[i] == '\r' && buf[i+1] == '\n' && buf[i+2] == '\r' && buf[i+3] == '\n')
+                {
+                  comp = 1;
+                  break;
+                }
+              }
+              tempcount = recv(current->socket, buf+count, strlen(buf)-count, 0);
+              if (tempcount == -1)
+                continue;
+            }
+                       
             // }
             char *html;
             char *s2 = strdup(buf+4);
