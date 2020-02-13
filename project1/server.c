@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
   /* a buffer to read data */
   char *buf;
-  int BUF_LEN = 11000;
+  int BUF_LEN = 65535;
 
   buf = (char *)malloc(BUF_LEN);
 
@@ -308,25 +308,27 @@ int main(int argc, char **argv) {
 	     //send(current->socket, message,sizeof(message),0);
 	     tempcount = recv(current->socket,buf+count, size-count,0);
 	     if(tempcount == -1){
-		     continue;
+		//printf("Error number value server receive: %d\n", errno);    
+		continue;
 	     }
 	     count += tempcount;
 	     printf("Count is %i\n",count);
 	     //size = (int) ntohs(*(int*) (buf)); 
 	  }
 	 
-            printf("data is %s\n", buf+10);
+          printf("data is %s\n", buf+10);
             // Send the same message back to client.
             // strcpy(send_buff+10, msg);
-            count = send(current->socket, buf, size, 0);
+          count = send(current->socket, buf, size, 0);
             
-	    while (count < size){
-		tempcount = send(current->socket,buf+count,size-count,0);
-		if(tempcount == -1){
-			continue;
+	  while (count < size){
+	       tempcount = send(current->socket,buf+count,size-count,0);
+	       if(tempcount == -1){
+		   //printf("Error number value server send: %d\n", errno);    
+		   continue;
 		}
 		count += tempcount;
-	    }
+	  }
 	    
 	    
 	    /*
