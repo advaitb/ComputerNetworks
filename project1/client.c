@@ -27,36 +27,36 @@ int main( int argc, char* argv[]){
 	size = atoi(argv[3]);
 	count = atoi(argv[4]);
 	/* check for correctness of command line arguments */
-	uint8_t i;
-	uint8_t cnt = 0;
-	for(i=0; i < 7; i++){
-		if(strcmp(hostname,clear_servers[i]) == 0){
-			printf("Hostname verfied to be: %s\n",hostname);
-			break;
-		}
-		else{
-			cnt++;
-		}
-	}
-	 if(cnt == 7){
-	 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
-	 	exit(1);
-	 }
-	 if(port < 18000 || port > 18200){
-	 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
-	 	exit(1);
-	 }
-	else if(size < 10 || size > 65535){
-		printf("Error: message size should be within 10 and 65535 but received %d\n", size);
-		exit(1);
-	}
-	else if( count < 1 || count > 10000){
-		printf("Error: count should be within 1 and 10000 but received %d\n", count);
-		exit(1);
-	}
-	else{
-		printf("Params checked [OK]\n");
-	}
+	// uint8_t i;
+	// uint8_t cnt = 0;
+	// for(i=0; i < 7; i++){
+	// 	if(strcmp(hostname,clear_servers[i]) == 0){
+	// 		printf("Hostname verfied to be: %s\n",hostname);
+	// 		break;
+	// 	}
+	// 	else{
+	// 		cnt++;
+	// 	}
+	// }
+	//  if(cnt == 7){
+	//  	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+	//  	exit(1);
+	//  }
+	//  if(port < 18000 || port > 18200){
+	//  	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
+	//  	exit(1);
+	//  }
+	// else if(size < 10 || size > 65535){
+	// 	printf("Error: message size should be within 10 and 65535 but received %d\n", size);
+	// 	exit(1);
+	// }
+	// else if( count < 1 || count > 10000){
+	// 	printf("Error: count should be within 1 and 10000 but received %d\n", count);
+	// 	exit(1);
+	// }
+	// else{
+	// 	printf("Params checked [OK]\n");
+	// }
 	/* the message we are sending across */
 	const char* msg = "Hello, this is client";
 	

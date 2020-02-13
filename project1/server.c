@@ -422,10 +422,11 @@ int main(int argc, char **argv) {
             
               count += tempcount;
             }
-          }
-
             close(current->socket);
             dump(&head, current->socket);
+          }
+
+            
           
           }
             if (count < 0) {
