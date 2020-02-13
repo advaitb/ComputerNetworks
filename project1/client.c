@@ -12,9 +12,10 @@
 
 int main( int argc, char* argv[]){
 	/* vars to store command line arguments */
+	/* Server names have changed so keep track of that */
 	char* hostname;
 	const char* clear_servers[4] =  
-	{"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
+	{"agate.clear.rice.edu","amber.clear.rice.edu", "cobalt.clear.rice.edu", "jade.clear.rice.edu","onyx.clear.rice.edu", "opal.clear.rice.edu",    	               "pyrite.clear.rice.edu"}; 
 	unsigned short port, size, count;
 	/* need 5 arguments */
 	if(argc !=  5){
@@ -28,7 +29,7 @@ int main( int argc, char* argv[]){
 	/* check for correctness of command line arguments */
 	uint8_t i;
 	uint8_t cnt = 0;
-	for(i=0; i < 4; i++){
+	for(i=0; i < 7; i++){
 		if(strcmp(hostname,clear_servers[i]) == 0){
 			printf("Hostname verfied to be: %s\n",hostname);
 			break;
@@ -37,15 +38,15 @@ int main( int argc, char* argv[]){
 			cnt++;
 		}
 	}
-	// if(cnt == 4){
-	// 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
-	// 	exit(1);
-	// }
-	// if(port < 18000 || port > 18200){
-	// 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
-	// 	exit(1);
-	// }
-	/*else */if(size < 10 || size > 65535){
+	 if(cnt == 7){
+	 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+	 	exit(1);
+	 }
+	 if(port < 18000 || port > 18200){
+	 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
+	 	exit(1);
+	 }
+	else if(size < 10 || size > 65535){
 		printf("Error: message size should be within 10 and 65535 but received %d\n", size);
 		exit(1);
 	}
@@ -151,30 +152,10 @@ int main( int argc, char* argv[]){
         {
         	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
 		if (temp_cnt == -1){
-			// printf("Error recving\n");
 			continue;
-			// abort();
 		}
 		recv_cnt += temp_cnt;
-		/*
-		printf("Still transmitting, re-try receiving\n");
-	        recv_cnt = recv(sock, receive_buff, size, 0);
-			size = (int) ntohs(*(int *)(receive_buff));
-			printf("size is %d\n", size);
-			printf("receive count is %d\n", recv_cnt);
-			printf("message is %s\n", receive_buff+10);
-        	*/
-	}
-
-		/* couldn't receive */
-		//if (recv_cnt < 0){
-		//	perror("Error receiving failure");
-		//	abort();
-		//}
-		/* retrieve the bytes from the server */
-		// rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
-		// rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
-		
+	}	
 		/* Get current time */
 		if(gettimeofday(&tv,NULL) == 0){
 			tv_sec = (int)tv.tv_sec;
