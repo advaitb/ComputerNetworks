@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 /* A linked list node data structure to maintain application
    information related to a connected socket */
@@ -342,7 +343,7 @@ int main(int argc, char **argv) {
             // while ( buf[(strlen(buf)-4)] != "\r\n\r\n" )
             // {
 
-            int comp = 0;
+            bool comp = false;
             int tempcount = 0;
             while (comp != 1)
             {
@@ -350,7 +351,7 @@ int main(int argc, char **argv) {
               {
                 if (buf[i] == '\r' && buf[i+1] == '\n' && buf[i+2] == '\r' && buf[i+3] == '\n')
                 {
-                  comp = 1;
+                  comp = true;
                   break;
                 }
               }
@@ -423,83 +424,7 @@ int main(int argc, char **argv) {
             free(msg);
           }
           
-
-          // if (strcmp(mode, "www") == 0)
-          // {
-          //   char *html;
-          //   char *s2 = strdup(buf+4);
-          //   relpath = strtok(s2, " ");
-
-          //   /* Check for Bad Request Error */
-
-
-          //   // 
-
-          //   strcpy(filename, root_directory);
-
-          //   strcat(filename, relpath);
-
-          //   fp = fopen(filename, "r");
-            
-          //   if (fp == NULL)
-          //   {
-          //     msg = (char*)malloc(54 * sizeof(char));
-          //     strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
-
-          //     perror("Error");
-          //   }
-          //   else
-          //   {
-          //     printf("File open succeeded.\n");
-          //     fseek(fp, 0, SEEK_END);
-          //     lSize = ftell(fp);
-          //     rewind(fp);
-          //     html = (char *)malloc(lSize* sizeof(char));
-              
-          //     msg = (char*)malloc((lSize + 47) * sizeof(char));
-          //     strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
-
-          //     if (html){
-          //       result = fread(html, 1, lSize, fp);
-          //       if (result != lSize){
-          //         printf("reading error\n");
-          //         exit(3);
-          //       }
-          //     strcat(msg, html);
-          //     free(html);
-
-          //     }
-          //     fclose(fp);
-          //   }
-          //   printf("size of html %ld\n", lSize);
-            
-          //   fp = NULL;
-          //   // Send Message
-          //   count = send(current->socket, msg, strlen(msg), 0);
-
-
-          //   // Need to send for a while loop
-
-
-
-          //   // ************************************
-
-          //   close(current->socket);
-          //   dump(&head, current->socket);
-          //   free(msg);
-          // }
-          // else
-          // {
-          //   // Ping Pong Mode
-          //   count = send(current->socket, buf, size, 0);
-          //   while (count < size){
-          //     tempcount = send(current->socket, buf+count, size-count, 0);
-          //     if (tempcount == -1)
-          //       continue;
-          //     count += tempcount;
-          //   }
           }
-            // ********************************
             // count = send(current->socket, buf, size, 0);
             if (count < 0) {
               if (errno == EAGAIN) {
