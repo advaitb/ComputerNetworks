@@ -120,14 +120,14 @@ int main( int argc, char* argv[]){
 			stv_sec = (int)tv.tv_sec;
 			stv_usec = (int)tv.tv_usec;
  		}
-		/* Assign bytes accordingly */
-		// *(char*)(send_buff) = (char) size;
-		*(short*)(send_buff) = htons(size);
- 		*(int*)(send_buff+2) = htonl(stv_sec);
- 		*(int*)(send_buff+6) = htonl(stv_usec);
-		strcpy(send_buff+10, msg);
-		/* send message to server */
-		printf("\nsend message\n");
+	/* Assign bytes accordingly */
+	// *(char*)(send_buff) = (char) size;
+	*(short*)(send_buff) = htons(size);
+ 	*(int*)(send_buff+2) = htonl(stv_sec);
+ 	*(int*)(send_buff+6) = htonl(stv_usec);
+	strcpy(send_buff+10, msg);
+	/* send message to server */
+	//printf("\nsend message\n");
 	int send_cnt = send(sock,send_buff,size,0);
 	printf("Send count %d\n", send_cnt);
 	int temp_cnt = send_cnt;
@@ -142,12 +142,12 @@ int main( int argc, char* argv[]){
 		printf("Send count %d\n", send_cnt);
 	}
 
-		/* receive message from server */
+	/* receive message from server */
         int recv_cnt = recv(sock, receive_buff, size, 0);
 	int size = (int) ntohs(*(int *)(receive_buff));
 	printf("size is %d\n", size);
 	printf("receive count is %d\n", recv_cnt);
-	printf("message is %s\n", receive_buff+10);
+	//printf("message is %s\n", receive_buff+10);
         while (recv_cnt < size)
         {
         	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
@@ -156,36 +156,30 @@ int main( int argc, char* argv[]){
 		}
 		recv_cnt += temp_cnt;
 	}	
-		/* Get current time */
-		if(gettimeofday(&tv,NULL) == 0){
-			tv_sec = (int)tv.tv_sec;
-			tv_usec = (int)tv.tv_usec;
- 		}
-		/* calculate latency in millisecs */ 
-		float sec_diff = (tv_sec - stv_sec)*1000;
-		// float usec_diff = (tv_sec - stv_sec)/1000;	
-		float usec_diff = (tv_usec - stv_usec)/1000;	
-		/* note latency */
-		timings[count-1] = sec_diff+usec_diff;
-		printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
-		printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
-		printf("Latency observed in iteration %i is %.3f\n",count,timings[count-1]);
-		/* decrement */
-		count--;
-	}
-	/* close connection and free memory */
-	close(sock);
-	free(send_buff);
-	free(receive_buff);
+	/* Get current time */
+	if(gettimeofday(&tv,NULL) == 0){
+		tv_sec = (int)tv.tv_sec;
+		tv_usec = (int)tv.tv_usec;
+ 	}
+	/* calculate latency in millisecs */ 
+	float sec_diff = (tv_sec - stv_sec)*1000;
+	// float usec_diff = (tv_sec - stv_sec)/1000;	
+	float usec_diff = (tv_usec - stv_usec)/1000;	
+	/* note latency */
+	timings[count-1] = sec_diff+usec_diff;
+	printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
+	printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
+	printf("Latency observed in iteration %i is %.3f\n",count,timings[count-1]);
+	/* decrement */
+	count--;
+      }
+      /* close connection and free memory */
+      close(sock);
+      free(send_buff);
+      free(receive_buff);
 	
 	
-
-
-
-	
-	
-	/* return */
-	return 0;
-
+       /* return */
+       return 0;
 }
 	
