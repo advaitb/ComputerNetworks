@@ -14,7 +14,7 @@ int main( int argc, char* argv[]){
 	/* vars to store command line arguments */
 	char* hostname;
 	const char* clear_servers[4] =  
-	{"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
+	{"agate.clear.rice.edu","amber.clear.rice.edu", "cobalt.clear.rice.edu", "jade.clear.rice.edu","onyx.clear.rice.edu", "opal.clear.rice.edu",    	               "pyrite.clear.rice.edu"}; 
 	unsigned short port, size, count;
 	/* need 5 arguments */
 	if(argc !=  4){
@@ -29,7 +29,7 @@ int main( int argc, char* argv[]){
 	// uint8_t i;
 	uint8_t cnt = 0;
 	uint8_t i;
-	for( i=0; i < 4; i++){
+	for( i=0; i < 7; i++){
 		if(strcmp(hostname,clear_servers[i]) == 0){
 			printf("Hostname verfied to be: %s\n",hostname);
 			break;
@@ -38,31 +38,21 @@ int main( int argc, char* argv[]){
 			cnt++;
 		}
 	}
-	// if(cnt == 4){
-	// 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
-	// 	exit(1);
-	// }
-	// if(port < 18000 || port > 18200){
-	// 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
-	// 	exit(1);
-	// }
-	// /*else */if(size < 10 || size > 65535){
-	// 	printf("Error: message size should be within 10 and 65535 but received %d\n", size);
-	// 	exit(1);
-	// }
-	// /*else*/ if( count < 1 || count > 10000){
-	// 	printf("Error: count should be within 1 and 10000 but received %d\n", count);
-	// 	exit(1);
-	// }
-	// else{
-	// 	printf("Params checked [OK]\n");
-	// }
-	/* the message we are sending across */
-	// const char* msg = "Hello, this is client";
-	// char *msg = (char*) malloc(count);	
-	// char *increment_msg = "0";
-
-	/* establish connection based on sample code provided in class */	
+	if(cnt == 7){
+	 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+	 	exit(1);
+	 }
+	 if(port < 18000 || port > 18200){
+	 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
+	 	exit(1);
+	 }
+	 else  if( count < 1 || count > 10000){
+		printf("Error: count should be within 1 and 10000 but received %d\n", count);
+	 	exit(1);
+	 }
+	 else{
+	 	printf("Params checked [OK]\n");
+	 }
 	
 	/* our client socket */
   	int sock;
@@ -78,7 +68,7 @@ int main( int argc, char* argv[]){
 	char* receive_buff;
 	char* send_buff;
 	/* intitialize mem to size -  10 bytes */
-    int BUF_LEN = 11000;
+        int BUF_LEN = 11000;
 	receive_buff = (char*) malloc(BUF_LEN);
 	send_buff = (char*) malloc(BUF_LEN);	
 	/* check if allocated */
@@ -143,8 +133,7 @@ int main( int argc, char* argv[]){
 			/* send message to server */
 			printf("\nsend message\n");
 			int send_cnt = send(sock,send_buff,size,0);
-            int temp_cnt = send_cnt;
-
+            	int temp_cnt = send_cnt;
         	while (send_cnt < size){
 				temp_cnt = send(sock,send_buff+send_cnt,size-send_cnt,0);
 				if (temp_cnt == -1){
@@ -167,30 +156,9 @@ int main( int argc, char* argv[]){
 	        	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
 				if (temp_cnt == -1){
 					continue;
-					// printf("Error recving\n");
-					// abort();
 				}
 				recv_cnt += temp_cnt;
 			}
-	   //      while (rsize != recv_cnt)
-	   //      {
-	   //      	printf("Still transmitting, re-try receiving\n");
-		  //       recv_cnt = recv(sock, receive_buff, BUF_LEN, 0);
-				// rsize = (int) ntohs(*(int *)(receive_buff));
-				// printf("rsize is %d\n", rsize);
-				// printf("receive count is %d\n", recv_cnt);
-				// printf("message is %s\n", receive_buff+10);
-	   //      }
-
-			/* couldn't receive */
-			// if (recv_cnt < 0){
-			// 	perror("Error receiving failure");
-			// 	abort();
-			// }
-			/* retrieve the bytes from the server */
-			// rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
-			// rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
-			
 			/* Get current time */
 			if(gettimeofday(&tv,NULL) == 0){
 				tv_sec = (int)tv.tv_sec;
