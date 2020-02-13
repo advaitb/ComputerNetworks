@@ -8,27 +8,28 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
+#include <math.h>
 
 int main( int argc, char* argv[]){
 	/* vars to store command line arguments */
 	char* hostname;
 	const char* clear_servers[4] =  
-	{"ring.clear.rice.edu", "sky.clear.rice.edu", "glass.clear.rice.edu", "water.clear.rice.edu"};
+	{"agate.clear.rice.edu","amber.clear.rice.edu", "cobalt.clear.rice.edu", "jade.clear.rice.edu","onyx.clear.rice.edu", "opal.clear.rice.edu",    	               "pyrite.clear.rice.edu"}; 
 	unsigned short port, size, count;
 	/* need 5 arguments */
-	if(argc !=  5){
+	if(argc !=  4){
 		printf("Not enough arguments!\n");
 		exit(1);
 	}
 	hostname = argv[1];
 	port = atoi(argv[2]);
-	size = atoi(argv[3]);
-	count = atoi(argv[4]);
+	// size = atoi(argv[3]);
+	count = atoi(argv[3]); // Here count is how many number of samples from 1 to 65535 bytes.
 	/* check for correctness of command line arguments */
 	// uint8_t i;
 	uint8_t cnt = 0;
-	for(uint8_t i=0; i < 4; i++){
+	uint8_t i;
+	for( i=0; i < 7; i++){
 		if(strcmp(hostname,clear_servers[i]) == 0){
 			printf("Hostname verfied to be: %s\n",hostname);
 			break;
@@ -37,31 +38,21 @@ int main( int argc, char* argv[]){
 			cnt++;
 		}
 	}
-	// if(cnt == 4){
-	// 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
-	// 	exit(1);
-	// }
-	// if(port < 18000 || port > 18200){
-	// 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
-	// 	exit(1);
-	// }
-	// /*else */if(size < 10 || size > 65535){
-	// 	printf("Error: message size should be within 10 and 65535 but received %d\n", size);
-	// 	exit(1);
-	// }
-	/*else*/ if( count < 1 || count > 10000){
+	if(cnt == 7){
+	 	printf("Error: hostname not verifiable. Please use only the allowed hostname in the list\n");
+	 	exit(1);
+	 }
+	 if(port < 18000 || port > 18200){
+	 	printf("Error: port number should be within 18000 and 18200 but received %d\n", port);
+	 	exit(1);
+	 }
+	 else  if( count < 1 || count > 10000){
 		printf("Error: count should be within 1 and 10000 but received %d\n", count);
-		exit(1);
-	}
-	else{
-		printf("Params checked [OK]\n");
-	}
-	/* the message we are sending across */
-	// const char* msg = "Hello, this is client";
-	char *msg = (char*) malloc(count);	
-	char *increment_msg = "0";
-
-	/* establish connection based on sample code provided in class */	
+	 	exit(1);
+	 }
+	 else{
+	 	printf("Params checked [OK]\n");
+	 }
 	
 	/* our client socket */
   	int sock;
@@ -77,7 +68,7 @@ int main( int argc, char* argv[]){
 	char* receive_buff;
 	char* send_buff;
 	/* intitialize mem to size -  10 bytes */
-    int BUF_LEN = 11000;
+        int BUF_LEN = 11000;
 	receive_buff = (char*) malloc(BUF_LEN);
 	send_buff = (char*) malloc(BUF_LEN);	
 	/* check if allocated */
@@ -111,88 +102,109 @@ int main( int argc, char* argv[]){
 	/* get time of day */
 	struct timeval tv;
 	/* 2D array to store timing, count - iteration, 0 - sec diff, 1 - usec  diff */ 
-	float timings[count];
+	uint8_t num_runs = 5;
+	float timings[num_runs][count];
 	/* send message count number of times */
-	int i = 0;
-	size = 11;
-	while (i < count){
-		strcpy(msg+i, increment_msg);
-		/* variables to save sec, usec. Should take 4 bytes each */
-		// int stv_sec,stv_usec,rtv_sec,rtv_usec;
-		int stv_sec,stv_usec,tv_sec,tv_usec;
-		if(gettimeofday(&tv,NULL) == 0){
-			stv_sec = (int)tv.tv_sec;
-			stv_usec = (int)tv.tv_usec;
- 		}
-		/* Assign bytes accordingly */
-		// *(char*)(send_buff) = (char) size;
-		*(short*)(send_buff) = htons(size);
- 		*(int*)(send_buff+2) = htonl(stv_sec);
- 		*(int*)(send_buff+6) = htonl(stv_usec);
-		strcpy(send_buff+10, msg);
+	unsigned short m  = 0;
+	size = 10;
+	uint8_t k;
+	int step_size  = (int) ((10000 - 10) / count);
+        for ( k = 0; k < num_runs; k++)
+	{
+		while (m < count){
+			// strcpy(msg+i, increment_msg);
+			int num_bytes = m * step_size;
+			printf("%d bytes msg to be sent\n", num_bytes);
+			char *msg = (char*) calloc(num_bytes, sizeof(char));
+			/* variables to save sec, usec. Should take 4 bytes each */
+			// int stv_sec,stv_usec,rtv_sec,rtv_usec;
+			int stv_sec,stv_usec,tv_sec,tv_usec;
+			if(gettimeofday(&tv,NULL) == 0){
+				stv_sec = (int)tv.tv_sec;
+				stv_usec = (int)tv.tv_usec;
+	 		}
+			/* Assign bytes accordingly */
+			// *(char*)(send_buff) = (char) size;
+			*(short*)(send_buff) = htons(size);
+	 		*(int*)(send_buff+2) = htonl(stv_sec);
+	 		*(int*)(send_buff+6) = htonl(stv_usec);
+			strcpy(send_buff+10, msg);
 
-		/* send message to server */
-		printf("\nsend message\n");
-		send(sock,send_buff,size,0);
+			/* send message to server */
+			printf("\nsend message\n");
+			int send_cnt = send(sock,send_buff,size,0);
+            	int temp_cnt = send_cnt;
+        	while (send_cnt < size){
+				temp_cnt = send(sock,send_buff+send_cnt,size-send_cnt,0);
+				if (temp_cnt == -1){
+					// abort();
+					printf("Error sending\n");
+					continue;
+				}
+				send_cnt += temp_cnt;
+				printf("Send count %d\n", send_cnt);
+			}
 
-		/* receive message from server */
-        int recv_cnt = recv(sock, receive_buff, BUF_LEN, 0);
-		int rsize = (int) ntohs(*(int *)(receive_buff));
-		printf("rsize is %d\n", rsize);
-		printf("receive count is %d\n", recv_cnt);
-		printf("message is %s\n", receive_buff+10);
-
-        while (rsize != recv_cnt)
-        {
-        	printf("Still transmitting, re-try receiving\n");
-	        recv_cnt = recv(sock, receive_buff, BUF_LEN, 0);
-			rsize = (int) ntohs(*(int *)(receive_buff));
+			/* receive message from server */
+	        int recv_cnt = recv(sock, receive_buff, BUF_LEN, 0);
+			int rsize = (int) ntohs(*(int *)(receive_buff));
 			printf("rsize is %d\n", rsize);
 			printf("receive count is %d\n", recv_cnt);
 			printf("message is %s\n", receive_buff+10);
-        }
-
-		/* couldn't receive */
-		if (recv_cnt < 0){
-			perror("Error receiving failure");
-			abort();
+	        while (recv_cnt < size)
+	        {
+	        	temp_cnt = recv(sock, receive_buff+recv_cnt, size-recv_cnt,0);
+				if (temp_cnt == -1){
+					continue;
+				}
+				recv_cnt += temp_cnt;
+			}
+			/* Get current time */
+			if(gettimeofday(&tv,NULL) == 0){
+				tv_sec = (int)tv.tv_sec;
+				tv_usec = (int)tv.tv_usec;
+	 		}
+			/* calculate latency in millisecs */ 
+			float sec_diff = (tv_sec - stv_sec)*1000;
+			// float usec_diff = (tv_sec - stv_sec)/1000;	
+			float usec_diff = (tv_usec - stv_usec)/1000;	
+			/* note latency */
+			timings[k][m] = sec_diff+usec_diff;
+			printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
+			printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
+			printf("Latency observed in iteration %i is %.3f\n",m,timings[k][m]);
+			/* increment message size*/
+			printf("message: %s\n", msg);
+			m++;
+			size += step_size;
+			free(msg);
 		}
-		/* retrieve the bytes from the server */
-		// rtv_sec = (int) ntohl(*(int *)(receive_buff+2));
-		// rtv_usec = (int) ntohl(*(int *)(receive_buff+6));
-		
-		/* Get current time */
-		if(gettimeofday(&tv,NULL) == 0){
-			tv_sec = (int)tv.tv_sec;
-			tv_usec = (int)tv.tv_usec;
- 		}
-		/* calculate latency in millisecs */ 
-		float sec_diff = (tv_sec - stv_sec)*1000;
-		// float usec_diff = (tv_sec - stv_sec)/1000;	
-		float usec_diff = (tv_usec - stv_usec);	
-		/* note latency */
-		timings[count-1] = sec_diff+usec_diff;
-		printf("stv_sec %d, stv_usec %d\n", stv_sec, stv_usec);
-		printf("tv_sec %d, tv_usec %d\n", tv_sec, tv_usec);
-		printf("Latency observed in iteration %i is %.3f\n",i,timings[count-1]);
-		/* increment message size*/
-		printf("message: %s\n", msg);
-		i++;
-		size++;
+		m = 0;
+		size = 10;
 	}
+	printf("close connection\n");
 	/* close connection and free memory */
 	close(sock);
 	free(send_buff);
 	free(receive_buff);
-	
-	
 
+	/* Write timings into file */
+	printf("write timings\n");
+	FILE *fp = malloc(10000);
 
-
-	
-	
+    fp = fopen("./test.txt", "w");
+    int c;
+    unsigned short j;
+    for (c = 0; c < num_runs; c++)
+    {
+	    for ( j = 0; j < count; j++)
+	    {
+	    	fprintf(fp, "%.3f,", timings[c][j]);
+	    }
+	    fprintf(fp, "\n");
+	}
+    fclose(fp);
 	/* return */
 	return 0;
 
 }
-	

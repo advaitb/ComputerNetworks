@@ -332,7 +332,6 @@ int main(int argc, char **argv) {
               tempcount = send(current->socket, buf+count, size-count, 0);
               if (tempcount == -1)
                 continue;
-            
               count += tempcount;
             }
           }
@@ -363,13 +362,6 @@ int main(int argc, char **argv) {
             char *s2 = strdup(buf+4);
             relpath = strtok(s2, " ");
 
-            /* Check for Bad Request Error */
-            // Get and HTTP
-
-
-
-
-            // 
 
             strcpy(filename, root_directory);
             strcat(filename, relpath);
@@ -381,6 +373,13 @@ int main(int argc, char **argv) {
               strcpy(msg, "HTTP/1.1 404 Not Found \r\nContent-Type: text/html \r\n\r\n");
               perror("Error");
             }
+            else if ( strncmp(buf, "GET", 3) != 0 )
+            {
+              msg = (char*)malloc(56 * sizeof(char));
+              strcpy(msg, "HTTP/1.1 400 Bad Request \r\nContent-Type: text/html \r\n\r\n");
+              perror("Error");
+            }
+            
             else
             {
               printf("File open succeeded.\n");
@@ -389,28 +388,29 @@ int main(int argc, char **argv) {
               rewind(fp);
               html = (char *)malloc(lSize* sizeof(char));
               
-              msg = (char*)malloc((lSize + 47) * sizeof(char));
-              strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
-
+              
               if (html){
                 result = fread(html, 1, lSize, fp);
-                if (result != lSize){
-
+                
+                if (result != lSize){                  
                   // Internal Error
-
-                  // 
-                  printf("reading error\n");
-                  exit(3);
+                  msg = (char*)malloc((66) * sizeof(char));
+                  strcpy(msg, "HTTP/1.1 500 Internal Server Error \r\nContent-Type: text/html \r\n\r\n");
                 }
+                else
+                {
+                  msg = (char*)malloc((lSize + 47) * sizeof(char));
+                  strcpy(msg, "HTTP/1.1 200 OK \r\nContent-Type: text/html \r\n\r\n");
+                }  
               strcat(msg, html);
               free(html);
-
               }
+              
               fclose(fp);
             }
             printf("size of html %ld\n", lSize);
             
-            fp = NULL;
+            // free(fp);
             // Send Message
             count = send(current->socket, msg, strlen(msg), 0);
 
@@ -425,11 +425,11 @@ int main(int argc, char **argv) {
 
             close(current->socket);
             dump(&head, current->socket);
-            free(msg);
+            // free(msg);
+            // free(buf);
           }
           
           }
-            // count = send(current->socket, buf, size, 0);
             if (count < 0) {
               if (errno == EAGAIN) {
                 /* we are trying to dump too much data down the socket,
@@ -447,4 +447,3 @@ int main(int argc, char **argv) {
     }
   }
     }
-    
