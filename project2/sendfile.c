@@ -21,6 +21,8 @@ int main(int argc, char const *argv[])
      * Packet Type: ACK or Data (1 Bit)
      * Identifier: Stop and Wait (1 Bit) 
      * Advertised Window: x
+     * Directory: 50 Bytes
+     * File name: 20 Bytes
      * Data: 1000 Bytes
      * CRC Error Code: 4 Bytes
      */
