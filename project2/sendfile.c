@@ -16,12 +16,13 @@
 
 int main(int argc, char const *argv[])
 {    
-    /* DGRAM Packet Structure:
-     * Packet Type:  
-     * Identifier: 
-     * Advertised Window:
-     * Data: 
-     * CRC Error Code: 
+    /* 
+     * DGRAM Packet Structure:
+     * Packet Type: ACK or Data (1 Bit)
+     * Identifier: Stop and Wait (1 Bit) 
+     * Advertised Window: x
+     * Data: 1000 Bytes
+     * CRC Error Code: 4 Bytes
      */
 
     /* TODO:
