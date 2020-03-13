@@ -11,7 +11,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-
 #define MAX_FILE_SIZE 30000000
 
 int main(int argc, char const *argv[])
@@ -38,6 +37,7 @@ int main(int argc, char const *argv[])
     char *msg;
     unsigned int server_address;
     struct sockaddr_in s_in;
+    long packet_size = 1076;
     
 
     long lSize;
@@ -62,9 +62,8 @@ int main(int argc, char const *argv[])
 
 
     // Read the FILE and breakdown to package into PACKETS.
-    int packet_size;
     FILE *fp;
-    unsigned char buf[MAX_FILE_SIZE];
+    
     fp = fopen("test.bin", "rb");
     if (!fp)
     {
@@ -75,49 +74,29 @@ int main(int argc, char const *argv[])
     fseek(fp, 0, SEEK_END);
     lSize = ftell(fp);
     rewind(fp);
-    file_data = (char *)malloc(lSize* sizeof(char));
-              
-    if (file_data)
+
+    file_data = (char *)malloc(packet_size * sizeof(char)); // 
+    size_t bytes_read;
+    int send_cnt;
+    int tmp_cnt;
+    int addr_len;
+    size_t total_bytes = 0;
+    while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
-        size_t result = fread(file_data, 1, lSize, fp);
-        if (result!=lSize)
-            perror("Error reading file");
-            return 1;
+        printf("Read %d bytes, now sending...\n", bytes_read);
+        total_bytes += bytes_read;
+        // send_cnt = 0;
+        // while (send_cnt != packet_size)
+        // {
+        //     tmp_cnt = sendto(sockfd, (const char *)file_data, strlen(file_data), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
+        //     send_cnt += tmp_cnt;
+        // }
+        // recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
     }
-
-
-
-
-
-
-
-    // Send Message to Server
-    int send_cnt = 0;
-
-    // While ALL packets are not sent
-    while (1)
-    {
-        // While EACH packet is not sent
-        while (send_cnt != packet_size)
-        {
-            int tmp_cnt = sendto(sockfd, (const char *)msg, strlen(msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
-            send_cnt += tmp_cnt;
-        }
-
-        // Wait until you hear ACK for last sent package
-        int len;
-        recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, len); // If ACK is not recvd it will timeout!
-        // Check if this ack is for Packet
-        
-        
-        
-    }
+    printf("Complete file sent. %d bytes sent\n", total_bytes);
     
     
-
-    // 4. Process reply, and return to Step 2
-
-    // 5. Close socket descriptor and exit.
+    // Close socket descriptor and exit.
 
     return 0;
 }
