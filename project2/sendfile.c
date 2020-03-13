@@ -81,22 +81,27 @@ int main(int argc, char const *argv[])
     int tmp_cnt;
     int addr_len;
     size_t total_bytes = 0;
+    char *packet_msg;
+
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
         printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
-        // send_cnt = 0;
-        // while (send_cnt != packet_size)
-        // {
-        //     tmp_cnt = sendto(sockfd, (const char *)file_data, strlen(file_data), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
-        //     send_cnt += tmp_cnt;
-        // }
-        // recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+
+        // construct packet message
+
+        //
+        send_cnt = 0;
+        while (send_cnt != packet_size)
+        {
+            tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
+            send_cnt += tmp_cnt;
+        }
+        recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
     }
     printf("Complete file sent. %d bytes sent.\n", total_bytes);
     
     
     // Close socket descriptor and exit.
-
     return 0;
 }
