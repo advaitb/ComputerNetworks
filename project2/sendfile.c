@@ -93,7 +93,7 @@ int main(int argc, char const *argv[])
         // }
         // recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
     }
-    printf("Complete file sent. %d bytes sent\n", total_bytes);
+    printf("Complete file sent. %d bytes sent.\n", total_bytes);
     
     
     // Close socket descriptor and exit.
