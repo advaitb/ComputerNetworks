@@ -31,11 +31,34 @@ int main(int argc, char const *argv[])
      * Error Checking Codes -> Cyclic Redundancy Check
      */
 
-    unsigned short port;
+    // Handle Command Line Inputs
+    if (argc!=5)
+    {
+        printf("Incorrect number of arguments!\n");
+        exit(1);
+    }
+    
+    char* rFlag = argv[1];
+    char* host_port = argv[2];
+    char* fFlag = argv[3];
+    char* dir_name = argv[4];
+
+    char* ptr1 = strtok(host_port, ":");
+    char* hostc = ptr1;
+    ptr1 = strtok(NULL, ":");
+    char* portc = ptr1;
+
+    char* ptr2 = strtok(dir_name, "/");
+    char* dir = ptr2;
+    ptr2 = strtok(NULL, "/");
+    char* fileName = ptr2;
+
+
+    unsigned short port = atoi(portc);
     int sockfd;
     char rcv_buffer[1024];
     char *msg;
-    unsigned int server_address;
+    // unsigned int server_address;
     struct sockaddr_in s_in;
     long packet_size = 1076;
     
@@ -56,9 +79,8 @@ int main(int argc, char const *argv[])
     memset(&s_in, 0, sizeof(s_in));
     s_in.sin_family = AF_INET;
     s_in.sin_port = htons(port);
-    s_in.sin_addr.s_addr = server_address;
+    s_in.sin_addr.s_addr = inet_addr(hostc);
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
-
 
 
     // Read the FILE and breakdown to package into PACKETS.
@@ -84,11 +106,13 @@ int main(int argc, char const *argv[])
     char *packet_msg;
     packet_msg = malloc(packet_size);
     char* directory[50]; 
+    strncpy(directory, dir, 50);
     char* name[20];
+    strncpy(name, fileName, 20);
 
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
-        printf("Read %d bytes, now sending...\n", bytes_read);
+        // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
 
         // construct packet message
@@ -96,7 +120,11 @@ int main(int argc, char const *argv[])
         packet_msg[1] = 0; // Stop and Wait Scheme
         strcpy(packet_msg+2, directory); // Directory information
         strcpy(packet_msg+52, name);
-        //
+        strcpy(packet_msg+72, file_data);
+
+        char* CRC_code[4];
+        strcpy(packet_msg+1072, CRC_code);
+        
         send_cnt = 0;
         // while (send_cnt != packet_size)
         // {
