@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 {    
     /* 
      * DGRAM Packet Structure:
-     * Packet Type: ACK or Data (1 Bit)
+     * Packet Type: ACK or Data (1 Bit - 0:Data, 1: Ack)
      * Identifier: Stop and Wait (1 Bit) 
      * Advertised Window: x
      * Directory: 50 Bytes
@@ -82,6 +82,9 @@ int main(int argc, char const *argv[])
     int addr_len;
     size_t total_bytes = 0;
     char *packet_msg;
+    packet_msg = malloc(packet_size);
+    char* directory[50]; 
+    char* name[20];
 
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
@@ -89,15 +92,18 @@ int main(int argc, char const *argv[])
         total_bytes += bytes_read;
 
         // construct packet message
-
+        packet_msg[0] = 0; // Data Message
+        packet_msg[1] = 0; // Stop and Wait Scheme
+        strcpy(packet_msg+2, directory); // Directory information
+        strcpy(packet_msg+52, name);
         //
         send_cnt = 0;
-        while (send_cnt != packet_size)
-        {
-            tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
-            send_cnt += tmp_cnt;
-        }
-        recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+        // while (send_cnt != packet_size)
+        // {
+        //     tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
+        //     send_cnt += tmp_cnt;
+        // }
+        // recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
     }
     printf("Complete file sent. %d bytes sent.\n", total_bytes);
     
