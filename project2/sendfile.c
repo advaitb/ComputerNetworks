@@ -26,6 +26,7 @@ int main(int argc, char const *argv[])
      * CRC Error Code: 4 Bytes
      */
 
+
     /* TODO:
      * Add Stop and Wait Ack Scheme -> Replace with Sliding Window Later
      * Error Checking Codes -> Cyclic Redundancy Check
@@ -110,31 +111,57 @@ int main(int argc, char const *argv[])
     char* name[20];
     strncpy(name, fileName, 20);
 
+    char* currID[1];
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
-
+        currID[0] = 0;
         // construct packet message
         packet_msg[0] = 0; // Data Message
-        packet_msg[1] = 0; // Stop and Wait Scheme
+        packet_msg[1] = currID; // Stop and Wait Scheme
         strcpy(packet_msg+2, directory); // Directory information
-        strcpy(packet_msg+52, name);
-        strcpy(packet_msg+72, file_data);
+        strcpy(packet_msg+52, name); // File Name
+        strcpy(packet_msg+72, file_data); // Actual Data
 
-        char* CRC_code[4];
+        char* CRC_code[4]; // CRC Code
+
+        // Compute CRC
+
+        //
+
         strcpy(packet_msg+1072, CRC_code);
         
         send_cnt = 0;
-        // while (send_cnt != packet_size)
-        // {
-        //     tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
-        //     send_cnt += tmp_cnt;
-        // }
-        // recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+        while (send_cnt != packet_size)
+        {
+            tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
+            if(tmp_cnt < 0){
+                printf("Error sending!\n");
+                return 1;
+            }
+                
+            send_cnt += tmp_cnt;
+            printf("send count: %d", send_cnt);
+        }
+        // Complete packet sent!
+        printf("packet sent\n");
+        int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+        if (bytes_rcvd > 0 && rcv_buffer[0] == 1 )
+        {
+            printf("Ack received!\n");
+            if (rcv_buffer[1] == currID[0])
+            {
+                printf("Ack rcvd for last message sent!");
+                //switch currID
+                if (currID[0] == 0)
+                    currID[0] = 1;
+                else
+                    currID[0] = 0;
+            }
+        }
     }
     printf("Complete file sent. %d bytes sent.\n", total_bytes);
-    
     
     // Close socket descriptor and exit.
     return 0;
