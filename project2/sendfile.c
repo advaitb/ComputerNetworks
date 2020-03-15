@@ -13,6 +13,25 @@
 
 #define MAX_FILE_SIZE 30000000
 
+unsigned int crc32b(unsigned char *message) {
+   int i, j;
+   unsigned int byte, crc, mask;
+
+   i = 0;
+   crc = 0xFFFFFFFF;
+   while (message[i] != 0) {
+      byte = message[i];            // Get next byte.
+      crc = crc ^ byte;
+      for (j = 7; j >= 0; j--) {    // Do eight times.
+         mask = -(crc & 1);
+         crc = (crc >> 1) ^ (0xEDB88320 & mask);
+      }
+      i = i + 1;
+   }
+   return ~crc;
+}
+
+
 int main(int argc, char const *argv[])
 {    
     /* 
@@ -108,6 +127,7 @@ int main(int argc, char const *argv[])
     char* sentID[1];
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
+        memset(packet_msg, 0, 1076);
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
         sentID[0] = 0;
@@ -118,12 +138,10 @@ int main(int argc, char const *argv[])
         strcpy(packet_msg+52, name); // File Name
         strcpy(packet_msg+72, file_data); // Actual Data
 
-        char* CRC_code[4]; // CRC Code
-
+       
         // Compute CRC
-
-        //
-        strcpy(packet_msg+1072, CRC_code);
+        unsigned int crc = crc32b(packet_msg);
+        memcpy(packet_msg+1072, &crc, 4);
 
 
         while (1){
