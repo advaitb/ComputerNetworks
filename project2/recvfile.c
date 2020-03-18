@@ -95,7 +95,7 @@ int main(int argc, char const *argv[])
     // Receive all the packets
     while(1)
     {
-        printf("Packet recv buf Size %d\n", sizeof(recv_buf));
+        // printf("Packet recv buf Size %d\n", sizeof(recv_buf));
         recv_buf = (char *)malloc(packet_size);
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         printf("Received bytes %d\n", count);
@@ -111,15 +111,22 @@ int main(int argc, char const *argv[])
         // Check crc
         printf("Check crc\n");
         unsigned int crc = crc32b(recv_buf);
+        // printf("crc %d\n", crc);
         if (crc != 0)
         {
+            printf("CRC error\n");
             free(recv_buf);
             continue; // If error detected, discard the packet
         }
 
         // Check sequence number in stop & wait fashion
         printf("Check sequence number\n");
-        char recvID = recv_buf[1];
+        char recvID[1];
+        recvID[0] = recv_buf[1];
+        printf("recved packet %s\n", recv_buf);
+        printf("recvID %c\n", recvID[0]);
+        printf("lastID %c\n", lastID[0]);
+        // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         if (recvID != lastID[0])
             lastID[0] = recvID;
         else
@@ -130,30 +137,44 @@ int main(int argc, char const *argv[])
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strncpy(dir, recv_buf+2, 50);
+        strcpy(dir, "/home/tony/Desktop");
+        // strncpy(dir, recv_buf+2, 50);
         strncpy(fileName, recv_buf+52, 20);
         strncpy(recv_msg, recv_buf+72, 1000);
 
         // Save message to the file
         char filePath[70];
         strcpy(filePath, dir);
+        strcat(filePath, "/");
         strcat(filePath, fileName);
-        fp = fopen(filePath, "a");
+        char* option = "a";
+        if (access(filePath, F_OK) == -1)
+        {
+            // file doesn't exist
+            option = "w";
+        }
+        printf("file path %s, option %s\n", filePath, option);
+        fp = fopen(filePath, option);
+
         if (!fp)
         {
-            printf("Unable to open file.\n");
+            // printf("Unable to open file.\n");
+            perror("Unable to open file");
             return 1;
         }
-        if (fwrite(recv_msg, 1, sizeof(recv_msg), fp) != 1)
+        printf("Opened file at %s\n", filePath);
+        printf("recv msg size %d\n", sizeof(recv_msg));
+        if (fwrite(recv_msg, 1, sizeof(recv_msg), fp) != sizeof(recv_msg))
         {
-            printf("Write to file error!\n");
+            perror("Write to file error");
             exit(1);
         }
 
         fclose(fp);
-        free(recv_msg);
+        // free(recv_msg);
 
         // Send Ack
+        printf("Start to send Ack\n");
         ackmsg[1] = lastID[0];
         int sendcount = sendto(sockfd, (const char *)ackmsg, sizeof(ackmsg), MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
