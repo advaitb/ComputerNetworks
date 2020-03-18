@@ -97,6 +97,7 @@ int main(int argc, char const *argv[])
     {
         recv_buf = (char *)malloc(packet_size);
         int count = recvfrom(sockfd, recv_buf, sizeof(recv_buf), MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+        printf("Received bytes %d\n", count);
         int tempcount = 0;
         while (count < packet_size)
         {
@@ -106,6 +107,7 @@ int main(int argc, char const *argv[])
             count += tempcount;
         }
         // Check crc
+        printf("Check crc\n");
         unsigned int crc = crc32b(recv_buf);
         if (crc != 0)
         {
@@ -114,6 +116,7 @@ int main(int argc, char const *argv[])
         }
 
         // Check sequence number in stop & wait fashion
+        printf("Check sequence number\n");
         char recvID = recv_buf[1];
         if (recvID != lastID[0])
             lastID[0] = recvID;
