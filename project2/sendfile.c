@@ -70,7 +70,7 @@ int main(int argc, char const *argv[])
 
     unsigned short port = atoi(portc);
     int sockfd;
-    char rcv_buffer[1024];
+    char rcv_buffer[2];
     char *msg;
     // unsigned int server_address;
     struct sockaddr_in s_in;
@@ -150,6 +150,7 @@ int main(int argc, char const *argv[])
             //if recvid == sendid
             //      change sendID
             //      break
+
             printf("Packet Size %d\n", packet_size);
             send_cnt = 0;
             while (send_cnt < packet_size)
@@ -160,11 +161,19 @@ int main(int argc, char const *argv[])
                     return 1;
                 }    
                 send_cnt += tmp_cnt;
-                // printf("send count: %d\n", send_cnt);
+                printf("send count: %d\n", send_cnt);
             }
             printf("Packet Sent\n");
             // Complete packet sent!
 
+            // int bytes_rcvd = 0;
+            // int ack_size = 2;
+            // while (bytes_rcvd < ack_size)
+            // {
+            //     int tmp_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+            //     bytes_rcvd += tmp_rcvd;
+            // }
+            
             int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
             if (bytes_rcvd > 0)
             {
