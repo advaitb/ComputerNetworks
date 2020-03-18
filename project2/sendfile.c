@@ -152,10 +152,11 @@ int main(int argc, char const *argv[])
             //      break
 
             printf("Packet Size %d\n", packet_size);
+            printf("Packet message Size %d\n", sizeof(packet_msg));
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
-                tmp_cnt = sendto(sockfd, (const char *)packet_msg, sizeof(packet_msg), 0, (const struct sockaddr *) &s_in, sizeof(s_in));
+                tmp_cnt = sendto(sockfd, (const char *)packet_msg, packet_size, 0, (const struct sockaddr *) &s_in, sizeof(s_in));
                 if(tmp_cnt <= 0){
                     printf("Error sending!\n");
                     return 1;

@@ -95,14 +95,15 @@ int main(int argc, char const *argv[])
     // Receive all the packets
     while(1)
     {
+        printf("Packet recv buf Size %d\n", sizeof(recv_buf));
         recv_buf = (char *)malloc(packet_size);
-        int count = recvfrom(sockfd, recv_buf, sizeof(recv_buf), MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+        int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         printf("Received bytes %d\n", count);
         int tempcount = 0;
         while (count < packet_size)
         {
             tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-            printf("Received bytes tempcount%d\n", count);
+            printf("Received bytes temp count%d\n", tempcount);
             if (tempcount == -1)
                 continue;
             count += tempcount;
