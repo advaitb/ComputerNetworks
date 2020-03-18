@@ -102,6 +102,7 @@ int main(int argc, char const *argv[])
         while (count < packet_size)
         {
             tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+            printf("Received bytes tempcount%d\n", count);
             if (tempcount == -1)
                 continue;
             count += tempcount;
