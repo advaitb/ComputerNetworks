@@ -150,22 +150,25 @@ int main(int argc, char const *argv[])
             //if recvid == sendid
             //      change sendID
             //      break
+            printf("Packet Size %d\n", packet_size);
             send_cnt = 0;
-            while (send_cnt != packet_size)
+            while (send_cnt < packet_size)
             {
-                tmp_cnt = sendto(sockfd, (const char *)packet_msg, strlen(packet_msg), NULL, (const struct sockaddr *) &s_in, sizeof(s_in));
+                tmp_cnt = sendto(sockfd, (const char *)packet_msg, sizeof(packet_msg), 0, (const struct sockaddr *) &s_in, sizeof(s_in));
                 if(tmp_cnt <= 0){
                     printf("Error sending!\n");
                     return 1;
                 }    
                 send_cnt += tmp_cnt;
-                printf("send count: %d\n", send_cnt);
+                // printf("send count: %d\n", send_cnt);
             }
+            printf("Packet Sent\n");
             // Complete packet sent!
 
             int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
             if (bytes_rcvd > 0)
             {
+                printf("Ack received!\n");
                 // Ack received
                 char* rcvID = rcv_buffer[1];
                 if (rcvID[0] == sentID[0])
