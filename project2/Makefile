@@ -1,21 +1,10 @@
-CC	 	= gcc
-LD	 	= gcc
-CFLAGS	 	= -Wall -g
+all: rfile sfile
 
-LDFLAGS	 	= 
-DEFS 	 	=
+rfile: common.h rfile.c
+	gcc  -pthread rfile.c -o rfile
 
-all:	sendfile recvfile 
-
-server: sendfile.c
-	$(CC) $(DEFS) $(CFLAGS) $(LIB) -o sendfile sendfile.c
-
-client: recvfile.c
-	$(CC) $(DEFS) $(CFLAGS) $(LIB) -o recvfile recvfile.c
+sfile: common.h sfile.c
+	gcc  -pthread sfile.c -o sfile
 
 clean:
-	rm -f *.o
-	rm -f *~
-	rm -f core.*.*
-	rm -f sendfile
-	rm -f recvfile
+	rm -f rfile sfile
