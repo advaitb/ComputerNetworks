@@ -163,16 +163,7 @@ int main(int argc, char const *argv[])
                 printf("send count: %d\n", send_cnt);
             }
             printf("Packet Sent\n");
-            // Complete packet sent!
-
-            // int bytes_rcvd = 0;
-            // int ack_size = 2;
-            // while (bytes_rcvd < ack_size)
-            // {
-            //     int tmp_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
-            //     bytes_rcvd += tmp_rcvd;
-            // }
-            
+    
             int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
             printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
