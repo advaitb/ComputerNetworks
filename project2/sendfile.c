@@ -67,7 +67,6 @@ int main(int argc, char const *argv[])
     ptr2 = strtok(NULL, "/");
     char* fileName = ptr2;
 
-
     unsigned short port = atoi(portc);
     int sockfd;
     char rcv_buffer[2];
@@ -81,7 +80,7 @@ int main(int argc, char const *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 1;
+    tv.tv_sec = 2;
     tv.tv_usec = 0;
 
     // Create a UDP Socket
@@ -93,7 +92,7 @@ int main(int argc, char const *argv[])
     memset(&s_in, 0, sizeof(s_in));
     s_in.sin_family = AF_INET;
     s_in.sin_port = htons(port);
-    s_in.sin_addr.s_addr = inet_addr(hostc);
+    s_in.sin_addr.s_addr = htons(inet_addr(hostc));
 
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
 
@@ -152,7 +151,6 @@ int main(int argc, char const *argv[])
             //      break
 
             printf("Packet Size %d\n", packet_size);
-            printf("Packet message Size %d\n", sizeof(packet_msg));
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -175,7 +173,8 @@ int main(int argc, char const *argv[])
             //     bytes_rcvd += tmp_rcvd;
             // }
             
-            int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, sizeof(rcv_buffer), MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+            int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+            printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
             {
                 printf("Ack received!\n");
@@ -189,6 +188,11 @@ int main(int argc, char const *argv[])
                         sentID[0] == 1;
                     break;
                 } 
+            }
+            else
+            {
+                perror("Error Receiving Ack");
+                exit(1);
             }
         }
     }
