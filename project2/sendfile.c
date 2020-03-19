@@ -92,7 +92,8 @@ int main(int argc, char const *argv[])
     memset(&s_in, 0, sizeof(s_in));
     s_in.sin_family = AF_INET;
     s_in.sin_port = htons(port);
-    s_in.sin_addr.s_addr = htons(inet_addr(hostc));
+    // s_in.sin_addr.s_addr = htons(inet_addr(hostc));
+    s_in.sin_addr.s_addr = inet_addr(hostc);
 
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
 
@@ -114,7 +115,7 @@ int main(int argc, char const *argv[])
     size_t bytes_read;
     int send_cnt;
     int tmp_cnt;
-    int addr_len;
+    socklen_t addr_len = sizeof(struct sockaddr_in);
     size_t total_bytes = 0;
     char *packet_msg;
     packet_msg = malloc(packet_size);
@@ -164,7 +165,7 @@ int main(int argc, char const *argv[])
             }
             printf("Packet Sent\n");
     
-            int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, addr_len);
+            int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
             printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
             {
