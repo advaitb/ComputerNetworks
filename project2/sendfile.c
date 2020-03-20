@@ -38,7 +38,7 @@ int main(int argc, char const *argv[])
      * DGRAM Packet Structure:
      * Packet Type: ACK or Data (1 Bit - 0:Data, 1: Ack)
      * Identifier: Stop and Wait (1 Bit) 
-     * Packet Size: 2 Bytes
+     * Packet Size: 2 Bytes short int
      * Advertised Window: x
      * Directory: 50 Bytes
      * File name: 20 Bytes
@@ -74,7 +74,7 @@ int main(int argc, char const *argv[])
     char *msg;
     // unsigned int server_address;
     struct sockaddr_in s_in;
-    long packet_size = 1076;
+    long packet_size = 1078;
     
 
     long lSize;
@@ -113,7 +113,7 @@ int main(int argc, char const *argv[])
     rewind(fp);
 
     file_data = (char *)malloc(packet_size * sizeof(char)); // 
-    size_t bytes_read;
+    short bytes_read;
     int send_cnt;
     int tmp_cnt;
     socklen_t addr_len = sizeof(struct sockaddr_in);
@@ -128,31 +128,34 @@ int main(int argc, char const *argv[])
     char* sentID[1];
     memset(sentID, 0, 1);
     int total_bytes_sent = 0;
+
+    // char* data_size[2];
+    
     while ((bytes_read = fread(file_data, 1, 1000, fp)) > 0)
     {
-        memset(packet_msg, 0, 1076);
+        memset(packet_msg, 0, 1078);
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
-        
+        // memcpy(data_size, &bytes_read, 2);
         // construct packet message
         // packet_msg[0] = 0; // Data Message
         // packet_msg[1] = sentID[0]; // Stop and Wait Scheme
         memset(packet_msg, 0, 1);
         memcpy(packet_msg+1, sentID, 1);
-        
-        memcpy(packet_msg+2, directory, 50); // Directory information
-        memcpy(packet_msg+52, name, 20); // File Name
-        memcpy(packet_msg+72, file_data, 1000); // Actual Data
+        memcpy(packet_msg+2, &bytes_read, 2);
+        memcpy(packet_msg+4, directory, 50); // Directory information
+        memcpy(packet_msg+54, name, 20); // File Name
+        memcpy(packet_msg+74, file_data, 1000); // Actual Data
 
         memset(file_data, 0, 1000);
        
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
-        memcpy(packet_msg+1072, &crc, 4);
+        memcpy(packet_msg+1074, &crc, 4);
 
 
         printf("\n\n\nSend Buffer\n");
-        for (int i = 0; i < 1076; i ++) {
+        for (int i = 0; i < 1078; i ++) {
                 printf(" %02x", (unsigned) packet_msg[i]);
         }
 
