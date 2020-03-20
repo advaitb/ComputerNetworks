@@ -125,6 +125,7 @@ int main(int argc, char const *argv[])
     strncpy(name, fileName, 20);
 
     char* sentID[1];
+    int total_bytes_sent = 0;
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
         memset(packet_msg, 0, 1076);
@@ -138,6 +139,7 @@ int main(int argc, char const *argv[])
         strcpy(packet_msg+52, name); // File Name
         strcpy(packet_msg+72, file_data); // Actual Data
 
+        memset(file_data, 0, 1000);
        
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
@@ -163,7 +165,7 @@ int main(int argc, char const *argv[])
                 printf("send count: %d\n", send_cnt);
             }
             printf("Packet Sent\n");
-    
+            total_bytes_sent += send_cnt;
             int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
             printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
@@ -197,7 +199,9 @@ int main(int argc, char const *argv[])
             }
         }
     }
-    printf("Complete file sent. %d bytes sent.\n", total_bytes);
+    printf("Complete file sent. %d File Size.\n", total_bytes);
+    printf("Complete file sent. %d bytes sent.\n", total_bytes_sent);
+
     
     // Close socket descriptor and exit.
     close(sockfd);
