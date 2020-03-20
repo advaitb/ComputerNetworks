@@ -13,7 +13,7 @@
 
 #define MAX_FILE_SIZE 30000000
 
-unsigned int crc32b(unsigned char *message) {
+unsigned int crc32b(char *message) {
    int i, j;
    unsigned int byte, crc, mask;
 

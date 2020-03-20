@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-unsigned int crc32b(unsigned char *message) {
+unsigned int crc32b(char *message) {
    int i, j;
    unsigned int byte, crc, mask;
 
@@ -27,7 +27,7 @@ unsigned int crc32b(unsigned char *message) {
    return ~crc;
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     // Handle Command Line Inputs
     if (argc != 3)
@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
     }
 
     long packet_size = 1078;
-    long HEADER_LEN = 76;
+    // long HEADER_LEN = 78;
 
     char* recv_buf;
     char ackmsg[2];
@@ -92,8 +92,8 @@ int main(int argc, char const *argv[])
 
     ackmsg[0] = 1;
 
-    char lastID[1];
-    lastID[0] = 1;
+    char lastID;
+    lastID = 1;
     // Receive all the packets
     while(1)
     {
@@ -123,14 +123,14 @@ int main(int argc, char const *argv[])
 
         // Check sequence number in stop & wait fashion
         printf("Check sequence number\n");
-        char recvID[1];
-        recvID[0] = recv_buf[1];
+        char recvID;
+        recvID = recv_buf[1];
         printf("recved packet %d %d\n", recv_buf[0], recv_buf[1]);
-        printf("recvID %d\n", recvID[0]);
-        printf("lastID %d\n", lastID[0]);
+        printf("recvID %d\n", recvID);
+        printf("lastID %d\n", lastID);
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
-        if (recvID != lastID[0])
-            lastID[0] = recvID[0];
+        if (recvID != lastID)
+            lastID = recvID;
         else
         {
             free(recv_buf);
@@ -182,7 +182,7 @@ int main(int argc, char const *argv[])
             return 1;
         }
         printf("Opened file at %s\n", filePath);
-        printf("recv msg size %d\n", sizeof(recv_msg));
+        printf("recv msg size %ld\n", sizeof(recv_msg));
         if (fwrite(recv_msg, 1, sizeof(recv_msg), fp) != sizeof(recv_msg))
         {
             perror("Write to file error");
@@ -194,7 +194,7 @@ int main(int argc, char const *argv[])
 
         // Send Ack
         printf("Start to send Ack\n");
-        ackmsg[1] = lastID[0];
+        ackmsg[1] = lastID;
         int sendcount = sendto(sockfd, (const char *)ackmsg, sizeof(ackmsg), MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
         {
