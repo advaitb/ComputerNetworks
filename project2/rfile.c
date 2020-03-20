@@ -60,7 +60,11 @@ int main(int argc, char* argv[]){
         s_in.sin_family = AF_INET;
         s_in.sin_port = htons(atoi(argv[2]));
         s_in.sin_addr.s_addr = INADDR_ANY;
-
+    	/* bind server socket to the address */
+    	if (bind(sockfd, (struct sockaddr *) &s_in, sizeof(s_in)) < 0){
+        	perror("Failed to bind socket to address");
+        	exit(EXIT_FAILURE);
+    	}
         int buff_size; /* check buff size is  */
         char curr_buffer[max_buffer_size];
         uint8_t finish_read = 0;
@@ -87,8 +91,10 @@ int main(int argc, char* argv[]){
                 last_ack_sent = last_frame_received + WINDOW_SIZE;
                 while(1){
                         socklen_t client_addr_size;
-                        packetsz = recvfrom(sockfd, (char *) packet, MAX_PACK_SIZE, MSG_WAITALL, (struct sockaddr *) &client_addr,  &client_addr_size);
-                        is_this_the_end = packet[0];
+                        fprintf(stderr,"before");
+			packetsz = recvfrom(sockfd, (char *) packet, MAX_PACK_SIZE, MSG_WAITALL, (struct sockaddr *) &client_addr,  &client_addr_size);
+                        fprintf(stderr,"after");
+			is_this_the_end = packet[0];
                         uint32_t pack_seq_num;
                         memcpy(&pack_seq_num, packet + 1, 4);
                         uint32_t pack_data_size;
@@ -175,7 +181,7 @@ void *send_ackn() {
                 uint32_t pack_seq_num;
                 memcpy(&pack_seq_num, packet+1, 4);
                 uint32_t pack_data_size;
-                memcpy(&pack_data_size, packet + 5, 9);
+                memcpy(&pack_data_size, packet + 5, 4);
                 datasz = ntohl(pack_data_size);
                 memcpy(data, packet + 9, datasz);
                 packeterror = (packet[datasz + 9] != csum(packet, datasz + (int) 9));
