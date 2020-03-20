@@ -126,7 +126,8 @@ int main(int argc, char const *argv[])
     strncpy(name, fileName, 20);
 
     char* sentID[1];
-    memset(sentID, 0, 1);
+    // memset(sentID, 0, 1);
+    sentID[0] = 0;
     int total_bytes_sent = 0;
                 printf("Sent ID: %d\n", sentID[0]);
 
