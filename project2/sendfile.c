@@ -129,22 +129,17 @@ int main(int argc, char const *argv[])
     // memset(sentID, 0, 1);
     sentID[0] = 0;
     int total_bytes_sent = 0;
-                printf("Sent ID: %d\n", sentID[0]);
 
-    // char* data_size[2];
     
     while ((bytes_read = fread(file_data, 1, 1000, fp)) > 0)
     {
         memset(packet_msg, 0, 1078);
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
-        // memcpy(data_size, &bytes_read, 2);
-        // construct packet message
-        // packet_msg[0] = 0; // Data Message
-        // packet_msg[1] = sentID[0]; // Stop and Wait Scheme
+      
         memset(packet_msg, 0, 1);
         memcpy(packet_msg+1, sentID, 1);
-        // memcpy(packet_msg+2, &bytes_read, 2);
+
         *(short*)(packet_msg+2) = htons(bytes_read);
         memcpy(packet_msg+4, directory, 50); // Directory information
         memcpy(packet_msg+54, name, 20); // File Name
@@ -157,11 +152,6 @@ int main(int argc, char const *argv[])
         unsigned int crc = crc32b(packet_msg);
         memcpy(packet_msg+1074, &crc, 4);
 
-
-        printf("\n\n\nSend Buffer\n");
-        for (int i = 0; i < 1078; i ++) {
-                printf(" %02x", (unsigned) packet_msg[i]);
-        }
 
 
         while (1){
@@ -180,7 +170,6 @@ int main(int argc, char const *argv[])
                     return 1;
                 }    
                 send_cnt += tmp_cnt;
-                printf("send count: %d\n", send_cnt);
             }
             printf("Packet Sent\n");
             total_bytes_sent += send_cnt;
@@ -192,8 +181,8 @@ int main(int argc, char const *argv[])
                 // Ack received
                 char* rcvID[1];
                 rcvID[0] =  rcv_buffer[1];
-                printf("Sent ID: %d\n", sentID[0]);
-                printf("Rcvd ID: %d\n", rcvID[0]);
+                // printf("Sent ID: %d\n", sentID[0]);
+                // printf("Rcvd ID: %d\n", rcvID[0]);
                 if (rcvID[0] == sentID[0])
                 {
                     if (sentID[0] == 1)
@@ -205,7 +194,7 @@ int main(int argc, char const *argv[])
                         memset(sentID, 1, 1);
                     }
                         
-                    printf("Sending NEXT packet now...\n");
+                    // printf("Sending NEXT packet now...\n");
                     break;
                 }
                 else
@@ -222,8 +211,7 @@ int main(int argc, char const *argv[])
             }
         }
     }
-    printf("Complete file sent. %d File Size.\n", total_bytes);
-    printf("Complete file sent. %d bytes sent.\n", total_bytes_sent);
+    printf("completed\n");
 
     
     // Close socket descriptor and exit.
