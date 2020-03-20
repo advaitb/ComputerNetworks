@@ -80,7 +80,7 @@ int main(int argc, char const *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 2;
+    tv.tv_sec = 3;
     tv.tv_usec = 0;
 
     // Create a UDP Socket
@@ -173,19 +173,22 @@ int main(int argc, char const *argv[])
                 // Ack received
                 char* rcvID[1];
                 rcvID[0] =  rcv_buffer[1];
+                printf("Sent ID: %d\n", sentID[0]);
+                printf("Rcvd ID: %d\n", rcvID[0]);
                 if (rcvID[0] == sentID[0])
                 {
                     if (sentID[0] == 1)
                         sentID[0] == 0;
                     else
                         sentID[0] == 1;
+                    printf("Sending next packet now...\n");
                     break;
                 } 
             }
             else
             {
-                perror("Error Receiving Ack");
-                exit(1);
+                perror("Error Receiving Ack - Possible timeout!");
+                // exit(1);
             }
         }
     }
