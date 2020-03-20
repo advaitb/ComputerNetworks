@@ -140,10 +140,10 @@ int main(int argc, char const *argv[])
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strcpy(dir, "/home/tony/Desktop");
+        strcpy(dir, "/home/shloksobti/Desktop");
         // strncpy(dir, recv_buf+2, 50);
-        strncpy(fileName, recv_buf+52, 20);
-        strncpy(recv_msg, recv_buf+72, 1000);
+        memcpy(fileName, recv_buf+52, 20);
+        memcpy(recv_msg, recv_buf+72, 1000);
 
         printf("\nrecv_msg\n");
         for (int i = 0; i < sizeof recv_msg; i ++) {
