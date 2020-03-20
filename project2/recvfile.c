@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
         printf("lastID %c\n", lastID[0]);
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         if (recvID != lastID[0])
-            lastID[0] = recvID;
+            lastID[0] = recvID[0];
         else
         {
             free(recv_buf);
