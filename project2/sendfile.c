@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printf("completed\n");
+    printf("[completed]\n");
 
     
     // Close socket descriptor and exit.

@@ -100,18 +100,18 @@ int main(int argc, char *argv[])
         // printf("Packet recv buf Size %d\n", sizeof(recv_buf));
         recv_buf = (char *)malloc(packet_size);
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-        printf("Received bytes %d\n", count);
+        // printf("Received bytes %d\n", count);
         int tempcount = 0;
         while (count < packet_size)
         {
             tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-            printf("Received bytes temp count%d\n", tempcount);
+            // printf("Received bytes temp count%d\n", tempcount);
             if (tempcount == -1)
                 continue;
             count += tempcount;
         }
         // Check crc
-        printf("Check crc\n");
+        // printf("Check crc\n");
         unsigned int crc = crc32b(recv_buf);
         // printf("crc %d\n", crc);
         if (crc != 0)
@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
         }
 
         // Check sequence number in stop & wait fashion
-        printf("Check sequence number\n");
+        // printf("Check sequence number\n");
         char recvID;
         recvID = recv_buf[1];
-        printf("recved packet %d %d\n", recv_buf[0], recv_buf[1]);
-        printf("recvID %d\n", recvID);
-        printf("lastID %d\n", lastID);
+        // printf("recved packet %d %d\n", recv_buf[0], recv_buf[1]);
+        // printf("recvID %d\n", recvID);
+        // printf("lastID %d\n", lastID);
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         if (recvID != lastID)
             lastID = recvID;
@@ -145,14 +145,14 @@ int main(int argc, char *argv[])
         // memcpy(dir, recv_buf+2, 50);
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
         char recv_msg[msg_size];
-        printf("msg size %d\n", msg_size);
+        // printf("msg size %d\n", msg_size);
         memcpy(fileName, recv_buf+54, 20);
         memcpy(recv_msg, recv_buf+74, msg_size);
 
-        printf("\nrecv_msg\n");
-        for (int i = 0; i < msg_size; i ++) {
-                printf(" %02x", (unsigned) recv_msg[i]);
-        }
+        // printf("\nrecv_msg\n");
+        // for (int i = 0; i < msg_size; i ++) {
+        //         printf(" %02x", (unsigned) recv_msg[i]);
+        // }
 
         // printf("\n\n\nrecv_buf\n");
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
             // file doesn't exist
             option = "w";
         }
-        printf("file path %s, option %s\n", filePath, option);
+        // printf("file path %s, option %s\n", filePath, option);
         fp = fopen(filePath, option);
 
         if (!fp)
@@ -181,8 +181,8 @@ int main(int argc, char *argv[])
             perror("Unable to open file");
             return 1;
         }
-        printf("Opened file at %s\n", filePath);
-        printf("recv msg size %ld\n", sizeof(recv_msg));
+        // printf("Opened file at %s\n", filePath);
+        // printf("recv msg size %ld\n", sizeof(recv_msg));
         if (fwrite(recv_msg, 1, sizeof(recv_msg), fp) != sizeof(recv_msg))
         {
             perror("Write to file error");
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
         // free(recv_msg);
 
         // Send Ack
-        printf("Start to send Ack\n");
+        // printf("Start to send Ack\n");
         ackmsg[1] = lastID;
         int sendcount = sendto(sockfd, (const char *)ackmsg, sizeof(ackmsg), MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
