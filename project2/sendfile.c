@@ -38,6 +38,7 @@ int main(int argc, char const *argv[])
      * DGRAM Packet Structure:
      * Packet Type: ACK or Data (1 Bit - 0:Data, 1: Ack)
      * Identifier: Stop and Wait (1 Bit) 
+     * Packet Size: 2 Bytes
      * Advertised Window: x
      * Directory: 50 Bytes
      * File name: 20 Bytes
