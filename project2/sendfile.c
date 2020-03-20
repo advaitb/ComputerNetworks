@@ -128,6 +128,7 @@ int main(int argc, char const *argv[])
     char* sentID[1];
     memset(sentID, 0, 1);
     int total_bytes_sent = 0;
+                printf("Sent ID: %d\n", sentID[0]);
 
     // char* data_size[2];
     
@@ -142,13 +143,15 @@ int main(int argc, char const *argv[])
         // packet_msg[1] = sentID[0]; // Stop and Wait Scheme
         memset(packet_msg, 0, 1);
         memcpy(packet_msg+1, sentID, 1);
-        memcpy(packet_msg+2, &bytes_read, 2);
+        // memcpy(packet_msg+2, &bytes_read, 2);
+        *(short*)(packet_msg+2) = htons(bytes_read);
         memcpy(packet_msg+4, directory, 50); // Directory information
         memcpy(packet_msg+54, name, 20); // File Name
         memcpy(packet_msg+74, file_data, 1000); // Actual Data
 
         memset(file_data, 0, 1000);
-       
+                printf("Sent ID: %d\n", sentID[0]);
+
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
         memcpy(packet_msg+1074, &crc, 4);
