@@ -127,18 +127,21 @@ int main(int argc, char const *argv[])
     char* sentID[1];
     memset(sentID, 0, 1);
     int total_bytes_sent = 0;
-    while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
+    while ((bytes_read = fread(file_data, 1, 1000, fp)) > 0)
     {
         memset(packet_msg, 0, 1076);
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
         
         // construct packet message
-        packet_msg[0] = 0; // Data Message
-        packet_msg[1] = sentID[0]; // Stop and Wait Scheme
-        strcpy(packet_msg+2, directory); // Directory information
-        strcpy(packet_msg+52, name); // File Name
-        strcpy(packet_msg+72, file_data); // Actual Data
+        // packet_msg[0] = 0; // Data Message
+        // packet_msg[1] = sentID[0]; // Stop and Wait Scheme
+        memset(packet_msg, 0, 1);
+        memcpy(packet_msg+1, sentID, 1);
+        
+        memcpy(packet_msg+2, directory, 50); // Directory information
+        memcpy(packet_msg+52, name, 20); // File Name
+        memcpy(packet_msg+72, file_data, 1000); // Actual Data
 
         memset(file_data, 0, 1000);
        
