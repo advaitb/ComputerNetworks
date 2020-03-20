@@ -133,7 +133,7 @@ int main(int argc, char const *argv[])
         sentID[0] = 0;
         // construct packet message
         packet_msg[0] = 0; // Data Message
-        packet_msg[1] = sentID; // Stop and Wait Scheme
+        packet_msg[1] = sentID[0]; // Stop and Wait Scheme
         strcpy(packet_msg+2, directory); // Directory information
         strcpy(packet_msg+52, name); // File Name
         strcpy(packet_msg+72, file_data); // Actual Data

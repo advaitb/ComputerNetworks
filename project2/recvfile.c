@@ -123,9 +123,9 @@ int main(int argc, char const *argv[])
         printf("Check sequence number\n");
         char recvID[1];
         recvID[0] = recv_buf[1];
-        printf("recved packet %s\n", recv_buf);
-        printf("recvID %c\n", recvID[0]);
-        printf("lastID %c\n", lastID[0]);
+        printf("recved packet %d %d\n", recv_buf[0], recv_buf[1]);
+        printf("recvID %d\n", recvID[0]);
+        printf("lastID %d\n", lastID[0]);
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         if (recvID != lastID[0])
             lastID[0] = recvID[0];
