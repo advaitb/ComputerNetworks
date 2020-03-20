@@ -171,7 +171,8 @@ int main(int argc, char const *argv[])
             {
                 printf("Ack received!\n");
                 // Ack received
-                char* rcvID = rcv_buffer[1];
+                char* rcvID[1];
+                rcvID[0] =  rcv_buffer[1];
                 if (rcvID[0] == sentID[0])
                 {
                     if (sentID[0] == 1)
