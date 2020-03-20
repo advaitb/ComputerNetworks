@@ -125,13 +125,14 @@ int main(int argc, char const *argv[])
     strncpy(name, fileName, 20);
 
     char* sentID[1];
+    memset(sentID, 0, 1);
     int total_bytes_sent = 0;
     while ((bytes_read = fread(file_data, 1, packet_size, fp)) > 0)
     {
         memset(packet_msg, 0, 1076);
         // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
-        sentID[0] = 0;
+        
         // construct packet message
         packet_msg[0] = 0; // Data Message
         packet_msg[1] = sentID[0]; // Stop and Wait Scheme
@@ -144,6 +145,12 @@ int main(int argc, char const *argv[])
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
         memcpy(packet_msg+1072, &crc, 4);
+
+
+        printf("\n\n\nSend Buffer\n");
+        for (int i = 0; i < 1076; i ++) {
+                printf(" %02x", (unsigned) packet_msg[i]);
+        }
 
 
         while (1){
@@ -179,9 +186,14 @@ int main(int argc, char const *argv[])
                 if (rcvID[0] == sentID[0])
                 {
                     if (sentID[0] == 1)
-                        sentID[0] == 0;
+                    {
+                        memset(sentID, 0, 1);
+                    }
                     else
-                        sentID[0] == 1;
+                    {
+                        memset(sentID, 1, 1);
+                    }
+                        
                     printf("Sending NEXT packet now...\n");
                     break;
                 }
