@@ -48,6 +48,29 @@ time_t timeElapsed(time_t curr_time, time_t init_time){
 
 int last_ack_received, last_frame_sent; /* variables track whether to slide window */
 
+void setWindowBits(){
+    if (track_ack_window[0]){
+        int sft = 1;
+        for (int i = 1; i < WINDOW_SIZE; i++) {
+            if(!track_ack_window[i]){
+                    break;
+            }
+            sft += 1;
+        }
+        for (int j = 0; j < WINDOW_SIZE - sft; j++) {
+            track_sent_time[j] = track_sent_time[j + sft];
+            track_sent_window[j] = track_sent_window[j + sft];
+            track_ack_window[j] = track_ack_window[j + sft];
+        }
+       for (int k = WINDOW_SIZE - sft; k < WINDOW_SIZE; k++) {
+            track_ack_window[k] = 0;
+            track_sent_window[k] = 0;
+        }
+        last_ack_received += sft;
+        last_frame_sent = last_ack_received + WINDOW_SIZE;
+    }
+}
+
 int main(int argc, char* argv[]){
         if(argc < 4){
                 fprintf(stderr,"Not enough arguments\n \tArgs are: [FNAME] [SERVER_IP] [PORT]\n");
@@ -64,6 +87,7 @@ int main(int argc, char* argv[]){
                 perror("Socket creation failed");
                 exit(EXIT_FAILURE);
         }
+        
         memset(&s_in, 0, sizeof(s_in));
         s_in.sin_family = AF_INET;
         s_in.sin_port = htons(atoi(argv[3]));
@@ -82,6 +106,7 @@ int main(int argc, char* argv[]){
         pthread_create(&thread, NULL, check_ackn, NULL ); /* start running thread */
         while(!finish_read){
                 buff_size  = fread(curr_buffer, 1, max_buffer_size, f);
+                //fprintf(stderr,"Buffer has: %s",curr_buffer);
                 if(buff_size  ==  max_buffer_size){
                         char check_one_byte_ahead[1];
                         if (fread(check_one_byte_ahead,1,1,f) == 0 ){
@@ -92,7 +117,6 @@ int main(int argc, char* argv[]){
                 else{
                         finish_read = 1;
                 }
-
                 pthread_mutex_lock(&slock); /* access new sliding window */  
                 last_ack_received = -1;
                 last_frame_sent = last_ack_received + WINDOW_SIZE;
@@ -111,30 +135,11 @@ int main(int argc, char* argv[]){
                 uint8_t sent_all = 0; /*  sent all set to false initially */
                 while (!sent_all){
                     pthread_mutex_lock(&slock); /* lock it */
-                    if (track_ack_window[0]){
-                        int sft = 1;
-                        for (int i = 1; i < WINDOW_SIZE; i++) {
-                            if(!track_ack_window[i]){
-                                    break;
-                            }
-                            sft += 1;
-                        }
-                        for (int j = 0; j < WINDOW_SIZE - sft; j++) {
-                            track_sent_time[j] = track_sent_time[j + sft];
-                            track_sent_window[j] = track_sent_window[j + sft];
-                            track_ack_window[j] = track_ack_window[j + sft];
-                        }
-                       for (int k = WINDOW_SIZE - sft; k < WINDOW_SIZE; k++) {
-                            track_ack_window[k] = 0;
-                            track_sent_window[k] = 0;
-                        }
-                        last_ack_received += sft;
-                        last_frame_sent = last_ack_received + WINDOW_SIZE;
-                    }
+                    setWindowBits();
                     pthread_mutex_unlock(&slock); /* unlock */
-                for (int i = 0; i < WINDOW_SIZE; i ++) {
+                    for (int i = 0; i < WINDOW_SIZE; i ++) {
                         seq_num = last_ack_received + i + 1;
-                        if (seq_num < seq_cnt) {
+                        if (seq_num < seq_cnt){
                             pthread_mutex_lock(&slock);
                             if (!track_sent_window[i] || (!track_ack_window[i] && (timeElapsed(getCurrentTime(), track_sent_time[i]) > TIMEOUT))) {
                                 int buff_sft = seq_num * MAX_DATA_SIZE;
@@ -153,11 +158,12 @@ int main(int argc, char* argv[]){
                                 else{
                                         packet[0] = 0x1;
                                 }
+                                
                                 memcpy(packet+1,&pack_seq_num,4);
                                 memcpy(packet+5,&pack_datasz,9);
                                 memcpy(packet+9,data,datasz);
                                 packet[datasz + 9] = csum(packet, datasz + (int) 9);
-                                packetsz = datasz + (int)9;
+                                packetsz = datasz + (int) 9;
                                 sendto(sockfd, packet, packetsz, 0, (const struct sockaddr *) &server_addr, sizeof(server_addr));
                                 track_sent_window[i] = 1;
                                 track_sent_time[i] = getCurrentTime();
@@ -171,14 +177,16 @@ int main(int argc, char* argv[]){
                 }
                 ull data_sent = (ull) buff_util  * (ull) max_buffer_size  + (ull) buff_size;
                 fprintf(stderr,"\rSending packets worth %llu",data_sent);
-                buff_util+=1;
+                buff_util += 1;
                 if(finish_read){
                         break; /*  big while loop ends */
                 }
-        }
+        
         free(track_ack_window); /* free 'em dyn vars */
         free(track_sent_window);
         free(track_sent_time);
+	
+	}
         fclose(f);
         pthread_mutex_destroy(&slock);
         pthread_detach(thread);
@@ -195,6 +203,7 @@ void *check_ackn(){
         while(1){
                 socklen_t server_addr_size;
                 acknsz = recvfrom(sockfd, (char *)ackn, ACKN_SIZE, MSG_WAITALL, (struct sockaddr *) &server_addr, &server_addr_size);/* recv ackn */
+                fprintf(stderr,"does this work?");
                 ret_neg  = ackn[0] == 0x0;
                 uint32_t pack_seq_num;
                 memcpy(&pack_seq_num, ackn + 1, 4);
