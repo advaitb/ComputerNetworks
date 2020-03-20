@@ -63,14 +63,15 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    long packet_size = 1076;
+    long packet_size = 1078;
     long HEADER_LEN = 76;
 
     char* recv_buf;
     char ackmsg[2];
     char dir[50];
     char fileName[20];
-    char recv_msg[packet_size - HEADER_LEN];
+    // char recv_msg[packet_size - HEADER_LEN];
+    short msg_size = 1000;
     int packet_count = 0;
 
     // // Keep waiting for incoming connection
@@ -141,7 +142,10 @@ int main(int argc, char const *argv[])
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
         strcpy(dir, "/home/shloksobti/Desktop");
-        // strncpy(dir, recv_buf+2, 50);
+        // memcpy(dir, recv_buf+2, 50);
+        msg_size = (short) ntohs(*(short *)(recv_buf+2));
+        char recv_msg[msg_size];
+        printf("msg size %d\n", msg_size);
         memcpy(fileName, recv_buf+52, 20);
         memcpy(recv_msg, recv_buf+72, 1000);
 
@@ -152,9 +156,9 @@ int main(int argc, char const *argv[])
 
         printf("\n\n\nrecv_buf\n");
 
-        for (int i = 0; i < 1076; i ++) {
-                printf(" %02x", (unsigned) recv_buf[i]);
-        }
+        // for (int i = 0; i < 1078; i ++) {
+        //         printf(" %02x", (unsigned) recv_buf[i]);
+        // }
 
         // Save message to the file
         char filePath[70];
