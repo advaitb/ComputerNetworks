@@ -151,7 +151,6 @@ int main(int argc, char const *argv[])
             //      change sendID
             //      break
 
-            printf("Packet Size %d\n", packet_size);
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -181,13 +180,19 @@ int main(int argc, char const *argv[])
                         sentID[0] == 0;
                     else
                         sentID[0] == 1;
-                    printf("Sending next packet now...\n");
+                    printf("Sending NEXT packet now...\n");
                     break;
-                } 
+                }
+                else
+                {
+                    printf("Resending packet since ACK ID different from Sent ID\n");
+                }
+                 
             }
             else
             {
-                perror("Error Receiving Ack - Possible timeout!");
+                perror("Error Receiving Ack");
+                printf("Resending packet\n");
                 // exit(1);
             }
         }
