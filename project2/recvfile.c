@@ -71,6 +71,7 @@ int main(int argc, char const *argv[])
     char dir[50];
     char fileName[20];
     char recv_msg[packet_size - HEADER_LEN];
+    int packet_count = 0;
 
     // // Keep waiting for incoming connection
     // while(1)
@@ -135,12 +136,25 @@ int main(int argc, char const *argv[])
             continue;
         }
 
+        packet_count += 1;
+
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strcpy(dir, "/home/shloksobti/Desktop");
+        strcpy(dir, "/home/tony/Desktop");
         // strncpy(dir, recv_buf+2, 50);
         strncpy(fileName, recv_buf+52, 20);
         strncpy(recv_msg, recv_buf+72, 1000);
+
+        printf("\nrecv_msg\n");
+        for (int i = 0; i < sizeof recv_msg; i ++) {
+                printf(" %02x", (unsigned) recv_msg[i]);
+        }
+
+        printf("\n\n\nrecv_buf\n");
+
+        for (int i = 0; i < 1076; i ++) {
+                printf(" %02x", (unsigned) recv_buf[i]);
+        }
 
         // Save message to the file
         char filePath[70];
@@ -148,7 +162,8 @@ int main(int argc, char const *argv[])
         strcat(filePath, "/");
         strcat(filePath, fileName);
         char* option = "a";
-        if (access(filePath, F_OK) == -1)
+        // if (access(filePath, F_OK) == -1)
+        if (packet_count == 1)
         {
             // file doesn't exist
             option = "w";
