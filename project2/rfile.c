@@ -19,25 +19,27 @@ struct sockaddr_in client_addr;
 /* keep listening for ack and update sliding window */
 void *send_ackn();
 
-
 uint8_t* track_recv_window;
-//time_t init_time;
-//init_time  = time(NULL);
 
-//#define INIT_TIME time(NULL)
-
-/* get current time */
-//time_t getCurrentTime(){
-//        time_t curr_time;
-//        curr_time = time(NULL);
-//        return curr_time;
-//}
-
-/* get time elapsed */
-//time_t timeElapsed(time_t curr_time, time_t init_time){
-//        return curr_time-init_time;
-//}
 int last_frame_received, last_ack_sent; /*  NOTE THE DIFFERENCE IN THESE VARS */
+
+void regularShift(){
+    int sft = 1;
+    for (int i = 1; i < WINDOW_SIZE; i++) {
+            if (!track_recv_window[i]){
+                    break;
+            }
+            sft += 1;
+    }
+    for (int j  = 0; j  < WINDOW_SIZE - sft; j++) {
+            track_recv_window[j] = track_recv_window[j + sft];
+    }
+    for (int k = WINDOW_SIZE - sft; k < WINDOW_SIZE; k++) {
+            track_recv_window[k] = 0;
+    }
+    last_frame_received += sft;
+    last_ack_sent = last_frame_received + WINDOW_SIZE;
+}
 
 int main(int argc, char* argv[]){
 
@@ -91,10 +93,8 @@ int main(int argc, char* argv[]){
                 last_ack_sent = last_frame_received + WINDOW_SIZE;
                 while(1){
                         socklen_t client_addr_size;
-                        fprintf(stderr,"before");
-			packetsz = recvfrom(sockfd, (char *) packet, MAX_PACK_SIZE, MSG_WAITALL, (struct sockaddr *) &client_addr,  &client_addr_size);
-                        fprintf(stderr,"after");
-			is_this_the_end = packet[0];
+                        packetsz = recvfrom(sockfd, (char *) packet, MAX_PACK_SIZE, MSG_WAITALL, (struct sockaddr *) &client_addr,  &client_addr_size);
+                        is_this_the_end = packet[0];
                         uint32_t pack_seq_num;
                         memcpy(&pack_seq_num, packet + 1, 4);
                         uint32_t pack_data_size;
@@ -112,21 +112,7 @@ int main(int argc, char* argv[]){
                                         int buff_sft = seq_num * MAX_DATA_SIZE;
                                         if (seq_num == last_frame_received + 1) { /* perfecto! */
                                                 memcpy(curr_buffer + buff_sft, data, datasz);
-                                                int sft = 1;
-                                                for (int i = 1; i < WINDOW_SIZE; i++) {
-                                                        if (!track_recv_window[i]){
-                                                                break;
-                                                        }
-                                                        sft += 1;
-                                                }
-                                                for (int j  = 0; j  < WINDOW_SIZE - sft; j++) {
-                                                        track_recv_window[j] = track_recv_window[j + sft];
-                                                }
-                                                for (int k = WINDOW_SIZE - sft; k < WINDOW_SIZE; k++) {
-                                                        track_recv_window[k] = 0;
-                                                }
-                                                last_frame_received += sft;
-                                                last_ack_sent = last_frame_received + WINDOW_SIZE;
+                                                regularShift();
                                         }
                                         else if (seq_num > last_frame_received + 1) { /* out of order dammit! - deal by shift*/
                                                 if (!track_recv_window[seq_num - (last_frame_received + 1)]) {
