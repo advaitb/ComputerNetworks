@@ -32,7 +32,7 @@ unsigned int crc32b(unsigned char *message) {
 }
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {    
     /* 
      * DGRAM Packet Structure:
@@ -53,9 +53,9 @@ int main(int argc, char const *argv[])
         exit(1);
     }
     
-    char* rFlag = argv[1];
+    // char* rFlag = argv[1];
     char* host_port = argv[2];
-    char* fFlag = argv[3];
+    // char* fFlag = argv[3];
     char* dir_name = argv[4];
 
     char* ptr1 = strtok(host_port, ":");
@@ -71,13 +71,11 @@ int main(int argc, char const *argv[])
     unsigned short port = atoi(portc);
     int sockfd;
     char rcv_buffer[2];
-    char *msg;
+
     // unsigned int server_address;
     struct sockaddr_in s_in;
     long packet_size = 1078;
     
-
-    long lSize;
     char *file_data;
 
     struct timeval tv;
@@ -108,9 +106,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
     printf("File open succeeded.\n");
-    fseek(fp, 0, SEEK_END);
-    lSize = ftell(fp);
-    rewind(fp);
+
 
     file_data = (char *)malloc(packet_size * sizeof(char)); // 
     short bytes_read;
@@ -120,14 +116,12 @@ int main(int argc, char const *argv[])
     size_t total_bytes = 0;
     char *packet_msg;
     packet_msg = malloc(packet_size);
-    char* directory[50]; 
+    char directory[50]; 
     strncpy(directory, dir, 50);
-    char* name[20];
+    char name[20];
     strncpy(name, fileName, 20);
 
-    char* sentID[1];
-    // memset(sentID, 0, 1);
-    sentID[0] = 0;
+    char sentID = 0;
     int total_bytes_sent = 0;
 
     
@@ -138,7 +132,8 @@ int main(int argc, char const *argv[])
         total_bytes += bytes_read;
       
         memset(packet_msg, 0, 1);
-        memcpy(packet_msg+1, sentID, 1);
+        // memcpy(packet_msg+1, sentID, 1);
+        memset(packet_msg+1, sentID, 1);
 
         *(short*)(packet_msg+2) = htons(bytes_read);
         memcpy(packet_msg+4, directory, 50); // Directory information
@@ -146,7 +141,6 @@ int main(int argc, char const *argv[])
         memcpy(packet_msg+74, file_data, 1000); // Actual Data
 
         memset(file_data, 0, 1000);
-                printf("Sent ID: %d\n", sentID[0]);
 
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
@@ -173,28 +167,29 @@ int main(int argc, char const *argv[])
             }
             printf("Packet Sent\n");
             total_bytes_sent += send_cnt;
-            int bytes_rcvd = recvfrom(sockfd, (const char *)rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
+            int bytes_rcvd = recvfrom(sockfd, rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
             printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
             {
                 printf("Ack received!\n");
-                // Ack received
-                char* rcvID[1];
-                rcvID[0] =  rcv_buffer[1];
-                // printf("Sent ID: %d\n", sentID[0]);
-                // printf("Rcvd ID: %d\n", rcvID[0]);
-                if (rcvID[0] == sentID[0])
+                char rcvID;
+                rcvID = *(rcv_buffer+1);
+                // memcpy(rcvID, rcv_buffer+1, 1);
+                printf("Rcvd ID: %d\n", rcvID);
+                printf("Sent ID: %d\n", sentID);
+
+                if (rcvID == sentID)
                 {
-                    if (sentID[0] == 1)
+                    if (sentID == 1)
                     {
-                        memset(sentID, 0, 1);
+                        sentID = 0;
                     }
                     else
                     {
-                        memset(sentID, 1, 1);
+                        sentID = 1;
                     }
                         
-                    // printf("Sending NEXT packet now...\n");
+                    printf("Sending NEXT packet now...\n");
                     break;
                 }
                 else
