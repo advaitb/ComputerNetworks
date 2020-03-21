@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     char dir[50];
     char fileName[20];
     // char recv_msg[packet_size - HEADER_LEN];
-    short msg_size = 1000;
+    short msg_size;
     int packet_count = 0;
 
     // // Keep waiting for incoming connection
@@ -116,11 +116,15 @@ int main(int argc, char *argv[])
         // printf("crc %d\n", crc);
         if (crc != 0)
         {
-            printf("CRC error\n");
+            printf("[recv corrupt packet]\n");
             free(recv_buf);
             continue; // If error detected, discard the packet
         }
-
+        else
+        {
+            printf("[recv data] start %d status\n", count);
+        }
+        
         // Check sequence number in stop & wait fashion
         // printf("Check sequence number\n");
         char recvID;
@@ -129,6 +133,7 @@ int main(int argc, char *argv[])
         // printf("recvID %d\n", recvID);
         // printf("lastID %d\n", lastID);
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
+        
         if (recvID != lastID)
             lastID = recvID;
         else
@@ -144,8 +149,9 @@ int main(int argc, char *argv[])
         strcpy(dir, "/home/shloksobti/Desktop");
         // memcpy(dir, recv_buf+2, 50);
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
+
         char recv_msg[msg_size];
-        // printf("msg size %d\n", msg_size);
+        printf("msg size %d\n", msg_size);
         memcpy(fileName, recv_buf+54, 20);
         memcpy(recv_msg, recv_buf+74, msg_size);
 
@@ -208,8 +214,6 @@ int main(int argc, char *argv[])
 
     // }
 
-
-
-
+    printf("[completed]\n");
     return 0;
 }
