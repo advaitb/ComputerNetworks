@@ -89,7 +89,10 @@ int main(int argc, char *argv[])
     // char* rFlag = argv[1];
     char* host_port = argv[2];
     // char* fFlag = argv[3];
+    
     char* dir_name = argv[4];
+    char fopen_file[sizeof(dir_name)];
+    strcpy(fopen_file, dir_name);
 
     char* ptr1 = strtok(host_port, ":");
     char* hostc = ptr1;
@@ -116,6 +119,7 @@ int main(int argc, char *argv[])
     tv.tv_sec = 1;
     tv.tv_usec = 0;
 
+    int DATA_SIZE = 1000;
     // Create a UDP Socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
@@ -132,8 +136,8 @@ int main(int argc, char *argv[])
 
     // Read the FILE and breakdown to package into PACKETS.
     FILE *fp;
-    
-    fp = fopen("test.bin", "rb");
+    // printf("File %s\n", fopen_file);
+    fp = fopen(fopen_file, "rb");
     if (!fp)
     {
         printf("Unable to open file.\n");
@@ -159,7 +163,7 @@ int main(int argc, char *argv[])
     int total_bytes_sent = 0;
 
     
-    while ((bytes_read = fread(file_data, 1, 1000, fp)) > 0)
+    while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
         memset(packet_msg, 0, 1078);
         // printf("Read %d bytes, now sending...\n", bytes_read);
@@ -172,9 +176,9 @@ int main(int argc, char *argv[])
         *(short*)(packet_msg+2) = htons(bytes_read);
         memcpy(packet_msg+4, directory, 50); // Directory information
         memcpy(packet_msg+54, name, 20); // File Name
-        memcpy(packet_msg+74, file_data, 1000); // Actual Data
+        memcpy(packet_msg+74, file_data, DATA_SIZE); // Actual Data
 
-        memset(file_data, 0, 1000);
+        memset(file_data, 0, DATA_SIZE);
 
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
@@ -200,8 +204,9 @@ int main(int argc, char *argv[])
                 }    
                 send_cnt += tmp_cnt;
             }
-            printf("[sent]\n");
             total_bytes_sent += send_cnt;
+            printf("[send data] %ld %d\n", total_bytes-DATA_SIZE, bytes_read);
+
             int bytes_rcvd = recvfrom(sockfd, rcv_buffer, ack_size, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
             // printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
