@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/time.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -63,6 +65,11 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
+
     long packet_size = 1078;
     // long HEADER_LEN = 78;
 
@@ -100,6 +107,8 @@ int main(int argc, char *argv[])
         // printf("Packet recv buf Size %d\n", sizeof(recv_buf));
         recv_buf = (char *)malloc(packet_size);
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+        if (count < 0)
+            break;
         // printf("Received bytes %d\n", count);
         int tempcount = 0;
         while (count < packet_size)
@@ -210,7 +219,6 @@ int main(int argc, char *argv[])
 
         free(recv_buf);
     }
-
 
     // }
 

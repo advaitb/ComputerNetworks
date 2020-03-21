@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 3;
+    tv.tv_sec = 1;
     tv.tv_usec = 0;
 
     // Create a UDP Socket
