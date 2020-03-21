@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
-        printf("msg size %d\n", msg_size);
+        // printf("msg size %d\n", msg_size);
         memcpy(fileName, recv_buf+54, 20);
         memcpy(recv_msg, recv_buf+74, msg_size);
 

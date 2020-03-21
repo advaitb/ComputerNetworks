@@ -165,18 +165,18 @@ int main(int argc, char *argv[])
                 }    
                 send_cnt += tmp_cnt;
             }
-            printf("Packet Sent\n");
+            printf("[sent]\n");
             total_bytes_sent += send_cnt;
             int bytes_rcvd = recvfrom(sockfd, rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
-            printf("Bytes Rcvd: %d\n", bytes_rcvd);
+            // printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
             {
-                printf("Ack received!\n");
+                // printf("Ack received!\n");
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
                 // memcpy(rcvID, rcv_buffer+1, 1);
-                printf("Rcvd ID: %d\n", rcvID);
-                printf("Sent ID: %d\n", sentID);
+                // printf("Rcvd ID: %d\n", rcvID);
+                // printf("Sent ID: %d\n", sentID);
 
                 if (rcvID == sentID)
                 {
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
                         sentID = 1;
                     }
                         
-                    printf("Sending NEXT packet now...\n");
+                    // printf("Sending NEXT packet now...\n");
                     break;
                 }
                 else
