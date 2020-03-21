@@ -188,7 +188,6 @@ int main(int argc, char *argv[])
                     {
                         sentID = 1;
                     }
-                        
                     // printf("Sending NEXT packet now...\n");
                     break;
                 }
