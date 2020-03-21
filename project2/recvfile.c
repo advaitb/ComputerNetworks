@@ -11,6 +11,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#define MSB_MASK 0xFFFF0000
+#define LSB_MASK 0xFFFF
+
 unsigned int crc32b(char *message) {
    int i, j;
    unsigned int byte, crc, mask;
@@ -27,6 +30,40 @@ unsigned int crc32b(char *message) {
       i = i + 1;
    }
    return ~crc;
+}
+
+// unsigned char crc8b(char *message)
+// {
+//     int i, j;
+//     unsigned char crc, mask;
+
+//     i = 0;
+//     crc = 0xFF;
+//     while (message[i] != 0)
+//     {
+//         crc = crc ^ message[i];
+//         printf("crc %d\n", crc);
+//         printf(" %02x", (unsigned) crc);
+//         for (j = 7; j >= 0; j--) {
+//             mask = -(crc & 1);
+//             crc = (crc >> 1) ^ (0x31 & mask);
+//         }
+//         i = i + 1;
+//     }
+//     return ~crc;
+// }
+
+char csum(char *packet, int cnt) {
+    unsigned long pack_sum = 0;
+    while(cnt > 0) {
+        pack_sum += *packet++;
+        if (pack_sum & MSB_MASK) { /* standard checksum */
+            pack_sum = pack_sum & LSB_MASK;
+            pack_sum++; /* increment sum */
+        }
+        cnt-=1;
+    }
+    return (pack_sum & LSB_MASK); /* final bit-wise and */
 }
 
 int main(int argc, char *argv[])
@@ -71,7 +108,7 @@ int main(int argc, char *argv[])
     
 
     long packet_size = 1078;
-    short ack_size = 6;
+    short ack_size = 3;
     // long HEADER_LEN = 78;
 
     char* recv_buf;
@@ -218,12 +255,10 @@ int main(int argc, char *argv[])
         ackmsg[1] = lastID;
         // printf("ack msg %d\n", ackmsg[0]);
         // printf("ack msg %d\n", ackmsg[1]);
-        unsigned int crc_ack = crc32b(ackmsg);
-        printf("crc ack %d\n", crc_ack);
+        char crc_ack = csum(ackmsg, 2);
         memcpy(ack_packet, ackmsg, 2);
-        memcpy(ack_packet+2, &crc_ack, 4);
-        printf("crc ack should be %d at sender\n", crc32b(ack_packet));
-        int sendcount = sendto(sockfd, (const char *)ackmsg, sizeof(ackmsg), MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
+        memcpy(ack_packet+2, &crc_ack, 1);
+        int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
         {
             printf("Error sending!\n");

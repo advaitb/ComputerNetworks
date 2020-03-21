@@ -12,6 +12,8 @@
 #include <netdb.h>
 
 #define MAX_FILE_SIZE 30000000
+#define MSB_MASK 0xFFFF0000
+#define LSB_MASK 0xFFFF
 
 unsigned int crc32b(char *message) {
    int i, j;
@@ -31,6 +33,37 @@ unsigned int crc32b(char *message) {
    return ~crc;
 }
 
+// unsigned char crc8b(char *message)
+// {
+//     int i, j;
+//     unsigned char crc, mask;
+
+//     i = 0;
+//     crc = 0xFF;
+//     while (message[i] != 0)
+//     {
+//         crc = crc ^ message[i];
+//         for (j = 7; j >= 0; j--) {
+//             mask = -(crc & 1);
+//             crc = (crc >> 1) ^ (0x31 & mask);
+//         }
+//         i = i + 1;
+//     }
+//     return ~crc;
+// }
+
+char csum(char *packet, int cnt) {
+    unsigned long pack_sum = 0;
+    while(cnt > 0) {
+        pack_sum += *packet++;
+        if (pack_sum & MSB_MASK) { /* standard checksum */
+            pack_sum = pack_sum & LSB_MASK;
+            pack_sum++; /* increment sum */
+        }
+        cnt-=1;
+    }
+    return (pack_sum & LSB_MASK); /* final bit-wise and */
+}
 
 int main(int argc, char *argv[])
 {    
@@ -70,7 +103,7 @@ int main(int argc, char *argv[])
 
     unsigned short port = atoi(portc);
     int sockfd;
-    short ack_size = 6;
+    short ack_size = 3;
     char rcv_buffer[ack_size];
 
     // unsigned int server_address;
@@ -146,7 +179,7 @@ int main(int argc, char *argv[])
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
         memcpy(packet_msg+1074, &crc, 4);
-        printf("crc  %d\n", crc);
+        // printf("crc  %d\n", crc);
 
 
 
@@ -174,9 +207,8 @@ int main(int argc, char *argv[])
             if (bytes_rcvd > 0)
             {
                 // CRC
-                unsigned int crc_ack = crc32b(rcv_buffer);
-                printf("ack crc %d\n", crc_ack);
-                if (crc_ack != 0)
+                char csum_ack = csum(rcv_buffer, 2);
+                if (csum_ack != rcv_buffer[2])
                 {
                     printf("[recv corrupt packet]\n");
                     printf("Resending packet since ACK is corrupted\n");
