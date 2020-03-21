@@ -129,10 +129,6 @@ int main(int argc, char *argv[])
             free(recv_buf);
             continue; // If error detected, discard the packet
         }
-        else
-        {
-            printf("[recv data] start %d status\n", count);
-        }
         
         // Check sequence number in stop & wait fashion
         // printf("Check sequence number\n");
@@ -144,17 +140,22 @@ int main(int argc, char *argv[])
         // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         
         if (recvID != lastID)
+        {
             lastID = recvID;
+            printf("[recv data] start %d ACCEPTED\n", count);
+        }
         else
         {
             free(recv_buf);
+            lastID = recvID;
+            printf("[recv data] start %d IGNORED\n", count);
             continue;
         }
 
         packet_count += 1;
         if (packet_count == 1)
             setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
-            
+
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
         strcpy(dir, "/home/shloksobti/Desktop");
