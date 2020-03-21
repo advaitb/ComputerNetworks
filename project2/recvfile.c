@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     struct timeval tv;
     tv.tv_sec = 3;
     tv.tv_usec = 0;
-    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
+    
 
     long packet_size = 1078;
     // long HEADER_LEN = 78;
@@ -152,7 +152,9 @@ int main(int argc, char *argv[])
         }
 
         packet_count += 1;
-
+        if (packet_count == 1)
+            setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
+            
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
         strcpy(dir, "/home/shloksobti/Desktop");
