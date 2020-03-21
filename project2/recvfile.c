@@ -71,10 +71,13 @@ int main(int argc, char *argv[])
     
 
     long packet_size = 1078;
+    short ack_size = 6;
     // long HEADER_LEN = 78;
 
     char* recv_buf;
     char ackmsg[2];
+    char* ack_packet;
+    ack_packet = malloc(ack_size);
     char dir[50];
     char fileName[20];
     // char recv_msg[packet_size - HEADER_LEN];
@@ -158,7 +161,7 @@ int main(int argc, char *argv[])
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strcpy(dir, "/home/shloksobti/Desktop");
+        strcpy(dir, "/home/tony/Desktop");
         // memcpy(dir, recv_buf+2, 50);
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
@@ -213,6 +216,13 @@ int main(int argc, char *argv[])
         // Send Ack
         // printf("Start to send Ack\n");
         ackmsg[1] = lastID;
+        // printf("ack msg %d\n", ackmsg[0]);
+        // printf("ack msg %d\n", ackmsg[1]);
+        unsigned int crc_ack = crc32b(ackmsg);
+        printf("crc ack %d\n", crc_ack);
+        memcpy(ack_packet, ackmsg, 2);
+        memcpy(ack_packet+2, &crc_ack, 4);
+        printf("crc ack should be %d at sender\n", crc32b(ack_packet));
         int sendcount = sendto(sockfd, (const char *)ackmsg, sizeof(ackmsg), MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
         {

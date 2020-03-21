@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
 
     unsigned short port = atoi(portc);
     int sockfd;
-    char rcv_buffer[2];
+    short ack_size = 6;
+    char rcv_buffer[ack_size];
 
     // unsigned int server_address;
     struct sockaddr_in s_in;
@@ -145,6 +146,7 @@ int main(int argc, char *argv[])
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
         memcpy(packet_msg+1074, &crc, 4);
+        printf("crc  %d\n", crc);
 
 
 
@@ -167,10 +169,20 @@ int main(int argc, char *argv[])
             }
             printf("[sent]\n");
             total_bytes_sent += send_cnt;
-            int bytes_rcvd = recvfrom(sockfd, rcv_buffer, 2, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
+            int bytes_rcvd = recvfrom(sockfd, rcv_buffer, ack_size, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
             // printf("Bytes Rcvd: %d\n", bytes_rcvd);
             if (bytes_rcvd > 0)
             {
+                // CRC
+                unsigned int crc_ack = crc32b(rcv_buffer);
+                printf("ack crc %d\n", crc_ack);
+                if (crc_ack != 0)
+                {
+                    printf("[recv corrupt packet]\n");
+                    printf("Resending packet since ACK is corrupted\n");
+                    continue; // If error detected, discard the packet
+                }
+
                 // printf("Ack received!\n");
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
