@@ -189,9 +189,9 @@ int main(int argc, char *argv[])
 
         // Send Ack
         ackmsg[1] = lastID;
-        char crc_ack = csum(ackmsg, 2);
+        char csum_ack = csum(ackmsg, 2);
         memcpy(ack_packet, ackmsg, 2);
-        memcpy(ack_packet+2, &crc_ack, 1);
+        memcpy(ack_packet+2, &csum_ack, 1);
         int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
         {
