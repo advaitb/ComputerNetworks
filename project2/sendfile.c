@@ -33,25 +33,6 @@ unsigned int crc32b(char *message) {
    return ~crc;
 }
 
-// unsigned char crc8b(char *message)
-// {
-//     int i, j;
-//     unsigned char crc, mask;
-
-//     i = 0;
-//     crc = 0xFF;
-//     while (message[i] != 0)
-//     {
-//         crc = crc ^ message[i];
-//         for (j = 7; j >= 0; j--) {
-//             mask = -(crc & 1);
-//             crc = (crc >> 1) ^ (0x31 & mask);
-//         }
-//         i = i + 1;
-//     }
-//     return ~crc;
-// }
-
 char csum(char *packet, int cnt) {
     unsigned long pack_sum = 0;
     while(cnt > 0) {
@@ -136,7 +117,6 @@ int main(int argc, char *argv[])
 
     // Read the FILE and breakdown to package into PACKETS.
     FILE *fp;
-    // printf("File %s\n", fopen_file);
     fp = fopen(fopen_file, "rb");
     if (!fp)
     {
@@ -166,11 +146,9 @@ int main(int argc, char *argv[])
     while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
         memset(packet_msg, 0, 1078);
-        // printf("Read %d bytes, now sending...\n", bytes_read);
         total_bytes += bytes_read;
       
         memset(packet_msg, 0, 1);
-        // memcpy(packet_msg+1, sentID, 1);
         memset(packet_msg+1, sentID, 1);
 
         *(short*)(packet_msg+2) = htons(bytes_read);
@@ -208,7 +186,7 @@ int main(int argc, char *argv[])
             printf("[send data] %ld %d\n", total_bytes-DATA_SIZE, bytes_read);
 
             int bytes_rcvd = recvfrom(sockfd, rcv_buffer, ack_size, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
-            // printf("Bytes Rcvd: %d\n", bytes_rcvd);
+
             if (bytes_rcvd > 0)
             {
                 // CRC
@@ -223,10 +201,6 @@ int main(int argc, char *argv[])
                 // printf("Ack received!\n");
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
-                // memcpy(rcvID, rcv_buffer+1, 1);
-                // printf("Rcvd ID: %d\n", rcvID);
-                // printf("Sent ID: %d\n", sentID);
-
                 if (rcvID == sentID)
                 {
                     if (sentID == 1)
@@ -237,7 +211,6 @@ int main(int argc, char *argv[])
                     {
                         sentID = 1;
                     }
-                    // printf("Sending NEXT packet now...\n");
                     break;
                 }
                 else
@@ -250,13 +223,10 @@ int main(int argc, char *argv[])
             {
                 perror("Error Receiving Ack");
                 printf("Resending packet\n");
-                // exit(1);
             }
         }
     }
     printf("[completed]\n");
-
-    
     // Close socket descriptor and exit.
     close(sockfd);
     return 0;
