@@ -32,27 +32,6 @@ unsigned int crc32b(char *message) {
    return ~crc;
 }
 
-// unsigned char crc8b(char *message)
-// {
-//     int i, j;
-//     unsigned char crc, mask;
-
-//     i = 0;
-//     crc = 0xFF;
-//     while (message[i] != 0)
-//     {
-//         crc = crc ^ message[i];
-//         printf("crc %d\n", crc);
-//         printf(" %02x", (unsigned) crc);
-//         for (j = 7; j >= 0; j--) {
-//             mask = -(crc & 1);
-//             crc = (crc >> 1) ^ (0x31 & mask);
-//         }
-//         i = i + 1;
-//     }
-//     return ~crc;
-// }
-
 char csum(char *packet, int cnt) {
     unsigned long pack_sum = 0;
     while(cnt > 0) {
@@ -121,20 +100,6 @@ int main(int argc, char *argv[])
     short msg_size;
     int packet_count = 0;
 
-    // // Keep waiting for incoming connection
-    // while(1)
-    // {
-    // Accept a new socket
-    // new_sock = accept(sockfd, (struct sockaddr *) &addr, &addr_len);
-    // if (new_sock < 0)
-    // {
-    //     perror("error accepting connection");
-    //     abort();
-    // }
-
-    // // Connection is made
-    // printf("Accepted connection. Client IP address: %s\n", inet_ntoa(addr.sin_addr));
-
     FILE *fp;
 
     ackmsg[0] = 1;
@@ -144,25 +109,19 @@ int main(int argc, char *argv[])
     // Receive all the packets
     while(1)
     {
-        // printf("Packet recv buf Size %d\n", sizeof(recv_buf));
         recv_buf = (char *)malloc(packet_size);
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         if (count < 0)
             break;
-        // printf("Received bytes %d\n", count);
         int tempcount = 0;
         while (count < packet_size)
         {
             tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-            // printf("Received bytes temp count%d\n", tempcount);
             if (tempcount == -1)
                 continue;
             count += tempcount;
         }
-        // Check crc
-        // printf("Check crc\n");
         unsigned int crc = crc32b(recv_buf);
-        // printf("crc %d\n", crc);
         if (crc != 0)
         {
             printf("[recv corrupt packet]\n");
@@ -171,13 +130,8 @@ int main(int argc, char *argv[])
         }
         
         // Check sequence number in stop & wait fashion
-        // printf("Check sequence number\n");
         char recvID;
         recvID = recv_buf[1];
-        // printf("recved packet %d %d\n", recv_buf[0], recv_buf[1]);
-        // printf("recvID %d\n", recvID);
-        // printf("lastID %d\n", lastID);
-        // printf("last ID:%d, recv ID: %d\n", lastID[0], recvID);
         
         if (recvID != lastID)
         {
@@ -203,28 +157,14 @@ int main(int argc, char *argv[])
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
-        // printf("msg size %d\n", msg_size);
         memcpy(fileName, recv_buf+54, 20);
         memcpy(recv_msg, recv_buf+74, msg_size);
-
-        // printf("\nrecv_msg\n");
-        // for (int i = 0; i < msg_size; i ++) {
-        //         printf(" %02x", (unsigned) recv_msg[i]);
-        // }
-
-        // printf("\n\n\nrecv_buf\n");
-
-        // for (int i = 0; i < 1078; i ++) {
-        //         printf(" %02x", (unsigned) recv_buf[i]);
-        // }
-
         // Save message to the file
         char filePath[70];
         strcpy(filePath, dir);
         strcat(filePath, "/");
         strcat(filePath, fileName);
         char* option = "a";
-        // if (access(filePath, F_OK) == -1)
         if (packet_count == 1)
         {
             // file doesn't exist
@@ -239,22 +179,16 @@ int main(int argc, char *argv[])
             perror("Unable to open file");
             return 1;
         }
-        // printf("Opened file at %s\n", filePath);
-        // printf("recv msg size %ld\n", sizeof(recv_msg));
         if (fwrite(recv_msg, 1, sizeof(recv_msg), fp) != sizeof(recv_msg))
         {
             perror("Write to file error");
             exit(1);
         }
-
+         // close file
         fclose(fp);
-        // free(recv_msg);
 
         // Send Ack
-        // printf("Start to send Ack\n");
         ackmsg[1] = lastID;
-        // printf("ack msg %d\n", ackmsg[0]);
-        // printf("ack msg %d\n", ackmsg[1]);
         char crc_ack = csum(ackmsg, 2);
         memcpy(ack_packet, ackmsg, 2);
         memcpy(ack_packet+2, &crc_ack, 1);
@@ -267,9 +201,6 @@ int main(int argc, char *argv[])
 
         free(recv_buf);
     }
-
-    // }
-
     printf("[completed]\n");
     return 0;
 }
