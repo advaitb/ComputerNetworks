@@ -215,7 +215,15 @@ int main(int argc, char *argv[])
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
                 if (rcvID == sentID)
-                {
+                {   
+                        
+                    cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
+                    struct timeval ntv;
+                    ntv.tv_sec = cumulative_timeout;
+                    ntv.tv_usec = 0;
+                    //fprintf(stderr,"The new timeout is:%ld\n",cumulative_timeout);
+                    //set new timeout value
+                    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
                     if (sentID == 1)
                     {
                         sentID = 0;
@@ -230,12 +238,6 @@ int main(int argc, char *argv[])
                 {
                     printf("Resending packet since ACK ID different from Sent ID\n");
                 }
-                cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
-                struct timeval ntv;
-                ntv.tv_sec = cumulative_timeout;
-                ntv.tv_usec = 0;
-                //set new timeout value
-                setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
             }
             else
             {
