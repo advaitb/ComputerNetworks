@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
             //      change sendID
             //      break
             time_t start_time = getCurrentTime();
-            time_t end_time;
+            time_t end_time, pack_end_time;
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -193,9 +193,11 @@ int main(int argc, char *argv[])
                 if(tmp_cnt <= 0){
                     printf("Error sending!\n");
                     return 1;
-                }    
+                }
                 send_cnt += tmp_cnt;
             }
+            pack_end_time = getCurrentTime();
+            double send_time = (double)getTimeElapsed(pack_end_time,start_time);
             total_bytes_sent += send_cnt;
             printf("[send data] %ld %d\n", total_bytes-DATA_SIZE, bytes_read);
 
@@ -209,6 +211,8 @@ int main(int argc, char *argv[])
                 //fprintf(stderr, "Estimated rtt: %f\n", estimated_rtt);
                 //fprintf(stderr, "Deviation rtt: %f\n", dev_rtt);
                 timeout = estimated_rtt + 4*dev_rtt; // set timeout
+                timeout = timeout-send_time; // adjust for recv
+                fprintf(stderr,"Time out:%f ",timeout);
                 //fprintf(stderr,"This is the adaptive timeout: %f\n",timeout);
                 double sec, msec;
                 msec = modf(timeout,&sec);
@@ -216,7 +220,7 @@ int main(int argc, char *argv[])
                 struct timeval ntv;
                 ntv.tv_sec = sec;
                 ntv.tv_usec = msec;
-                setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );
+                setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );//recv timeout
 
                 char csum_ack = csum(rcv_buffer, 2);
                 if (csum_ack != rcv_buffer[2])
