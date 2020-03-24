@@ -2,7 +2,7 @@ CC	 	= gcc
 LD	 	= gcc
 CFLAGS	 	= -Wall -g
 
-LDFLAGS	 	= 
+LDFLAGS	 	=  
 DEFS 	 	=
 
 all:	sendfile recvfile 
