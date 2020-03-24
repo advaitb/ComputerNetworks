@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 5;
+    tv.tv_sec = 1; // initial timeout is 1 seconds
     tv.tv_usec = 0;
 
     int DATA_SIZE = 1000;
@@ -175,7 +175,9 @@ int main(int argc, char *argv[])
         memcpy(packet_msg+1074, &crc, 4);
         // printf("crc  %d\n", crc);
 
-        double cumulative_timeout = 5.00;
+        double estimated_rtt = 1.00;
+        double dev_rtt = 1.00;
+        double timeout;
         while (1){
             // send packet
             // recv ack
@@ -202,11 +204,15 @@ int main(int argc, char *argv[])
             if (bytes_rcvd > 0)
             {
                 end_time = getCurrentTime();
-                cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
-                //fprintf(stderr,"This is the value of cumulative_timeout: %f", cumulative_timeout);
+                estimated_rtt  = 0.875*(double)estimated_rtt + 0.125*(double)getTimeElapsed(end_time,start_time); //estimated_rtt  for smoothing
+                dev_rtt  = 0.75*dev_rtt + 0.25*(abs(estimated_rtt - (double)getTimeElapsed(end_time,start_time))); //calculate deviations
+                //fprintf(stderr, "Estimated rtt: %f\n", estimated_rtt);
+                //fprintf(stderr, "Deviation rtt: %f\n", dev_rtt);
+                timeout = estimated_rtt + 4*dev_rtt; // set timeout
+                //fprintf(stderr,"This is the adaptive timeout: %f\n",timeout);
                 double sec, msec;
-                msec = modf(cumulative_timeout,&sec); 
-                msec = msec*1000000;
+                msec = modf(timeout,&sec);
+                msec = msec*1000000;//convert sec to usec to feed into tv_usec
                 struct timeval ntv;
                 ntv.tv_sec = sec;
                 ntv.tv_usec = msec;
@@ -224,8 +230,7 @@ int main(int argc, char *argv[])
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
                 if (rcvID == sentID)
-                {   
-                        
+                {
                     //struct timeval ntv;
                     //ntv.tv_sec = cumulative_timeout;
                     //ntv.tv_usec = 0;
