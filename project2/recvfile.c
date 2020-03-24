@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strcpy(dir, "/home/shloksobti/Desktop");
+        strcpy(dir, "/home/advait/COMP556/project2/");
         // memcpy(dir, recv_buf+2, 50);
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 

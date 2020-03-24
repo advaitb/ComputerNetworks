@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include <sys/time.h>
-
+#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -45,6 +45,18 @@ char csum(char *packet, int cnt) {
     }
     return (pack_sum & LSB_MASK); /* final bit-wise and */
 }
+
+time_t getCurrentTime(){
+        time_t currtime;
+        currtime = time(NULL);
+        return currtime;
+}
+
+time_t getTimeElapsed(time_t end_time, time_t start_time){
+        return (end_time - start_time);
+}
+
+time_t sum_time;
 
 int main(int argc, char *argv[])
 {    
@@ -97,7 +109,7 @@ int main(int argc, char *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 1;
+    tv.tv_sec = 5;
     tv.tv_usec = 0;
 
     int DATA_SIZE = 1000;
@@ -163,15 +175,15 @@ int main(int argc, char *argv[])
         memcpy(packet_msg+1074, &crc, 4);
         // printf("crc  %d\n", crc);
 
-
-
+        time_t cumulative_timeout = 5;
         while (1){
             // send packet
             // recv ack
             //if recvid == sendid
             //      change sendID
             //      break
-
+            time_t start_time = getCurrentTime();
+            time_t end_time;
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -189,6 +201,7 @@ int main(int argc, char *argv[])
 
             if (bytes_rcvd > 0)
             {
+                end_time = getCurrentTime();
                 // CRC
                 char csum_ack = csum(rcv_buffer, 2);
                 if (csum_ack != rcv_buffer[2])
@@ -202,7 +215,15 @@ int main(int argc, char *argv[])
                 char rcvID;
                 rcvID = *(rcv_buffer+1);
                 if (rcvID == sentID)
-                {
+                {   
+                        
+                    cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
+                    struct timeval ntv;
+                    ntv.tv_sec = cumulative_timeout;
+                    ntv.tv_usec = 0;
+                    //fprintf(stderr,"The new timeout is:%ld\n",cumulative_timeout);
+                    //set new timeout value
+                    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
                     if (sentID == 1)
                     {
                         sentID = 0;
@@ -217,14 +238,15 @@ int main(int argc, char *argv[])
                 {
                     printf("Resending packet since ACK ID different from Sent ID\n");
                 }
-                 
             }
             else
             {
                 perror("Error Receiving Ack");
                 printf("Resending packet\n");
             }
+        
         }
+
     }
     printf("[completed]\n");
     // Close socket descriptor and exit.
