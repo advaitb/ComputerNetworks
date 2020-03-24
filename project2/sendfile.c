@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <math.h>
 #include <sys/time.h>
 #include <time.h>
 #include <sys/types.h>
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         memcpy(packet_msg+1074, &crc, 4);
         // printf("crc  %d\n", crc);
 
-        time_t cumulative_timeout = 5;
+        double cumulative_timeout = 5.00;
         while (1){
             // send packet
             // recv ack
@@ -202,7 +202,16 @@ int main(int argc, char *argv[])
             if (bytes_rcvd > 0)
             {
                 end_time = getCurrentTime();
-                // CRC
+                cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
+                //fprintf(stderr,"This is the value of cumulative_timeout: %f", cumulative_timeout);
+                double sec, msec;
+                msec = modf(cumulative_timeout,&sec); 
+                msec = msec*1000000;
+                struct timeval ntv;
+                ntv.tv_sec = sec;
+                ntv.tv_usec = msec;
+                setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );
+
                 char csum_ack = csum(rcv_buffer, 2);
                 if (csum_ack != rcv_buffer[2])
                 {
@@ -217,13 +226,12 @@ int main(int argc, char *argv[])
                 if (rcvID == sentID)
                 {   
                         
-                    cumulative_timeout  = 0.75*(double)cumulative_timeout + 0.25*(double)getTimeElapsed(end_time,start_time);
-                    struct timeval ntv;
-                    ntv.tv_sec = cumulative_timeout;
-                    ntv.tv_usec = 0;
+                    //struct timeval ntv;
+                    //ntv.tv_sec = cumulative_timeout;
+                    //ntv.tv_usec = 0;
                     //fprintf(stderr,"The new timeout is:%ld\n",cumulative_timeout);
                     //set new timeout value
-                    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
+                    //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
                     if (sentID == 1)
                     {
                         sentID = 0;
