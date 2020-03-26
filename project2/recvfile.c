@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
         // memcpy(recv_msg, &recv_buf, packet_size);
         // strcpy(dir, "/home/advait/COMP556/project2/");
         memcpy(dir, recv_buf+4, 50);
+        strcpy(dir, ".recv");
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
