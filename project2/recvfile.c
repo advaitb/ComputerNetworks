@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
             // file doesn't exist
             option = "w";
         }
-         printf("file path %s, option %s\n", filePath, option);
+         // printf("file path %s, option %s\n", filePath, option);
         fp = fopen(filePath, option);
 
         if (!fp)
