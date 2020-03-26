@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
 
     char lastID;
     lastID = 1;
+    int total_data = 0;
     // Receive all the packets
     while(1)
     {
@@ -135,17 +136,20 @@ int main(int argc, char *argv[])
         // Check sequence number in stop & wait fashion
         char recvID;
         recvID = recv_buf[1];
-        
+        msg_size = (short) ntohs(*(short *)(recv_buf+2));
+        total_data += msg_size;
+
         if (recvID != lastID)
         {
             lastID = recvID;
-            printf("[recv data] start %d ACCEPTED\n", count);
+            printf("[recv data] %d %u ACCEPTED\n", (total_data - msg_size), msg_size);
+            
         }
         else
         {
             free(recv_buf);
             lastID = recvID;
-            printf("[recv data] start %d IGNORED\n", count);
+            printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
             ackmsg[1] = lastID;
@@ -169,7 +173,7 @@ int main(int argc, char *argv[])
         // memcpy(recv_msg, &recv_buf, packet_size);
         // strcpy(dir, "/home/advait/COMP556/project2/");
         memcpy(dir, recv_buf+4, 50);
-        msg_size = (short) ntohs(*(short *)(recv_buf+2));
+        // msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
         memcpy(fileName, recv_buf+54, 20);

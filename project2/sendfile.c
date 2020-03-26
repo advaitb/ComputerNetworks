@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             pack_end_time = getCurrentTime();
             double send_time = (double)getTimeElapsed(pack_end_time,start_time);
             total_bytes_sent += send_cnt;
-            printf("[send data] %ld %d\n", total_bytes-DATA_SIZE, bytes_read);
+            printf("[send data] %ld %d\n", total_bytes-bytes_read, bytes_read);
 
             int bytes_rcvd = recvfrom(sockfd, rcv_buffer, ack_size, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
 
