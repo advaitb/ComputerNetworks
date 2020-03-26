@@ -85,8 +85,11 @@ int main(int argc, char *argv[])
     tv.tv_sec = 60;
     tv.tv_usec = 0;
     
+    int DATA_SIZE = 1000;
+    int HEADER_SIZE = 74;
+    int CRC_SIZE = 4;
 
-    long packet_size = 1078;
+    long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
     short ack_size = 3;
     // long HEADER_LEN = 78;
 
@@ -175,7 +178,7 @@ int main(int argc, char *argv[])
         char filePath[70];
         strcpy(filePath, dir);
         strcat(filePath, "/");
-        strcat(filePath, fileName);
+        strcat(filePath, fileName); //fileName
         char* option = "a";
         if (packet_count == 1)
         {

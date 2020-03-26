@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
 
     // unsigned int server_address;
     struct sockaddr_in s_in;
-    long packet_size = 1078;
     
     char *file_data;
 
@@ -112,7 +111,11 @@ int main(int argc, char *argv[])
     tv.tv_sec = 1; // initial timeout is 1 seconds
     tv.tv_usec = 0;
 
-    int DATA_SIZE = 1000;
+    int DATA_SIZE = 25000;
+    int HEADER_SIZE = 74;
+    int CRC_SIZE = 4;
+    long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
+
     // Create a UDP Socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
@@ -157,7 +160,7 @@ int main(int argc, char *argv[])
     
     while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
-        memset(packet_msg, 0, 1078);
+        memset(packet_msg, 0, packet_size);
         total_bytes += bytes_read;
       
         memset(packet_msg, 0, 1);
@@ -172,7 +175,7 @@ int main(int argc, char *argv[])
 
         // Compute CRC
         unsigned int crc = crc32b(packet_msg);
-        memcpy(packet_msg+1074, &crc, 4);
+        memcpy(packet_msg + (DATA_SIZE+HEADER_SIZE), &crc, CRC_SIZE);
         // printf("crc  %d\n", crc);
 
         double estimated_rtt = 1.00;
