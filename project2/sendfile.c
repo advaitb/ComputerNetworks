@@ -15,20 +15,26 @@
 #define MSB_MASK 0xFFFF0000
 #define LSB_MASK 0xFFFF
 
-unsigned int crc32b(char *message) {
-   int i, j;
-   unsigned int byte, crc, mask;
+unsigned int crc32b(char *message, long msg_len) {
+    int i, j;
+    unsigned int byte, crc, mask;
 
-   i = 0;
-   crc = 0xFFFFFFFF;
-   while (message[i] != 0) {
-      byte = message[i];            // Get next byte.
-      crc = crc ^ byte;
-      for (j = 7; j >= 0; j--) {    // Do eight times.
-         mask = -(crc & 1);
-         crc = (crc >> 1) ^ (0xEDB88320 & mask);
-      }
-      i = i + 1;
+    i = 0;
+    crc = 0xFFFFFFFF;
+    // while (message[i] != 0) {
+    while (i < msg_len) {
+        if (message[i] == 0)
+        {
+            i = i + 1;
+            continue;
+        }
+        byte = message[i];            // Get next byte.
+        crc = crc ^ byte;
+        for (j = 7; j >= 0; j--) {    // Do eight times.
+            mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+        i = i + 1;
    }
    return ~crc;
 }
@@ -174,7 +180,7 @@ int main(int argc, char *argv[])
         memset(file_data, 0, DATA_SIZE);
 
         // Compute CRC
-        unsigned int crc = crc32b(packet_msg);
+        unsigned int crc = crc32b(packet_msg, DATA_SIZE + HEADER_SIZE);
         memcpy(packet_msg + (DATA_SIZE+HEADER_SIZE), &crc, CRC_SIZE);
         // printf("crc  %d\n", crc);
 
