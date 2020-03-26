@@ -137,11 +137,12 @@ int main(int argc, char *argv[])
         char recvID;
         recvID = recv_buf[1];
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
-        total_data += msg_size;
+        
 
         if (recvID != lastID)
         {
             lastID = recvID;
+            total_data += msg_size;
             printf("[recv data] %d %u ACCEPTED\n", (total_data - msg_size), msg_size);
             
         }
@@ -149,7 +150,7 @@ int main(int argc, char *argv[])
         {
             free(recv_buf);
             lastID = recvID;
-            printf("[recv data] %d %u IGNORED\n", (total_data), msg_size);
+            printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
             ackmsg[1] = lastID;
