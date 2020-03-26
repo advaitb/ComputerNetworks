@@ -169,7 +169,6 @@ int main(int argc, char *argv[])
         // memcpy(recv_msg, &recv_buf, packet_size);
         // strcpy(dir, "/home/advait/COMP556/project2/");
         memcpy(dir, recv_buf+4, 50);
-        strcpy(dir, ".recv");
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
@@ -180,6 +179,7 @@ int main(int argc, char *argv[])
         strcpy(filePath, dir);
         strcat(filePath, "/");
         strcat(filePath, fileName); //fileName
+        strcat(filePath, ".recv");
         char* option = "a";
         if (packet_count == 1)
         {
