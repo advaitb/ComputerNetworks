@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     }
 
     struct timeval tv;
-    tv.tv_sec = 20;
+    tv.tv_sec = 60;
     tv.tv_usec = 0;
     
 
