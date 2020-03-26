@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     }
 
     struct timeval tv;
-    tv.tv_sec = 3;
+    tv.tv_sec = 20;
     tv.tv_usec = 0;
     
 
@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
-        strcpy(dir, "/home/advait/COMP556/project2/");
-        // memcpy(dir, recv_buf+2, 50);
+        // strcpy(dir, "/home/advait/COMP556/project2/");
+        memcpy(dir, recv_buf+4, 50);
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
             // file doesn't exist
             option = "w";
         }
-        // printf("file path %s, option %s\n", filePath, option);
+         printf("file path %s, option %s\n", filePath, option);
         fp = fopen(filePath, option);
 
         if (!fp)
