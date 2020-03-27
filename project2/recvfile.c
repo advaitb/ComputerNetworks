@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     ackmsg[0] = 1;
 
     char lastID;
-    lastID = 1;
+    lastID = (char)1;
     int total_data = 0;
     // Receive all the packets
     while(1)
