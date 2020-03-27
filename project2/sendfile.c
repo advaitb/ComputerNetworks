@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     char sentID = 0;
     int total_bytes_sent = 0;
 
-    double PRRT = 5;
+    double PRRT = 15;
     struct timeval tv;
     // tv.tv_sec = 3; // initial timeout is 1 seconds
     // tv.tv_usec = 0;
