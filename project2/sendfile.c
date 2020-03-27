@@ -199,16 +199,16 @@ int main(int argc, char *argv[])
             clock_t begin = clock();
             //time_t end_time, pack_end_time;
             // time_t end_time;
-            // send_cnt = 0;
-            // while (send_cnt < packet_size)
-            // {
-            tmp_cnt = sendto(sockfd, (const char *)packet_msg, packet_size, 0, (const struct sockaddr *) &s_in, sizeof(s_in));
-            //     if(tmp_cnt <= 0){
-            //         printf("Error sending!\n");
-            //         return 1;
-            //     }
-            //     send_cnt += tmp_cnt;
-            // }
+            send_cnt = 0;
+            while (send_cnt < packet_size)
+            {
+                tmp_cnt = sendto(sockfd, (const char *)packet_msg, packet_size, 0, (const struct sockaddr *) &s_in, sizeof(s_in));
+                if(tmp_cnt <= 0){
+                    printf("Error sending!\n");
+                    return 1;
+                }
+                send_cnt += tmp_cnt;
+            }
             //pack_end_time = getCurrentTime();
             //double send_time = (double)getTimeElapsed(pack_end_time,start_time);
             // total_bytes_sent += send_cnt;
@@ -275,10 +275,11 @@ int main(int argc, char *argv[])
                     {
                         sentID = 0;
                     }
-                    else
+                    else if (sentID == 0)
                     {
                         sentID = 1;
-                    }
+                    } 
+                    
                     break;
                 }
                 else
