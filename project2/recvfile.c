@@ -123,14 +123,14 @@ int main(int argc, char *argv[])
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         if (count < 0)
             break;
-        int tempcount = 0;
-        while (count < packet_size)
-        {
-            tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-            if (tempcount == -1)
-                continue;
-            count += tempcount;
-        }
+        // int tempcount = 0;
+        // while (count < packet_size)
+        // {
+        //     tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+        //     if (tempcount == -1)
+        //         continue;
+        //     count += tempcount;
+        // }
 
         // char* mangle = "aa";
         // unsigned int crc_correct = crc32b(recv_buf, DATA_SIZE + HEADER_SIZE);
