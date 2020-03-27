@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
                 //fprintf(stderr, "Deviation rtt: %f\n", dev_rtt);
                 timeout = estimated_rtt + 4*dev_rtt; // set timeout
                 timeout = timeout-send_time; // adjust for recv
-                fprintf(stderr,"Time out:%f ",timeout);
+                //fprintf(stderr,"Time out:%f ",timeout);
                 //fprintf(stderr,"This is the adaptive timeout: %f\n",timeout);
                 double sec, msec;
                 msec = modf(timeout,&sec);
