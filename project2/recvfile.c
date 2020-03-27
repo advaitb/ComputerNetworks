@@ -87,9 +87,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    struct timeval tv;
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
+    // struct timeval tv;
+    // tv.tv_sec = 5;
+    // tv.tv_usec = 0;
     
     int DATA_SIZE = 25000;
     int HEADER_SIZE = 74;
@@ -125,17 +125,17 @@ int main(int argc, char *argv[])
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         if (count < 0)
             break;
-        int tempcount;
+        // int tempcount;
         // while (count < packet_size)/
         
-        tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+        // tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         
         // }
-        if (tempcount <= 0)
-        {
-            printf("Packet not received!\n");
-            continue;
-        }
+        // if (count <= 0)
+        // {
+        //     printf("Packet not received!\n");
+        //     continue;
+        // }
         // char* mangle = "aa";
         // unsigned int crc_correct = crc32b(recv_buf, DATA_SIZE + HEADER_SIZE);
         // printf("crc before mangle %d\n", crc_correct);
