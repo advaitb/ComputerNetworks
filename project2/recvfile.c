@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         
         // }
-        if (tempcount < 0)
+        if (tempcount <= 0)
         {
             printf("Packet not received!\n");
             continue;
