@@ -241,7 +241,8 @@ int main(int argc, char *argv[])
 
                 // printf("Ack received!\n");
                 char rcvID;
-                rcvID = *(rcv_buffer+1);
+                // rcvID = *(rcv_buffer+1);
+                rcvID = rcv_buffer[1];
                 if (rcvID == sentID)
                 {
                     //struct timeval ntv;
