@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     // tv.tv_sec = 3; // initial timeout is 1 seconds
     // tv.tv_usec = 0;
     // setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
-    clock_t t;
+    clock_t begin = clock();
     while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
         memset(packet_msg, 0, packet_size);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
             //      change sendID
             //      break
             // time_t start_time = getCurrentTime();
-            clock_t begin = clock();
+            
             //time_t end_time, pack_end_time;
             // time_t end_time;
             send_cnt = 0;
@@ -267,6 +267,7 @@ int main(int argc, char *argv[])
 
                     clock_t end = clock();
                     double time_taken = (double)(end-begin) / CLOCKS_PER_SEC;
+                    begin = clock();
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
                     printf("Time Taken %f\n", time_taken);
                     PRRT = 0.7 * PRRT + 0.3 * time_taken;
