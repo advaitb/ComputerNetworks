@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     char name[20];
     strncpy(name, fileName, 20);
 
-    char sentID = 0;
+    char sentID = (char)0;
     int total_bytes_sent = 0;
 
     double PRRT = 5;
@@ -173,7 +173,8 @@ int main(int argc, char *argv[])
       
         memset(packet_msg, 0, 1);
         memset(packet_msg+1, sentID, 1);
-
+        // packet_msg[1] = (char)0;
+        
         *(short*)(packet_msg+2) = htons(bytes_read);
         memcpy(packet_msg+4, directory, 50); // Directory information
         memcpy(packet_msg+54, name, 20); // File Name
