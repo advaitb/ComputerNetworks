@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 1; // initial timeout is 1 seconds
+    tv.tv_sec = 10; // initial timeout is 1 seconds
     tv.tv_usec = 0;
 
     int DATA_SIZE = 25000;
@@ -184,17 +184,17 @@ int main(int argc, char *argv[])
         memcpy(packet_msg + (DATA_SIZE+HEADER_SIZE), &crc, CRC_SIZE);
         // printf("crc  %d\n", crc);
 
-        double estimated_rtt = 1.00;
-        double dev_rtt = 1.00;
-        double timeout;
+        //double estimated_rtt = 1.00;
+        //double dev_rtt = 1.00;
+        //double timeout;
         while (1){
             // send packet
             // recv ack
             //if recvid == sendid
             //      change sendID
             //      break
-            time_t start_time = getCurrentTime();
-            time_t end_time, pack_end_time;
+            //time_t start_time = getCurrentTime();
+            //time_t end_time, pack_end_time;
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -205,8 +205,8 @@ int main(int argc, char *argv[])
                 }
                 send_cnt += tmp_cnt;
             }
-            pack_end_time = getCurrentTime();
-            double send_time = (double)getTimeElapsed(pack_end_time,start_time);
+            //pack_end_time = getCurrentTime();
+            //double send_time = (double)getTimeElapsed(pack_end_time,start_time);
             total_bytes_sent += send_cnt;
             printf("[send data] %ld %d\n", total_bytes-bytes_read, bytes_read);
 
@@ -214,22 +214,22 @@ int main(int argc, char *argv[])
 
             if (bytes_rcvd > 0)
             {
-                end_time = getCurrentTime();
-                estimated_rtt  = 0.875*(double)estimated_rtt + 0.125*(double)getTimeElapsed(end_time,start_time); //estimated_rtt  for smoothing
-                dev_rtt  = 0.75*dev_rtt + 0.25*(abs(estimated_rtt - (double)getTimeElapsed(end_time,start_time))); //calculate deviations
+                //end_time = getCurrentTime();
+                //estimated_rtt  = 0.875*(double)estimated_rtt + 0.125*(double)getTimeElapsed(end_time,start_time); //estimated_rtt  for smoothing
+                //dev_rtt  = 0.75*dev_rtt + 0.25*(abs(estimated_rtt - (double)getTimeElapsed(end_time,start_time))); //calculate deviations
                 //fprintf(stderr, "Estimated rtt: %f\n", estimated_rtt);
                 //fprintf(stderr, "Deviation rtt: %f\n", dev_rtt);
-                timeout = estimated_rtt + 4*dev_rtt; // set timeout
-                timeout = timeout-send_time; // adjust for recv
+                //timeout = estimated_rtt + 4*dev_rtt; // set timeout
+                //timeout = timeout-send_time; // adjust for recv
                 //fprintf(stderr,"Time out:%f ",timeout);
                 //fprintf(stderr,"This is the adaptive timeout: %f\n",timeout);
-                double sec, msec;
-                msec = modf(timeout,&sec);
-                msec = msec*1000000;//convert sec to usec to feed into tv_usec
-                struct timeval ntv;
-                ntv.tv_sec = sec;
-                ntv.tv_usec = msec;
-                setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );//recv timeout
+                //double sec, msec;
+                //msec = modf(timeout,&sec);
+                //msec = msec*1000000;//convert sec to usec to feed into tv_usec
+                //struct timeval ntv;
+                //ntv.tv_sec = sec;
+                //ntv.tv_usec = msec;
+                //setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );//recv timeout
 
                 char csum_ack = csum(rcv_buffer, 2);
                 if (csum_ack != rcv_buffer[2])
