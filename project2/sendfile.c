@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
                 char rcvID;
                 // rcvID = *(rcv_buffer+1);
                 rcvID = rcv_buffer[1];
-                if (rcvID == sentID)
+                if ((char)rcvID == (char)sentID)
                 {
                     //struct timeval ntv;
                     //ntv.tv_sec = cumulative_timeout;
@@ -268,8 +268,8 @@ int main(int argc, char *argv[])
                     clock_t end = clock();
                     double time_taken = (double)(end-begin) / CLOCKS_PER_SEC;
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
-                    printf("Time Taken %d\n", time_taken);
-                    PRRT = 0.9 * PRRT + 0.1 * time_taken;
+                    printf("Time Taken %f\n", time_taken);
+                    PRRT = 0.7 * PRRT + 0.3 * time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
                     if (sentID == 1)
