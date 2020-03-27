@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     }
 
     struct timeval tv;
-    tv.tv_sec = 60;
+    tv.tv_sec = 5;
     tv.tv_usec = 0;
     
     int DATA_SIZE = 25000;
@@ -116,6 +116,8 @@ int main(int argc, char *argv[])
     char lastID;
     lastID = 1;
     int total_data = 0;
+
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
     // Receive all the packets
     while(1)
     {
@@ -123,15 +125,17 @@ int main(int argc, char *argv[])
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         if (count < 0)
             break;
-        int tempcount = 0;
-        while (count < packet_size)
+        int tempcount;
+        // while (count < packet_size)/
+        
+        tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
+            
+        // }
+        if (tempcount < 0)
         {
-            tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-            if (tempcount == -1)
-                continue;
-            count += tempcount;
+            printf("Packet not received!\n");
+            continue;
         }
-
         // char* mangle = "aa";
         // unsigned int crc_correct = crc32b(recv_buf, DATA_SIZE + HEADER_SIZE);
         // printf("crc before mangle %d\n", crc_correct);
@@ -195,9 +199,9 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        packet_count += 1;
-        if (packet_count == 1)
-            setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
+        // packet_count += 1;
+        // if (packet_count == 1)
+            
 
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
