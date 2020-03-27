@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     tv.tv_sec = 5; // initial timeout is 1 seconds
     tv.tv_usec = 0;
 
-    int DATA_SIZE = 25000;
+    int DATA_SIZE = 32000;
     int HEADER_SIZE = 74;
     int CRC_SIZE = 4;
     long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
