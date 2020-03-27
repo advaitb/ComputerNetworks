@@ -273,13 +273,12 @@ int main(int argc, char *argv[])
 
                     if (sentID == 1)
                     {
-                        sentID = 0;
+                        sentID = (char)0;
                     }
                     else if (sentID == 0)
                     {
-                        sentID = 1;
+                        sentID = (char)1;
                     } 
-                    
                     break;
                 }
                 else
