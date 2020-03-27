@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     // tv.tv_sec = 3; // initial timeout is 1 seconds
     // tv.tv_usec = 0;
     // setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
-
+    clock_t t;
     while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
         memset(packet_msg, 0, packet_size);
@@ -195,9 +195,10 @@ int main(int argc, char *argv[])
             //if recvid == sendid
             //      change sendID
             //      break
-            time_t start_time = getCurrentTime();
+            // time_t start_time = getCurrentTime();
+            t = clock();
             //time_t end_time, pack_end_time;
-            time_t end_time;
+            // time_t end_time;
             send_cnt = 0;
             while (send_cnt < packet_size)
             {
@@ -223,8 +224,10 @@ int main(int argc, char *argv[])
 
             if (bytes_rcvd > 0)
             {
-                end_time = getCurrentTime();
-                PRRT = 0.5 * PRRT + 0.5 * (double) getTimeElapsed(end_time, start_time);
+                // end_time = getCurrentTime();
+                t = clock() - t;
+                double time_taken = ((double)t)/CLOCKS_PER_SEC;
+                PRRT = 0.5 * PRRT + 0.5 * time_taken;
                 
                 //estimated_rtt  = 0.875*(double)estimated_rtt + 0.125*(double)getTimeElapsed(end_time,start_time); //estimated_rtt  for smoothing
                 //dev_rtt  = 0.75*dev_rtt + 0.25*(abs(estimated_rtt - (double)getTimeElapsed(end_time,start_time))); //calculate deviations
