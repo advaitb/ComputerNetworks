@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
             //      change sendID
             //      break
             // time_t start_time = getCurrentTime();
-            t = clock();
+            clock_t begin = clock();
             //time_t end_time, pack_end_time;
             // time_t end_time;
             // send_cnt = 0;
@@ -264,9 +264,10 @@ int main(int argc, char *argv[])
                     //set new timeout value
                     //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
 
-                    t = clock() - t;
-                    double time_taken = ((double)t)/CLOCKS_PER_SEC;
-                    printf("Time Taken %d", time_taken);
+                    clock_t end = clock();
+                    double time_taken = (double)(end-begin) / CLOCKS_PER_SEC;
+                    // double time_taken = ((double)t)/CLOCKS_PER_SEC;
+                    printf("Time Taken %d\n", time_taken);
                     PRRT = 0.5 * PRRT + 0.5 * time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
