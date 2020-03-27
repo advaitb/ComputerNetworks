@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
                     double time_taken = (double)(end-begin) / CLOCKS_PER_SEC;
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
                     printf("Time Taken %d\n", time_taken);
-                    PRRT = 0.5 * PRRT + 0.5 * time_taken;
+                    PRRT = 0.9 * PRRT + 0.1 * time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
                     if (sentID == 1)
