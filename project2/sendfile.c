@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     char *file_data;
 
     struct timeval tv;
-    tv.tv_sec = 10; // initial timeout is 1 seconds
+    tv.tv_sec = 3; // initial timeout is 1 seconds
     tv.tv_usec = 0;
 
     int DATA_SIZE = 25000;
