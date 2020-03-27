@@ -147,6 +147,18 @@ int main(int argc, char *argv[])
         {
             printf("[recv corrupt packet]\n");
             free(recv_buf);
+
+            // In this case an ACK is still sent
+            ackmsg[1] = lastID;
+            char csum_ack = csum(ackmsg, 2);
+            memcpy(ack_packet, ackmsg, 2);
+            memcpy(ack_packet+2, &csum_ack, 1);
+            int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
+            if (sendcount <= 0)
+            {
+                printf("Error sending!\n");
+                return 1;
+            }
             continue; // If error detected, discard the packet
         }
         
