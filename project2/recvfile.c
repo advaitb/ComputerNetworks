@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     lastID = 1;
     int total_data = 0;
 
-    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
+    // setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
     // Receive all the packets
     while(1)
     {
