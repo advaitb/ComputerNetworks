@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
         
         // Check sequence number in stop & wait fashion
         char recvID;
-        recvID = recv_buf[1];
+        recvID = (char) recv_buf[1];
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
         
 
