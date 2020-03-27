@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     char sentID = 0;
     int total_bytes_sent = 0;
 
-    double PRRT = 15;
+    double PRRT = 5;
     struct timeval tv;
     // tv.tv_sec = 3; // initial timeout is 1 seconds
     // tv.tv_usec = 0;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
                 //timeout = estimated_rtt + 4*dev_rtt; // set timeout
                 //timeout = timeout-send_time; // adjust for recv
                 // fprintf(stderr,"Time out:%f ",timeout);
-                fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
+                
                 //double sec, msec;
                 //msec = modf(timeout,&sec);
                 //msec = msec*1000000;//convert sec to usec to feed into tv_usec
@@ -267,6 +267,7 @@ int main(int argc, char *argv[])
                     t = clock() - t;
                     double time_taken = ((double)t)/CLOCKS_PER_SEC;
                     PRRT = 0.5 * PRRT + 0.5 * time_taken;
+                    fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
                     if (sentID == 1)
                     {
