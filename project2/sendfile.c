@@ -199,19 +199,19 @@ int main(int argc, char *argv[])
             t = clock();
             //time_t end_time, pack_end_time;
             // time_t end_time;
-            send_cnt = 0;
-            while (send_cnt < packet_size)
-            {
-                tmp_cnt = sendto(sockfd, (const char *)packet_msg, packet_size, 0, (const struct sockaddr *) &s_in, sizeof(s_in));
-                if(tmp_cnt <= 0){
-                    printf("Error sending!\n");
-                    return 1;
-                }
-                send_cnt += tmp_cnt;
-            }
+            // send_cnt = 0;
+            // while (send_cnt < packet_size)
+            // {
+            tmp_cnt = sendto(sockfd, (const char *)packet_msg, packet_size, 0, (const struct sockaddr *) &s_in, sizeof(s_in));
+            //     if(tmp_cnt <= 0){
+            //         printf("Error sending!\n");
+            //         return 1;
+            //     }
+            //     send_cnt += tmp_cnt;
+            // }
             //pack_end_time = getCurrentTime();
             //double send_time = (double)getTimeElapsed(pack_end_time,start_time);
-            total_bytes_sent += send_cnt;
+            // total_bytes_sent += send_cnt;
             printf("[send data] %ld %d\n", total_bytes-bytes_read, bytes_read);
 
             tv.tv_sec = 2 * (int)PRRT; // initial timeout is 1 seconds
@@ -266,6 +266,7 @@ int main(int argc, char *argv[])
 
                     t = clock() - t;
                     double time_taken = ((double)t)/CLOCKS_PER_SEC;
+                    printf("Time Taken %d", time_taken);
                     PRRT = 0.5 * PRRT + 0.5 * time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
