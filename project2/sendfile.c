@@ -225,9 +225,7 @@ int main(int argc, char *argv[])
             if (bytes_rcvd > 0)
             {
                 // end_time = getCurrentTime();
-                t = clock() - t;
-                double time_taken = ((double)t)/CLOCKS_PER_SEC;
-                PRRT = 0.5 * PRRT + 0.5 * time_taken;
+               
                 
                 //estimated_rtt  = 0.875*(double)estimated_rtt + 0.125*(double)getTimeElapsed(end_time,start_time); //estimated_rtt  for smoothing
                 //dev_rtt  = 0.75*dev_rtt + 0.25*(abs(estimated_rtt - (double)getTimeElapsed(end_time,start_time))); //calculate deviations
@@ -265,6 +263,11 @@ int main(int argc, char *argv[])
                     //fprintf(stderr,"The new timeout is:%ld\n",cumulative_timeout);
                     //set new timeout value
                     //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
+
+                    t = clock() - t;
+                    double time_taken = ((double)t)/CLOCKS_PER_SEC;
+                    PRRT = 0.5 * PRRT + 0.5 * time_taken;
+
                     if (sentID == 1)
                     {
                         sentID = 0;
