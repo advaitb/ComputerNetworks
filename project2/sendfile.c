@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
                     begin = clock();
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
                     printf("Time Taken %f\n", time_taken);
-                    PRRT = 0.7 * PRRT + 0.3 * time_taken;
+                    PRRT = 0.7 * PRRT + 0.3 * (1000)*time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
 
                     if (sentID == 1)
