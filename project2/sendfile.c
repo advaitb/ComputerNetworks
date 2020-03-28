@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			default:
-				fprintf(stderr, "Missing both host_ip:port and dir/fname");
+				fprintf(stderr, "Invalid option\n");
 				exit(EXIT_FAILURE);
 		}
 	}

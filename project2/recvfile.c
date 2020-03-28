@@ -59,7 +59,24 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    char* port = argv[2];
+    char* port; //= argv[2]; 
+    int opt; 
+    for(opt = 1; opt < argc; opt++){
+	if(argv[opt][0] == '-'){
+		switch(argv[opt][1]){
+			case 'p':
+				if((argv[opt+1][0] != '-') && (argv[opt+1][0] != ' ')) port = argv[opt+1];
+				else{
+					 fprintf(stderr, "Missing port\n");
+					 exit(EXIT_FAILURE);
+				}
+				break;
+			default:
+				fprintf(stderr, "Invalid option\n");
+				exit(EXIT_FAILURE);
+		}
+	}
+     }	
     unsigned short server_port = atoi(port);
     struct sockaddr_in sin, addr;
     int sockfd;
