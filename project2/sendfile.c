@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
 
     // double PRRT = 10;
     struct timeval tv;
-    tv.tv_sec = 3; // initial timeout is 1 seconds
-    tv.tv_usec = 0;
+    tv.tv_sec = 0; // initial timeout is 1 seconds
+    tv.tv_usec = 100000;
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
     // clock_t begin = clock();
     // printf("clock begin %f\n", (double)begin);
