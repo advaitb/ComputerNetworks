@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
 
             // In this case an ACK is still sent
             *(short*) (ackmsg+1) = htons(lastID);
-            char csum_ack = csum(ackmsg, 2);
-            memcpy(ack_packet, ackmsg, 2);
+            char csum_ack = csum(ackmsg, 3);
+            memcpy(ack_packet, ackmsg, 3);
             memcpy(ack_packet+3, &csum_ack, 1);
             int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
             if (sendcount <= 0)
@@ -184,8 +184,8 @@ int main(int argc, char *argv[])
 
             // In this case an ACK is still sent
             *(short*) (ackmsg+1) = htons(lastID);
-            char csum_ack = csum(ackmsg, 2);
-            memcpy(ack_packet, ackmsg, 2);
+            char csum_ack = csum(ackmsg, 3);
+            memcpy(ack_packet, ackmsg, 3);
             memcpy(ack_packet+3, &csum_ack, 1);
             int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
             if (sendcount <= 0)
@@ -240,8 +240,8 @@ int main(int argc, char *argv[])
 
         // Send Ack
         *(short*) (ackmsg+1) = htons(lastID);
-        char csum_ack = csum(ackmsg, 2);
-        memcpy(ack_packet, ackmsg, 2);
+        char csum_ack = csum(ackmsg, 3);
+        memcpy(ack_packet, ackmsg, 3);
         memcpy(ack_packet+3, &csum_ack, 1);
         int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)

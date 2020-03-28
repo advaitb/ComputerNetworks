@@ -249,9 +249,11 @@ int main(int argc, char *argv[])
                 //ntv.tv_usec = msec;
                 //setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO, (const char*)&ntv, sizeof ntv );//recv timeout
 
-                char csum_ack = csum(rcv_buffer, 2);
-                if (csum_ack != rcv_buffer[2])
+                char csum_ack = csum(rcv_buffer, 3);
+                if (csum_ack != rcv_buffer[3])
                 {
+                    printf("CSUM: %d\n", csum_ack);
+                    printf("RCV BUFF 3: %d\n", rcv_buffer[3]);
                     printf("[recv corrupt packet]\n");
                     printf("Resending packet since ACK is corrupted\n");
                     continue; // If error detected, discard the packet
