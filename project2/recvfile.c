@@ -92,15 +92,15 @@ int main(int argc, char *argv[])
     tv.tv_usec = 0;
     
     int DATA_SIZE = 25000;
-    int HEADER_SIZE = 74;
+    int HEADER_SIZE = 75;
     int CRC_SIZE = 4;
 
     long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
-    short ack_size = 3;
+    short ack_size = 4;
     // long HEADER_LEN = 78;
 
     char* recv_buf;
-    char ackmsg[2];
+    char ackmsg[3];
     char* ack_packet;
     ack_packet = malloc(ack_size);
     char dir[50];
@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
 
     ackmsg[0] = 1;
 
-    char lastID;
-    lastID = (char)1;
+    short lastID;
+    lastID = -1;
     int total_data = 0;
     // Receive all the packets
     while(1)
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
             free(recv_buf);
 
             // In this case an ACK is still sent
-            ackmsg[1] = lastID;
+            *(short*) ackmsg = htons(lastID);
             char csum_ack = csum(ackmsg, 2);
             memcpy(ack_packet, ackmsg, 2);
             memcpy(ack_packet+2, &csum_ack, 1);
@@ -163,10 +163,11 @@ int main(int argc, char *argv[])
         }
         
         // Check sequence number in stop & wait fashion
-        char recvID;
-        recvID = recv_buf[1];
-        msg_size = (short) ntohs(*(short *)(recv_buf+2));
+        short recvID;
+        recvID = (short) ntohs(*(short *)(recv_buf+1));
+        msg_size = (short) ntohs(*(short *)(recv_buf+3));
         
+        printf("receive ID %d, lastID %d\n", recvID, lastID);
 
         if (recvID != lastID)
         {
@@ -182,7 +183,7 @@ int main(int argc, char *argv[])
             printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
-            ackmsg[1] = lastID;
+            *(short*) ackmsg = htons(lastID);
             char csum_ack = csum(ackmsg, 2);
             memcpy(ack_packet, ackmsg, 2);
             memcpy(ack_packet+2, &csum_ack, 1);
@@ -238,7 +239,7 @@ int main(int argc, char *argv[])
         fclose(fp);
 
         // Send Ack
-        ackmsg[1] = lastID;
+        *(short*) ackmsg = htons(lastID);
         char csum_ack = csum(ackmsg, 2);
         memcpy(ack_packet, ackmsg, 2);
         memcpy(ack_packet+2, &csum_ack, 1);
