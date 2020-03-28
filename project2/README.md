@@ -27,7 +27,7 @@ The packet has three main components, namely:
 
 #### Adaptive Timeout:
 
-We implemented a smoothed adaptive timeout that is updated at the end of every iteration. The timeout is initialized with an arbitrary value and after every send and receive cycle the new RTT is calculated. The new timeout is set as the weighted sum of the most recent RTT and sum of previous RTTs is calculated. The assign the timeout value to the socket we use the SOCKOPT() method.
+We implemented a smoothed adaptive timeout that is updated at the end of every iteration. The timeout is initialized with an arbitrary value and after every send and receive cycle the new RTT is calculated. The new timeout is set as the weighted sum of the most recent RTT and sum of previous RTTs is calculated. To assign the timeout value to the socket we use the SOCKOPT() method.
 
 #### Tests:
 
