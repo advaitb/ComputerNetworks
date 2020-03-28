@@ -1,5 +1,5 @@
 
-
+Basic Outline:
 
 We have implemented a reliable file transport protocol using the stop and wait protocol. To ensure our program uses as low memory as possible the sender reads a single stream of data equivalent to the max data size that can be held by one packet and send it across to the receiver. The sender then waits for an ack from the receiver corresponding to the same packet id before reading the next stream from the file, if an ack corresponding to the packet id is not received for a given timeout we the sender retransmitts the packet again which is consistent with the stop and wait protocol.
 
