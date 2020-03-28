@@ -38,3 +38,5 @@ We test our implementation on cai (and clear) under various network disturbances
 2. Start receiver: ./recvfile -p [PORT]
 3. Start sender:   ./sendfile -r [HOST IP]:[PORT] -f [DIRECTORY/FILE]
 
+### Notes:
+* The recvfile will return (with exit code 0) after 100 seconds of not receiving any packets. Although it takes 100 seconds for it to temrinate, the file transferred is closed and can be accessed.
