@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
      * Packet Type: ACK or Data (1 Bit - 0:Data, 1: Ack)
      * Identifier: Stop and Wait (1 Bit) 
      * Packet Size: 2 Bytes short int
-     * Advertised Window: x
      * Directory: 50 Bytes
      * File name: 20 Bytes
      * Data: 1000 Bytes
@@ -109,34 +108,6 @@ int main(int argc, char *argv[])
 		}
 	}
      }	
-
-/*
-    int opt = 0;
-    while((opt = getopt(argc, argv, "r:f:")) != 1){
-	    switch(opt){
-		    case 'r':
-			    host_port = optarg;
-			    break;
-		    case 'f':
-			    dir_name  = optarg;
-			    break;
-		    case '?':
-			        if (optopt == 'r') {
-    					printf("\nMissing host_ip and port");
-  				} else if (optopt == 'f') {
-     					printf("\nMissing dir/filename");
-  				} else {	
-     					printf("\nInvalid option received");
-  				}
-  				break;
- 			}	
-     }	
-*/
-    //exit(1);
-     if (optind >= argc) {
-           fprintf(stderr, "Expected argument after options\n");
-           exit(EXIT_FAILURE);
-     }
 
     // char* rFlag = argv[1];
     //char* host_port = argv[2];
