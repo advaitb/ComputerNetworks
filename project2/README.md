@@ -1,6 +1,7 @@
 ### COMP 556: Project 2
 
 ##### Team:
+
 Shlok Singh Sobti (sss10)
 Tianyang Pan (tp36)
 Advait Balaji (ab114)
@@ -11,7 +12,12 @@ We have implemented a reliable file transport protocol using the stop and wait p
 
 ##### Packet structure:
 
-The packet has three main components, namely: data (MAX_DATA_SIZE = 32000 Bytes), header which contains packet id, directory name and file name (HEADER_SIZE = 74 Bytes);  and a 32 bit CRC code to ensure correctness (CRC_SIZE = 4 Bytes). The ack in contrast, uses 1 byte of checksum and 
+The packet has three main components, namely: data (MAX_DATA_SIZE = 32000 Bytes), header which contains packet id, directory name and file name (HEADER_SIZE = 74 Bytes); and a 32 bit CRC code to ensure correctness (CRC_SIZE = 4 Bytes). The ack in contrast, uses 1 byte of checksum and 2 Bytes for the packet id. 
+
+
+##### Tests:
+
+We test our implementation on cai (and clear) under various network disturbances like Drop, Delay, Duplicate, Mangle, and Reorder with varying values and our protocol produces correct output under any of the above conditions. The actual performance measures depend on the degree of perturbation.
 
 ##### Instructions to run:
 1. Compile: make
