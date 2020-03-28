@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     int total_bytes_sent = 0;
 
     double PRRT = 10;
-    double offset = 0;
+    double offset = 2;
     struct timeval tv;
     // tv.tv_sec = 3; // initial timeout is 1 seconds
     // tv.tv_usec = 0;
@@ -276,11 +276,11 @@ int main(int argc, char *argv[])
                     begin = clock();
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
                     printf("Time Taken %f\n", time_taken);
-                    PRRT = 0.3 * PRRT + 0.7 * time_taken;
+                    PRRT = 0.5 * PRRT + 0.5 * time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
                     printf("clock begin %f\n", (double)begin);
 
-                    offset = 0; // If successfully receive ACK, reset the offset
+                    offset = 2; // If successfully receive ACK, reset the offset
                     if (sentID == 1)
                     {
                         sentID = (char)0;
