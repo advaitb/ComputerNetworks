@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     ackmsg[0] = 1;
 
     char lastID;
-    lastID = (char)1;
+    lastID = 0;
     int total_data = 0;
     // Receive all the packets
     while(1)
@@ -168,9 +168,17 @@ int main(int argc, char *argv[])
         msg_size = (short) ntohs(*(short *)(recv_buf+2));
         
 
-        if (recvID != lastID)
+        if (recvID == lastID)
         {
-            lastID = recvID;
+            if (recvID == 0)
+            {
+                lastID = 1;
+            }
+            else if (recvID == 1)
+            {
+                lastID = 0;
+            }
+            
             total_data += msg_size;
             printf("[recv data] %d %u ACCEPTED\n", (total_data - msg_size), msg_size);
             
@@ -178,7 +186,15 @@ int main(int argc, char *argv[])
         else
         {
             free(recv_buf);
-            lastID = recvID;
+            // lastID = recvID;
+            if (recvID == 0)
+            {
+                lastID = 1;
+            }
+            else if (recvID == 1)
+            {
+                lastID = 0;
+            }
             printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent

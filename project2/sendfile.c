@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
                 char rcvID;
                 // rcvID = *(rcv_buffer+1);
                 rcvID = rcv_buffer[1];
-                if ((char)rcvID == (char)sentID)
+                if ((char)rcvID != (char)sentID)
                 {
                     //struct timeval ntv;
                     //ntv.tv_sec = cumulative_timeout;
