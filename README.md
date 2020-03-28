@@ -2,8 +2,8 @@
 
 ##### Team:
 
-Shlok Singh Sobti (sss10)
-Tianyang Pan (tp36)
+Shlok Singh Sobti (sss10)\
+Tianyang Pan (tp36)\
 Advait Balaji (ab114)
 
 ##### Basic Outline:
@@ -12,19 +12,22 @@ We have implemented a reliable file transport protocol using the stop and wait p
 
 ##### Packet structure:
 
-The packet has three main components, namely: \
-Header (75 Bytes) \
-Data (25,000 Bytes) \
-CRC Code (4 Bytes) \
+The packet has three main components, namely: 
 
+* Header (75 Bytes)
+  * ACK or Frame Distinguishing Flag (1 Byte)
+  * Frame/Packet ID (2 Bytes)
+  * Packet Size (2 Bytes)
+  * File Directory (50 Bytes)
+  * File Name (20 Bytes)
+* Data (25,000 Bytes)
+* CRC Code / Checkum (4 Bytes or 1 Byte)
+  * The main frame uses a CRC code, while the ack frame uses a checksum scheme to check for corrupted packets.
 
-
-data (MAX_DATA_SIZE = 25000 Bytes), header which contains packet id, directory name and file name (HEADER_SIZE = 74 Bytes); and a 32 bit CRC code to ensure correctness (CRC_SIZE = 4 Bytes). The ack in contrast, uses 1 byte of checksum and 2 Bytes for the packet id. 
 
 ##### Adaptive Timeout:
 
-We also use an adaptive timeout that is updated at the end of every iteration. The timeout is initialized at 20 secs and after every send and receive cycle the new RTT is calculated and a weighted sum of the most recent RTT and sum of previous RTTs is calculated. The timeout is then adjusted to ascertain the receive timeout and sockopt for recvtime is set with the said value
-
+We implemented a smoothed adaptive timeout that is updated at the end of every iteration. The timeout is initialized with an arbitrary value and after every send and receive cycle the new RTT is calculated. The new timeout is set as the weighted sum of the most recent RTT and sum of previous RTTs is calculated. The assign the timeout value to the socket we use the SOCKOPT() method.
 
 ##### Tests:
 
