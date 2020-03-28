@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
         
         printf("receive ID %d, lastID %d\n", recvID, lastID);
 
-        if (recvID != lastID)
+        if (recvID = lastID+1)
         {
             lastID = recvID;
             total_data += msg_size;
