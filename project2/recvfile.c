@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         recvID = (short) ntohs(*(short *)(recv_buf+1));
         msg_size = (short) ntohs(*(short *)(recv_buf+3));
         
-        printf("receive ID %d, lastID %d\n", recvID, lastID);
+        // printf("receive ID %d, lastID %d\n", recvID, lastID);
 
         if (recvID == lastID+1)
         {
