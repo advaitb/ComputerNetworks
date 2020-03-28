@@ -78,17 +78,46 @@ int main(int argc, char *argv[])
      */
 
     // Handle Command Line Inputs
-    if (argc!=5)
-    {
-        printf("Incorrect number of arguments!\n");
-        exit(1);
-    }
-    
+    //if (argc!=5)
+    //{
+    //    printf("Incorrect number of arguments!\n");
+    //    exit(1);
+    //}
+    char* host_port;
+    char* dir_name;
+
+    int opt = 0;
+    while((opt = getopt(argc, argv, "r:f:")) != 1){
+	    switch(opt){
+		    case 'r':
+			    host_port = optarg;
+			    break;
+		    case 'f':
+			    dir_name  = optarg;
+			    break;
+		    case '?':
+			        if (optopt == 'r') {
+    					printf("\nMissing host_ip and port");
+  				} else if (optopt == 'f') {
+     					printf("\nMissing dir/filename");
+  				} else {	
+     					printf("\nInvalid option received");
+  				}
+  				break;
+ 			}	
+     }	
+
+    //exit(1);
+     if (optind >= argc) {
+           fprintf(stderr, "Expected argument after options\n");
+           exit(EXIT_FAILURE);
+     }
+
     // char* rFlag = argv[1];
-    char* host_port = argv[2];
+    //char* host_port = argv[2];
     // char* fFlag = argv[3];
     
-    char* dir_name = argv[4];
+    //char* dir_name = argv[4];
     char fopen_file[sizeof(dir_name)];
     strcpy(fopen_file, dir_name);
 
