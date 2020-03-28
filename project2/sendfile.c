@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
     // tv.tv_usec = 0;
     // setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
     clock_t begin = clock();
+    printf("clock begin %f\n", (double)begin);
     while ((bytes_read = fread(file_data, 1, DATA_SIZE, fp)) > 0)
     {
         memset(packet_msg, 0, packet_size);
@@ -220,8 +221,11 @@ int main(int argc, char *argv[])
             setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
 
 
+            printf("clock begin %f\n", (double)begin);
 
+            printf("clock  %f\n", (double)clock());
             int bytes_rcvd = recvfrom(sockfd, rcv_buffer, ack_size, MSG_WAITALL, (struct sockaddr *)&s_in, &addr_len);
+            printf("clock  %f\n", (double)clock());
 
             if (bytes_rcvd > 0)
             {
@@ -266,12 +270,14 @@ int main(int argc, char *argv[])
                     //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ntv, sizeof ntv); // Set the timeout value
 
                     clock_t end = clock();
+                    printf("clock end %f\n", (double)end);
                     double time_taken = (double)(end-begin) / CLOCKS_PER_SEC;
                     begin = clock();
                     // double time_taken = ((double)t)/CLOCKS_PER_SEC;
-                    printf("Time Taken %f\n", time_taken);
+                    printf("Time Taken %f\n", 1000 * time_taken);
                     PRRT = 0.7 * PRRT + 0.3 * (1000)*time_taken;
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
+                    printf("clock begin %f\n", (double)begin);
 
                     if (sentID == 1)
                     {
