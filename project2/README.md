@@ -11,7 +11,7 @@ We have implemented a reliable file transport protocol using the stop and wait p
 
 ##### Packet structure:
 
-The packet has three main components, namely: data (MAX_DATA_SIZE = 32000 Bytes), header which contains packet id, directory name and file name (HEADER_SIZE = 74 Bytes);  and a 32 bit CRC code to ensure correctness (CRC_SIZE = 4 Bytes). The ack in contrast uses 1 byte of checksum and 
+The packet has three main components, namely: data (MAX_DATA_SIZE = 32000 Bytes), header which contains packet id, directory name and file name (HEADER_SIZE = 74 Bytes);  and a 32 bit CRC code to ensure correctness (CRC_SIZE = 4 Bytes). The ack in contrast, uses 1 byte of checksum and 
 
 ##### Instructions to run:
 1. Compile: make
