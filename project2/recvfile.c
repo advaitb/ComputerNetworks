@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         else
         {
             free(recv_buf);
-            lastID = recvID;
+            // lastID = recvID;
             printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
