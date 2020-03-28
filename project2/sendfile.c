@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 
 
     int DATA_SIZE = 25000;
-    int HEADER_SIZE = 74;
+    int HEADER_SIZE = 75;
     int CRC_SIZE = 4;
     long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
 
@@ -157,7 +157,8 @@ int main(int argc, char *argv[])
     char name[20];
     strncpy(name, fileName, 20);
 
-    char sentID = (char)0;
+    // char sentID = (char)0;
+    short sentID = 0;
     int total_bytes_sent = 0;
 
     double PRRT = 10;
@@ -173,13 +174,13 @@ int main(int argc, char *argv[])
         total_bytes += bytes_read;
       
         memset(packet_msg, 0, 1);
-        memset(packet_msg+1, sentID, 1);
+        // memset(packet_msg+1, sentID, 2);
         // packet_msg[1] = (char)0;
-        
-        *(short*)(packet_msg+2) = htons(bytes_read);
-        memcpy(packet_msg+4, directory, 50); // Directory information
-        memcpy(packet_msg+54, name, 20); // File Name
-        memcpy(packet_msg+74, file_data, DATA_SIZE); // Actual Data
+        *(short*)(packet_msg+1) = htons(sentID);
+        *(short*)(packet_msg+3) = htons(bytes_read);
+        memcpy(packet_msg+5, directory, 50); // Directory information
+        memcpy(packet_msg+55, name, 20); // File Name
+        memcpy(packet_msg+75, file_data, DATA_SIZE); // Actual Data
 
         memset(file_data, 0, DATA_SIZE);
 
@@ -257,10 +258,12 @@ int main(int argc, char *argv[])
                 }
 
                 // printf("Ack received!\n");
-                char rcvID;
+                short rcvID;
+                rcvID = (short) ntohs(*(short *)(rcv_buffer+1));
+
                 // rcvID = *(rcv_buffer+1);
-                rcvID = rcv_buffer[1];
-                if ((char)rcvID == (char)sentID)
+                // rcvID = rcv_buffer[1];
+                if (rcvID == sentID)
                 {
                     //struct timeval ntv;
                     //ntv.tv_sec = cumulative_timeout;
@@ -279,14 +282,7 @@ int main(int argc, char *argv[])
                     fprintf(stderr,"This is the adaptive timeout: %f\n",PRRT);
                     printf("clock begin %f\n", (double)begin);
 
-                    if (sentID == 1)
-                    {
-                        sentID = (char)0;
-                    }
-                    else if (sentID == 0)
-                    {
-                        sentID = (char)1;
-                    } 
+                    sentID += 1;
                     break;
                 }
                 else
