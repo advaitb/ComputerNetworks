@@ -20,7 +20,6 @@ unsigned int crc32b(char *message, long msg_len) {
 
     i = 0;
     crc = 0xFFFFFFFF;
-    // while (message[i] != 0) {
     while (i < msg_len) {
         if (message[i] == 0)
         {
@@ -60,7 +59,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    // char* pFlag = argv[1];
     char* port = argv[2];
     unsigned short server_port = atoi(port);
     struct sockaddr_in sin, addr;
@@ -94,10 +92,8 @@ int main(int argc, char *argv[])
     int DATA_SIZE = 25000;
     int HEADER_SIZE = 75;
     int CRC_SIZE = 4;
-
     long packet_size = DATA_SIZE + HEADER_SIZE + CRC_SIZE;
     short ack_size = 4;
-    // long HEADER_LEN = 78;
 
     char* recv_buf;
     char ackmsg[3];
@@ -105,17 +101,15 @@ int main(int argc, char *argv[])
     ack_packet = malloc(ack_size);
     char dir[50];
     char fileName[20];
-    // char recv_msg[packet_size - HEADER_LEN];
     short msg_size;
     int packet_count = 0;
-
     FILE *fp;
 
     ackmsg[0] = 1;
-
     short lastID;
     lastID = -1;
     int total_data = 0;
+
     // Receive all the packets
     while(1)
     {
@@ -123,27 +117,11 @@ int main(int argc, char *argv[])
         int count = recvfrom(sockfd, recv_buf, packet_size, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
         if (count < 0)
             break;
-        // int tempcount = 0;
-        // while (count < packet_size)
-        // {
-        //     tempcount = recvfrom(sockfd, recv_buf+count, sizeof(recv_buf)-count, MSG_WAITALL, (struct sockaddr *)&addr, &addr_len);
-        //     if (tempcount == -1)
-        //         continue;
-        //     count += tempcount;
-        // }
-
-        // char* mangle = "aa";
-        // unsigned int crc_correct = crc32b(recv_buf, DATA_SIZE + HEADER_SIZE);
-        // printf("crc before mangle %d\n", crc_correct);
-        // memcpy(recv_buf+400, mangle, 2);
 
         // Check if crc32b's are the same
         unsigned int crc = crc32b(recv_buf, packet_size - CRC_SIZE);
         unsigned int crc_send = *(unsigned int *)(recv_buf + packet_size - CRC_SIZE);
-        // unsigned int crc = crc32b(recv_buf, packet_size);
-        // printf("crc %d\n", crc);
         if (crc != crc_send)
-        // if (crc != 0)
         {
             printf("[recv corrupt packet]\n");
             free(recv_buf);
@@ -167,8 +145,6 @@ int main(int argc, char *argv[])
         recvID = (short) ntohs(*(short *)(recv_buf+1));
         msg_size = (short) ntohs(*(short *)(recv_buf+3));
         
-        printf("receive ID %d, lastID %d\n", recvID, lastID);
-
         if (recvID == lastID+1)
         {
             lastID = recvID;
@@ -179,7 +155,6 @@ int main(int argc, char *argv[])
         else
         {
             free(recv_buf);
-            // lastID = recvID;
             printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
@@ -200,20 +175,18 @@ int main(int argc, char *argv[])
         if (packet_count == 1)
             setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); // Set the timeout value
 
-        // Copy the packet to the message
-        // memcpy(recv_msg, &recv_buf, packet_size);
-        // strcpy(dir, "/home/advait/COMP556/project2/");
+        // Read data from the packet
         memcpy(dir, recv_buf+5, 50);
-        // msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
         memcpy(fileName, recv_buf+55, 20);
         memcpy(recv_msg, recv_buf+75, msg_size);
-        // Save message to the file
+
+        // Save to the file
         char filePath[70];
         strcpy(filePath, dir);
         strcat(filePath, "/");
-        strcat(filePath, fileName); //fileName
+        strcat(filePath, fileName);
         strcat(filePath, ".recv");
         char* option = "a";
         if (packet_count == 1)
@@ -221,12 +194,10 @@ int main(int argc, char *argv[])
             // file doesn't exist
             option = "w";
         }
-         // printf("file path %s, option %s\n", filePath, option);
         fp = fopen(filePath, option);
 
         if (!fp)
         {
-            // printf("Unable to open file.\n");
             perror("Unable to open file");
             return 1;
         }
@@ -235,7 +206,6 @@ int main(int argc, char *argv[])
             perror("Write to file error");
             exit(1);
         }
-         // close file
         fclose(fp);
 
         // Send Ack
