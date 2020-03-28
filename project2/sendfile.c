@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     unsigned short port = atoi(portc);
     int sockfd;
-    short ack_size = 3;
+    short ack_size = 4;
     char rcv_buffer[ack_size];
 
     // unsigned int server_address;
