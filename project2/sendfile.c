@@ -14,7 +14,7 @@
 #define MAX_FILE_SIZE 30000000
 #define MSB_MASK 0xFFFF0000
 #define LSB_MASK 0xFFFF
-
+//comment
 unsigned int crc32b(char *message, long msg_len) {
     int i, j;
     unsigned int byte, crc, mask;
