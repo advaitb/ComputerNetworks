@@ -78,14 +78,39 @@ int main(int argc, char *argv[])
      */
 
     // Handle Command Line Inputs
-    //if (argc!=5)
-    //{
-    //    printf("Incorrect number of arguments!\n");
-    //    exit(1);
-    //}
+    if (argc!=5)
+    {
+        printf("Incorrect number of arguments!\n");
+        exit(1);
+    }
     char* host_port;
     char* dir_name;
+    int opt; 
+    for(opt = 1; opt < argc; opt++){
+	if(argv[opt][0] == '-'){
+		switch(argv[opt][1]){
+			case 'r':
+				if((argv[opt+1][0] != '-') && (argv[opt+1][0] != ' ') && (strchr(argv[opt+1],':') != NULL)) host_port = argv[opt+1];
+				else{
+					 fprintf(stderr, "Missing host_ip:port\n");
+					 exit(EXIT_FAILURE);
+				}
+				break;
+			case 'f':	
+				if((argv[opt+1][0] != '-') && (argv[opt+1][0] != ' ') && (strchr(argv[opt+1],'/')!= NULL)) dir_name = argv[opt+1];
+				else{
+					 fprintf(stderr, "Missing dir/fname\n");
+					 exit(EXIT_FAILURE);
+				}
+				break;
+			default:
+				fprintf(stderr, "Missing both host_ip:port and dir/fname");
+				exit(EXIT_FAILURE);
+		}
+	}
+     }	
 
+/*
     int opt = 0;
     while((opt = getopt(argc, argv, "r:f:")) != 1){
 	    switch(opt){
@@ -106,7 +131,7 @@ int main(int argc, char *argv[])
   				break;
  			}	
      }	
-
+*/
     //exit(1);
      if (optind >= argc) {
            fprintf(stderr, "Expected argument after options\n");
