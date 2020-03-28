@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
             }
             //pack_end_time = getCurrentTime();
             //double send_time = (double)getTimeElapsed(pack_end_time,start_time);
-            // total_bytes_sent += send_cnt;
+            total_bytes_sent += send_cnt;
             printf("[send data] %ld %d\n", total_bytes-bytes_read, bytes_read);
 
             tv.tv_sec = 2 * (int)PRRT; // initial timeout is 1 seconds
