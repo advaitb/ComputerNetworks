@@ -263,6 +263,7 @@ int main(int argc, char *argv[])
 
                 // rcvID = *(rcv_buffer+1);
                 // rcvID = rcv_buffer[1];
+                printf("Sent ID: %i   Rcvd ID: %i\n", sentID, rcvID);
                 if (rcvID == sentID)
                 {
                     //struct timeval ntv;
