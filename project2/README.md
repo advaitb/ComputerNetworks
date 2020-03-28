@@ -1,3 +1,5 @@
+### COMP 556: Project 2
+
 ##### Team:
 Shlok Singh Sobti (sss10)
 Tianyang Pan (tp36)
