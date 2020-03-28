@@ -149,10 +149,10 @@ int main(int argc, char *argv[])
             free(recv_buf);
 
             // In this case an ACK is still sent
-            *(short*) ackmsg = htons(lastID);
+            *(short*) (ackmsg+1) = htons(lastID);
             char csum_ack = csum(ackmsg, 2);
             memcpy(ack_packet, ackmsg, 2);
-            memcpy(ack_packet+2, &csum_ack, 1);
+            memcpy(ack_packet+3, &csum_ack, 1);
             int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
             if (sendcount <= 0)
             {
@@ -183,10 +183,10 @@ int main(int argc, char *argv[])
             printf("[recv data] %d %u IGNORED\n", (total_data - msg_size), msg_size);
 
             // In this case an ACK is still sent
-            *(short*) ackmsg = htons(lastID);
+            *(short*) (ackmsg+1) = htons(lastID);
             char csum_ack = csum(ackmsg, 2);
             memcpy(ack_packet, ackmsg, 2);
-            memcpy(ack_packet+2, &csum_ack, 1);
+            memcpy(ack_packet+3, &csum_ack, 1);
             int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
             if (sendcount <= 0)
             {
@@ -203,12 +203,12 @@ int main(int argc, char *argv[])
         // Copy the packet to the message
         // memcpy(recv_msg, &recv_buf, packet_size);
         // strcpy(dir, "/home/advait/COMP556/project2/");
-        memcpy(dir, recv_buf+4, 50);
+        memcpy(dir, recv_buf+5, 50);
         // msg_size = (short) ntohs(*(short *)(recv_buf+2));
 
         char recv_msg[msg_size];
-        memcpy(fileName, recv_buf+54, 20);
-        memcpy(recv_msg, recv_buf+74, msg_size);
+        memcpy(fileName, recv_buf+55, 20);
+        memcpy(recv_msg, recv_buf+75, msg_size);
         // Save message to the file
         char filePath[70];
         strcpy(filePath, dir);
@@ -239,10 +239,10 @@ int main(int argc, char *argv[])
         fclose(fp);
 
         // Send Ack
-        *(short*) ackmsg = htons(lastID);
+        *(short*) (ackmsg+1) = htons(lastID);
         char csum_ack = csum(ackmsg, 2);
         memcpy(ack_packet, ackmsg, 2);
-        memcpy(ack_packet+2, &csum_ack, 1);
+        memcpy(ack_packet+3, &csum_ack, 1);
         int sendcount = sendto(sockfd, (const char *)ack_packet, ack_size, MSG_CONFIRM, (const struct sockaddr *) &addr, sizeof(addr));
         if (sendcount <= 0)
         {
