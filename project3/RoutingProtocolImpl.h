@@ -34,9 +34,18 @@ class RoutingProtocolImpl : public RoutingProtocol {
     // special port number of SPECIAL_PORT (see global.h) to indicate
     // that the packet is generated locally and not received from 
     // a neighbor router.
+    
+    // Alarms fired!
+    void pingTime();//time for pinging neighbors
+    void pongTime();//reply to ping to set rtt
+    void lsTime();//lstable update
+    void dvTime();//dvtable update
 
  private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
+    unsigned short num_ports;
+    unsigned short router_id;
+    eProtocolType protocol;
 };
 
 #endif

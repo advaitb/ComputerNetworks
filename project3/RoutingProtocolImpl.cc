@@ -11,7 +11,11 @@ RoutingProtocolImpl::~RoutingProtocolImpl() {
 }
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
-  // add your own code
+  // set private variables
+  this->num_ports = num_ports;
+  this->router_id = router_id;
+  this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
+
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
