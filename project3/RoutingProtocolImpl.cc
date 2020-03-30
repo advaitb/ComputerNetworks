@@ -3,7 +3,6 @@
 
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
   sys = n;
-  // add your own code
 }
 
 RoutingProtocolImpl::~RoutingProtocolImpl() {
@@ -15,19 +14,30 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   this->num_ports = num_ports;
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
+  
 
+  if(this->protocol == P_LS){
+  //TODO
+  
+  }
+  else if(this->protocol ==  P_DV ){
+  //TODO
+  
+  }
+  else{
+	fprintf(stderr, "Not able to recognize protocol, please choose between LS and DV\n");
+	exit(EXIT_FAILURE);
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
-  // add your own code
   char* alarmtype = reinterpret_cast<char*>(data);
-  if (strcmp(alarmtype,"ping") == 0) pingTime();
-  else if(strcmp(alarmtype, "pong") == 0) pongTime();
-  else if(strcmp(alarmtype, "distancevector") == 0) dvTime();
-  else if(strcmp(alarmtype, "linkstatepacket") == 0) lsTime();
-  else if(strcmp(alarmtype, "update") == 0) updateTime();
+  if (strcmp(alarmtype,this->ping) == 0) pingTime();
+  else if(strcmp(alarmtype, this->pong) == 0) pongTime();
+  else if(strcmp(alarmtype, this->distancevector) == 0) dvTime();
+  else if(strcmp(alarmtype, this->linkstate) == 0) lsTime();
+  else if(strcmp(alarmtype, this->update) == 0) updateTime();
   else {
-	fprintf(stderr, "Not able to recognize %s alarm", alarmtype);
+	fprintf(stderr, "Not able to recognize %s alarmi\n", alarmtype);
 	exit(EXIT_FAILURE);
   }
 }
@@ -37,5 +47,26 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
   // need to free recv after processing
   // need to check what kind of packet has been received - there are 5 different kinds of packets!
 }
+
+void RoutingProtocolImpl::pingTime(){
+	//TODO
+}
+
+void RoutingProtocolImpl::pongTime(){
+	//TODO
+}
+
+void RoutingProtocolImpl::lsTime(){
+	//TODO
+}
+
+void RoutiingProtocolImpl::dvTime(){
+	//TODO
+}
+
+void RoutingProtocolImpl::updateTime(){
+	//TODO
+}
+
 
 // add more of your own code
