@@ -3,6 +3,15 @@
 
 #include "RoutingProtocol.h"
 
+#define pingalarm 10000  //10s
+#define lsalarm 30000    //30s
+#define dvalarm 30000    //30s
+#define checkalarm 1000  //1s
+#define pongto 15000     //15s
+#define lsto 45000       //45s
+#define dvto 45000       //45s
+
+
 class RoutingProtocolImpl : public RoutingProtocol {
   public:
     RoutingProtocolImpl(Node *n);
