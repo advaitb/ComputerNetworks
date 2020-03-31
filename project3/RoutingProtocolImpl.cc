@@ -20,7 +20,7 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
   
   setAlarmType(this, 0, reinterpret_cast<void*>(this->ping));
-  setAlarmType(this, checkalarm, reinterpret_cast<void*>(this->checkalarm)); 
+  setAlarmType(this, checkalarm, reinterpret_cast<void*>(this->update)); 
   
   
   if(this->protocol == P_LS){
