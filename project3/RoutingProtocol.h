@@ -6,6 +6,7 @@
 class Node;
 
 class RoutingProtocol {
+  
   protected:
     Node *sys;
 

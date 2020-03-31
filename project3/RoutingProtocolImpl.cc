@@ -1,16 +1,19 @@
 #include "RoutingProtocolImpl.h"
 #include <string.h>
 
-void RoutingProtocolImpl::setAlarmType(RoutingProtocol *r, unsigned int duration, void *d){
-	sys->set_alarm(r,duration,d);
-}
-
+// init node
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
   sys = n;
 }
 
+// deconstructor
 RoutingProtocolImpl::~RoutingProtocolImpl() {
   // add your own code (if needed)
+}
+
+// set the alarm
+void RoutingProtocolImpl::setAlarmType(RoutingProtocol *r, unsigned int duration, void *d){
+	sys->set_alarm(r,duration,d);
 }
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
@@ -19,8 +22,8 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
   
-  setAlarmType(this, 0, reinterpret_cast<void*>(this->ping));
-  setAlarmType(this, checkalarm, reinterpret_cast<void*>(this->update)); 
+  setAlarmType(this, 0, (void*)this->ping);
+  setAlarmType(this, checkalarm, (void*)this->update); 
   
   
   if(this->protocol == P_LS){
@@ -34,6 +37,7 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   else{
 	fprintf(stderr, "Not able to recognize protocol, please choose between LS and DV\n");
 	exit(EXIT_FAILURE);
+  }
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
@@ -62,7 +66,7 @@ void RoutingProtocolImpl::lsTime(){
 	//TODO
 }
 
-void RoutiingProtocolImpl::dvTime(){
+void RoutingProtocolImpl::dvTime(){
 	//TODO
 }
 

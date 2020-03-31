@@ -46,10 +46,11 @@ class RoutingProtocolImpl : public RoutingProtocol {
     
     // Alarms fired!
     void pingTime();//time for pinging neighbors
-    void pongTime();//reply to ping to set rtt
+    void updateTime();//update time
     void lsTime();//lstable update
-    void dvTime();//dvtable update
-
+    void dvTime();//dvtable update 
+    
+    void setAlarmType(RoutingProtocol *r, unsigned int duration, void *d);//sys->set_alarm
  private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
     unsigned short num_ports;
