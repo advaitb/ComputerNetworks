@@ -58,10 +58,6 @@ void RoutingProtocolImpl::pingTime(){
 	//TODO
 }
 
-void RoutingProtocolImpl::pongTime(){
-	//TODO
-}
-
 void RoutingProtocolImpl::lsTime(){
 	//TODO
 }
