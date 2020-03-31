@@ -56,7 +56,6 @@ class RoutingProtocolImpl : public RoutingProtocol {
     unsigned short router_id;
     eProtocolType protocol;
     const char* ping = "ping";
-    const char* pong = "pong";
     const char* distancevector = "distancevector";
     const char* linkstate = "linkstate";
     const char* update = "update";
