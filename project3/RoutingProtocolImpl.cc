@@ -1,6 +1,10 @@
 #include "RoutingProtocolImpl.h"
 #include <string.h>
 
+void RoutingProtocolImpl::setAlarmType(RoutingProtocol *r, unsigned int duration, void *d){
+	sys->set_alarm(r,duration,d);
+}
+
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
   sys = n;
 }
@@ -15,7 +19,10 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
   
-
+  setAlarmType(this, 0, reinterpret_cast<void*>(this->ping));
+  setAlarmType(this, checkalarm, reinterpret_cast<void*>(this->checkalarm)); 
+  
+  
   if(this->protocol == P_LS){
   //TODO
   
@@ -37,7 +44,7 @@ void RoutingProtocolImpl::handle_alarm(void *data) {
   else if(strcmp(alarmtype, this->linkstate) == 0) lsTime();
   else if(strcmp(alarmtype, this->update) == 0) updateTime();
   else {
-	fprintf(stderr, "Not able to recognize %s alarmi\n", alarmtype);
+	fprintf(stderr, "Not able to recognize %s alarm\n", alarmtype);
 	exit(EXIT_FAILURE);
   }
 }
