@@ -2,6 +2,7 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
+#include "Node.h"
 
 #define pingalarm 10000  //10s
 #define lsalarm 30000    //30s

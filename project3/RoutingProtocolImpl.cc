@@ -12,7 +12,7 @@ RoutingProtocolImpl::~RoutingProtocolImpl() {
 }
 
 // set the alarm
-void RoutingProtocolImpl::setAlarmType(RoutingProtocol *r, unsigned int duration, void *d){
+void RoutingProtocolImpl::setAlarmType( RoutingProtocol *r, unsigned int duration, void *d){
 	sys->set_alarm(r,duration,d);
 }
 
@@ -22,9 +22,9 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
   
+  
   setAlarmType(this, 0, (void*)this->ping);
   setAlarmType(this, checkalarm, (void*)this->update); 
-  
   
   if(this->protocol == P_LS){
   //TODO
