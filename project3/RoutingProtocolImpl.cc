@@ -28,10 +28,11 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   
   if(this->protocol == P_LS){
   //TODO
-  
+   LS_table(this->router_id); 
   }
   else if(this->protocol ==  P_DV ){
   //TODO
+  DV_table(this->router_id);
   
   }
   else{
