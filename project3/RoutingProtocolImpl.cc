@@ -1,5 +1,7 @@
 #include "RoutingProtocolImpl.h"
 #include <string.h>
+#include "DV_Protocol.h"
+#include "LS_Protocol.h"
 
 // init node
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
@@ -18,26 +20,29 @@ void RoutingProtocolImpl::setAlarmType( RoutingProtocol *r, unsigned int duratio
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
   // set private variables
+  
+  if( protocol_type != P_LS || protocol_type != P_DV) {
+	fprintf(stderr, "Incorrect protocol initialization\n");
+	exit(EXIT_FAILURE); 
+  }
+
   this->num_ports = num_ports;
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
   
   
-  setAlarmType(this, 0, (void*)this->ping);
+  setAlarmType(this, 0, (void*)this->ping); //initialize ping
   setAlarmType(this, checkalarm, (void*)this->update); 
   
-  if(this->protocol == P_LS){
-  //TODO
-   LS_table(this->router_id); 
-  }
-  else if(this->protocol ==  P_DV ){
-  //TODO
-  DV_table(this->router_id);
-  
-  }
-  else{
-	fprintf(stderr, "Not able to recognize protocol, please choose between LS and DV\n");
-	exit(EXIT_FAILURE);
+  switch(this->protocol){
+	case P_LS:
+		ls->setRouterID(this->router_id);
+		setAlarmType(this, lsalarm, (void*)this->linkstate);
+		break;
+	case P_DV:
+		dv->setRouterID(this->router_id);
+		setAlarmType(this, dvalarm, (void*)this->distancevector); 
+		break;
   }
 }
 

@@ -3,6 +3,8 @@
 
 #include "RoutingProtocol.h"
 #include "Node.h"
+#include "LS_Protocol.h"
+#include "DV_Protocol.h"
 
 #define pingalarm 10000  //10s
 #define lsalarm 30000    //30s
@@ -52,7 +54,10 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void dvTime();//dvtable update 
     
     void setAlarmType(RoutingProtocol *r, unsigned int duration, void *d);//sys->set_alarm
- private:
+    DV_Protocol* dv;
+    LS_Protocol* ls;
+    
+  private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
     unsigned short num_ports;
     unsigned short router_id;
