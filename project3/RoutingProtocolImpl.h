@@ -56,6 +56,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void setAlarmType(RoutingProtocol *r, unsigned int duration, void *d);//sys->set_alarm
     DV_Protocol* dv;
     LS_Protocol* ls;
+    //enum PACK_TYPE{ DATA, PING, PONG, LS, DV};
     
   private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
@@ -66,6 +67,12 @@ class RoutingProtocolImpl : public RoutingProtocol {
     const char* distancevector = "distancevector";
     const char* linkstate = "linkstate";
     const char* update = "update";
+
+   const char DATA = 0x00;
+   const char PING = 0x01;
+   const char PONG = 0x02;
+   const char LS = 0x03;
+   const char DV = 0x04;
 };
 
 #endif

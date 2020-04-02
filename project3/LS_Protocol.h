@@ -10,7 +10,10 @@ class LS_Protocol{
 	
 	void setRouterID(unsigned short router_id);
 
-
+	private:
+	
+	unsigned short router_id;
+	unsigned short seqnum;
 
 
 };
