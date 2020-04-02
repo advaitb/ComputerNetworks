@@ -3,6 +3,9 @@
 #include "DV_Protocol.h"
 #include "LS_Protocol.h"
 
+#define PING_PACK_SIZE 12
+
+
 // init node
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
   sys = n;
@@ -62,12 +65,25 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
   // add your own code
   // need to free recv after processing
   // need to check what kind of packet has been received - there are 5 different kinds of packets!
-  
-  
+  char type = *(char*)packet; //first byte contains the packet type
+  if(type == DATA) recvDataPacket((char*)packet,size);
+  else if(type == PING) recvPingPacket(port,(char*) packet, size); 
+  else if(type == PONG) recvPongPacket(port, (char*) packet);
+  else if(type == LS) recvLSPacket(port, (char*) packet, size );
+  else if(type == DV) recvDVPacket((char*) packet, size);
+  else {
+	fprintf(stderr, "Packet received has incorrect type\n");
+	free(packet);
+  }
 }
 
 void RoutingProtocolImpl::pingTime(){
 	//TODO
+	int i;
+	for(i=0;i<this->num_ports;i++){
+		sendPingPacket(i);
+	}
+	setAlarmType(this, pingalarm, (void*)this->ping); 
 }
 
 void RoutingProtocolImpl::lsTime(){
@@ -82,5 +98,28 @@ void RoutingProtocolImpl::updateTime(){
 	//TODO
 }
 
+void RoutingProtocolImpl::sendPingPacket(int port){
+	char* ping_packet = (char*)malloc(PING_PACK_SIZE);
+	*ping_packet = (char)PING;
+	*(unsigned short*)(ping_packet + 2) = (unsigned short)htons(PING_PACK_SIZE);
+	*(unsigned short*)(ping_packet + 4) = (unsigned short)htons(this->router_id);
+	*(unsigned int*)(ping_packet + 8) = (unsigned int)htonl(sys->time());
+	sys->send(port, ping_packet, PING_PACK_SIZE);
+}
 
+void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
+	//TODO
+}
+void RoutingProtocolImpl::recvPingPacket(unsigned short port, char* packet, unsigned short size){
+	//TODO
+}
+void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
+	//TODO
+}
+void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsigned short size){
+	//TODO
+}
+void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
+		//TODO
+}
 // add more of your own code

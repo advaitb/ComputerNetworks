@@ -54,6 +54,16 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void dvTime();//dvtable update 
     
     void setAlarmType(RoutingProtocol *r, unsigned int duration, void *d);//sys->set_alarm
+    //recv packets - main recv will call each of these functions
+    void recvDataPacket(char* packet, unsigned short size);
+    void recvPingPacket(unsigned short port, char* packet, unsigned short size);
+    void recvPongPacket(unsigned short port, char* packet);
+    void recvLSPacket(unsigned short port, char* packet, unsigned short size);
+    void recvDVPacket(char* packet, unsigned short size);
+    //send packets
+    void sendPingPacket(int port);
+
+    //protocol pointers
     DV_Protocol* dv;
     LS_Protocol* ls;
     //enum PACK_TYPE{ DATA, PING, PONG, LS, DV};
@@ -67,12 +77,12 @@ class RoutingProtocolImpl : public RoutingProtocol {
     const char* distancevector = "distancevector";
     const char* linkstate = "linkstate";
     const char* update = "update";
-
-   const char DATA = 0x00;
-   const char PING = 0x01;
-   const char PONG = 0x02;
-   const char LS = 0x03;
-   const char DV = 0x04;
+    //const char indicating packet type
+    //const char DATA = 0x00;
+    //const char PING = 0x01;
+    //const char PONG = 0x02;
+    //const char LS = 0x03;
+    //const char DV = 0x04;
 };
 
 #endif
