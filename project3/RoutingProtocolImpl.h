@@ -60,6 +60,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void recvPongPacket(unsigned short port, char* packet);
     void recvLSPacket(unsigned short port, char* packet, unsigned short size);
     void recvDVPacket(char* packet, unsigned short size);
+    void verify(char* packet, unsigned short size);
     //send packets
     void sendPingPacket(int port);
 
@@ -83,6 +84,11 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //const char PONG = 0x02;
     //const char LS = 0x03;
     //const char DV = 0x04;
+};
+
+struct Port {
+  unsigned int time_to_expire;
+  unsigned short port_id;
 };
 
 #endif

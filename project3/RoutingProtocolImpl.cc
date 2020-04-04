@@ -3,8 +3,8 @@
 #include "DV_Protocol.h"
 #include "LS_Protocol.h"
 
-#define PING_PACK_SIZE 12
-
+#define PING_PACK_SIZE 9
+#define PONG_PACK_SIZE 5
 
 // init node
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
@@ -101,9 +101,9 @@ void RoutingProtocolImpl::updateTime(){
 void RoutingProtocolImpl::sendPingPacket(int port){
 	char* ping_packet = (char*)malloc(PING_PACK_SIZE);
 	*ping_packet = (char)PING;
-	*(unsigned short*)(ping_packet + 2) = (unsigned short)htons(PING_PACK_SIZE);
-	*(unsigned short*)(ping_packet + 4) = (unsigned short)htons(this->router_id);
-	*(unsigned int*)(ping_packet + 8) = (unsigned int)htonl(sys->time());
+	*(unsigned short*)(ping_packet + 1) = (unsigned short)htons(PING_PACK_SIZE);
+	*(unsigned short*)(ping_packet + 3) = (unsigned short)htons(this->router_id);
+	*(unsigned int*)(ping_packet + 5) = (unsigned int)htonl(sys->time());
 	sys->send(port, ping_packet, PING_PACK_SIZE);
 }
 
@@ -111,10 +111,33 @@ void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
 	//TODO
 }
 void RoutingProtocolImpl::recvPingPacket(unsigned short port, char* packet, unsigned short size){
-	//TODO
+	//need to send back a PONG to the  router that sent the PING
+	unsigned short packet_size = (unsigned short)ntohs(*(unsigned short*)(packet + 1));
+	if(packet_size != PING_PACK_SIZE){
+		free(packet);
+		return;
+	}
+	unsigned short recv_id = (unsigned short)ntohs(*(unsigned short*)(packet + 3));       
+	char* pong_packet = (char*)malloc(PONG_PACK_SIZE);
+	*pong_packet = (char)PONG;
+  	*(unsigned short*)(pong_packet + 1) = (unsigned short)htons(this->router_id);
+  	*(unsigned short*)(pong_packet + 3) = (unsigned short)htons(recv_id);
+	free(packet);
+        sys->send(port, pong_packet, PONG_PACK_SIZE);
 }
 void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
-	//TODO
+	//pong packets
+	if(this->router_id != (unsigned short)ntohs(*(unsigned short*)(packet+3))){
+		free(packet);
+		return;
+	}
+	unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet + 5));
+  	unsigned short linkcost = (short)(sys->time() - sendtime);
+  	unsigned short src_id = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
+  	unsigned int time_to_expire = sys->time() + pongto;
+  	free(packet);		
+	//TODO - NEED TO UPDATE TABLE
+
 }
 void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsigned short size){
 	//TODO
