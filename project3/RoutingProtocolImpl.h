@@ -5,7 +5,7 @@
 #include "Node.h"
 #include "LS_Protocol.h"
 #include "DV_Protocol.h"
-
+#include <unordered_map>
 #define pingalarm 10000  //10s
 #define lsalarm 30000    //30s
 #define dvalarm 30000    //30s
@@ -13,6 +13,12 @@
 #define pongto 15000     //15s
 #define lsto 45000       //45s
 #define dvto 45000       //45s
+
+
+struct LinkTable{
+  unsigned int expire_timeout;
+  unsigned short port_ID;
+};
 
 
 class RoutingProtocolImpl : public RoutingProtocol {
@@ -67,8 +73,10 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //protocol pointers
     DV_Protocol* dv;
     LS_Protocol* ls;
-    //enum PACK_TYPE{ DATA, PING, PONG, LS, DV};
     
+    //Link information
+    unordered_map<unsigned short,LinkTable> linkmap;
+
   private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
     unsigned short num_ports;
@@ -85,11 +93,5 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //const char LS = 0x03;
     //const char DV = 0x04;
 };
-
-struct Port {
-  unsigned int time_to_expire;
-  unsigned short port_id;
-};
-
 #endif
 
