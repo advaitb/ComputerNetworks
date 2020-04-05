@@ -152,7 +152,7 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
     		LinkTable lnk = it->second;
     		lnk.expire_timeout = expire_timeout;
 		linkmap[s_ID] = lnk;
-  	} else {//
+  	} else {//add to link table
 		LinkTable lnk;	
 		lnk.expire_timeout = expire_timeout;
     		lnk.port_ID = port ;
