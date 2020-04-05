@@ -4,7 +4,7 @@
 #include "LS_Protocol.h"
 
 #define PING_PACK_SIZE 9
-#define PONG_PACK_SIZE 5
+#define PONG_PACK_SIZE 9
 
 // init node
 RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
@@ -108,7 +108,15 @@ void RoutingProtocolImpl::sendPingPacket(int port){
 }
 
 void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
-	//TODO
+	//TODO	
+	//this is the end point?
+	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet+3));
+	//packet intended for this router
+	if(this->router_id == s_ID){
+		free(packet);
+		return;
+	}
+	updateTable(s_ID, packet, size);
 }
 void RoutingProtocolImpl::recvPingPacket(unsigned short port, char* packet, unsigned short size){
 	//need to send back a PONG to the  router that sent the PING
@@ -117,25 +125,49 @@ void RoutingProtocolImpl::recvPingPacket(unsigned short port, char* packet, unsi
 		free(packet);
 		return;
 	}
-	unsigned short recv_id = (unsigned short)ntohs(*(unsigned short*)(packet + 3));       
+	unsigned short recv_id = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
+	unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet+5));       
 	char* pong_packet = (char*)malloc(PONG_PACK_SIZE);
 	*pong_packet = (char)PONG;
   	*(unsigned short*)(pong_packet + 1) = (unsigned short)htons(this->router_id);
   	*(unsigned short*)(pong_packet + 3) = (unsigned short)htons(recv_id);
+	*(unsigned int*)(pong_packet + 5) = (unsigned int)htonl(sendtime);
 	free(packet);
         sys->send(port, pong_packet, PONG_PACK_SIZE);
 }
 void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
-	//pong packets
+	//pong packet - check if this is the correct end point
 	if(this->router_id != (unsigned short)ntohs(*(unsigned short*)(packet+3))){
 		free(packet);
 		return;
 	}
+	//calculate linkcost	
 	unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet + 5));
   	unsigned short linkcost = (short)(sys->time() - sendtime);
-  	unsigned short src_id = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
-  	unsigned int time_to_expire = sys->time() + pongto;
-  	free(packet);		
+  	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
+  	//timeout
+	unsigned int expire_timeout = sys->time() + pongto;
+	unordered_map<unsigned short, LinkTable>::iterator it = linkmap.find(s_ID);
+  	if (it != linkmap.end()) {//update link table
+    		LinkTable lnk = it->second;
+    		lnk.expire_timeout = expire_timeout;
+		linkmap[s_ID] = lnk;
+  	} else {//
+		LinkTable lnk;	
+		lnk.expire_timeout = expire_timeout;
+    		lnk.port_ID = port ;
+    		linkmap[s_ID] = lnk;
+  	}		
+	switch(this->protocol){
+		case P_LS:
+			//TODO
+			break;
+		case P_DV:
+			//TODO
+			break;
+		
+	}
+	free(packet);		
 	//TODO - NEED TO UPDATE TABLE
 
 }
@@ -145,4 +177,19 @@ void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsign
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 		//TODO
 }
+
+void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigned short size ){
+ 	unordered_map<unsigned short, unsigned short>::iterator it = routingtable.find(s_ID);
+  	if (it != routingtable.end()) {
+    		unsigned short hop = it->second;
+    		unordered_map<unsigned short, LinkTable>::iterator link_it = linkmap.find(hop);
+    		if (link_it != linkmap.end()) {
+      			LinkTable lnk = link_it->second;
+      			sys->send(lnk.port_ID, packet, size);
+    		}else{
+			free(packet);
+		}	
+  	}
+}
+
 // add more of your own code

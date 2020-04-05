@@ -67,16 +67,21 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void recvLSPacket(unsigned short port, char* packet, unsigned short size);
     void recvDVPacket(char* packet, unsigned short size);
     void verify(char* packet, unsigned short size);
+    
     //send packets
     void sendPingPacket(int port);
-
+    //Update Table
+    void updateTable(unsigned short s_ID, char* packet, unsigned short size);
+    
     //protocol pointers
     DV_Protocol* dv;
     LS_Protocol* ls;
     
     //Link information
     unordered_map<unsigned short,LinkTable> linkmap;
-
+    //RoutingTable
+    unordered_map<unsigned short, unsigned short> routingtable;
+  
   private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
     unsigned short num_ports;
