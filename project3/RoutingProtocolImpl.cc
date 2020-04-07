@@ -29,7 +29,7 @@ void RoutingProtocolImpl::setAlarmType( RoutingProtocol *r, unsigned int duratio
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
   // set private variables
   
-  if( protocol_type != P_LS || protocol_type != P_DV) {
+  if( protocol_type != P_LS && protocol_type != P_DV) {
 	fprintf(stderr, "Incorrect protocol initialization\n");
 	exit(EXIT_FAILURE); 
   }
