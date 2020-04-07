@@ -84,6 +84,10 @@ class RoutingProtocolImpl : public RoutingProtocol {
     unordered_map<unsigned short,LinkTable> linkmap;
     //RoutingTable
     unordered_map<unsigned short, unsigned short> routingtable;
+
+    // DV Table
+    // key: dest_ID, value: (cost, next_hop)
+    unordered_map<unsigned short, pair<float, unsigned short>> dvtable;
   
   private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 

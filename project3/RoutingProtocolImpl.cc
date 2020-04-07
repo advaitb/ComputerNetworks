@@ -187,8 +187,55 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsigned short size){
 	//TODO
 }
+
+// DV Packet format:
+// 0      7|8       15|16        |        31|
+//   type  | reserved |         size        |
+//     source ID      |       dest ID       |
+//      Node ID 1     |        cost 1       |
+//      Node ID 2     |        cost 2       |
+//      .......       |        .....        |
+//
+// A: this->router_id
+// V: s_ID
+// Y: Node ID n
+// D(V, Y)= node_cost
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 		//TODO
+	// Read packet
+	// unsigned short size = (unsigned short)ntohs(*(unsigned short*)(packet + 2)); // Is the param size the same as the size field in the packet??
+	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
+	unsigned short d_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
+
+    for (int i = 8; i < size; i += 4)
+    {
+    	unsigned short node_ID = (unsigned short)ntohs(*(unsigned short*)(packet + i));
+    	unsigned short node_cost = (unsigned short)ntohs(*(unsigned short*)(packet + i + 2));
+
+        auto it = dvtable.find(node_ID);
+        if (it == dvtable.end())
+			fprintf(stderr, "Node does not exist\n");
+		else
+		{
+			auto cost_hop = it->second;
+			float cost = cost_hop.first;
+			unsigned short nexthop = cost_hop.second;
+			cost = node_cost; // + c(A,V) //Need a table to store neighbors and costs?
+
+		}
+
+    }
+
+	// If c(A, V) changes by d       // This part should be handled in dvalarm??
+	// for all destinations Y through V, D(A, Y, V) += d
+
+	// Else if (update D(V,Y) received from V)
+	// D(A,Y,V) = c(A,V) + D(V,Y)
+
+	// If there is a new minimum for destination Y, send new message D(A,Y) to all neighbors
+	char* dv_reply_packet = (char*)malloc(1); // Need to know how many entries were updated
+	*dv_reply_packet = (char)DV;
+
 }
 
 void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigned short size ){
