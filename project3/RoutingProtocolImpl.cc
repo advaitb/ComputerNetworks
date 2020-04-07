@@ -14,6 +14,11 @@ RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
 // deconstructor
 RoutingProtocolImpl::~RoutingProtocolImpl() {
   // add your own code (if needed)
+  unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin();
+  while (it != linkmap.end()) {
+    LinkTable lnk = it->second;
+    linkmap.erase(it++);
+  }
 }
 
 // set the alarm
@@ -88,6 +93,8 @@ void RoutingProtocolImpl::pingTime(){
 
 void RoutingProtocolImpl::lsTime(){
 	//TODO
+	sendLSPacket();
+	setAlarmType(this, lsalarm, (void*)this->linkstate);	
 }
 
 void RoutingProtocolImpl::dvTime(){
@@ -106,6 +113,12 @@ void RoutingProtocolImpl::sendPingPacket(int port){
 	*(unsigned int*)(ping_packet + 5) = (unsigned int)htonl(sys->time());
 	sys->send(port, ping_packet, PING_PACK_SIZE);
 }
+
+void RoutingProtocolImpl::sendLSPacket(){
+	//TODO
+}
+
+
 
 void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
 	//TODO	
@@ -190,6 +203,33 @@ void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigne
 			free(packet);
 		}	
   	}
+}
+
+bool RoutingProtocolImpl::checkTopology(){
+ 	bool ischange = false;
+  	unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin();
+  	set<unsigned short> changed_s_ID;
+  	while (it != linkmap.end()) {
+    		LinkTable lnk= it->second;
+    		if (sys->time() > lnk.expire_timeout) {
+      			ischange = true;
+      			changed_s_ID.insert(it->first);
+      			linkmap.erase(it++);
+    		} else {
+      			++it;
+    		}	
+  	}
+  	if(ischange){
+    		if (this->protocol == P_LS) {
+      			//TODO
+			//ls_table.delete_ls(deleted_dst_ids);
+      			//ls_table.dijkstra(routing_table);
+    		} else {
+			//TODO
+      			//dv_table.delete_dv(deleted_dst_ids, routing_table);
+    		}
+  	}	
+  	return ischange;
 }
 
 // add more of your own code

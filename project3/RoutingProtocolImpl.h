@@ -6,6 +6,7 @@
 #include "LS_Protocol.h"
 #include "DV_Protocol.h"
 #include <unordered_map>
+#include <set>
 #define pingalarm 10000  //10s
 #define lsalarm 30000    //30s
 #define dvalarm 30000    //30s
@@ -67,9 +68,11 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void recvLSPacket(unsigned short port, char* packet, unsigned short size);
     void recvDVPacket(char* packet, unsigned short size);
     void verify(char* packet, unsigned short size);
-    
+    bool checkTopology();    
     //send packets
+    //PONG sent in recvPingPacket
     void sendPingPacket(int port);
+    void sendLSPacket();
     //Update Table
     void updateTable(unsigned short s_ID, char* packet, unsigned short size);
     
