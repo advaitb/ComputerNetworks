@@ -67,6 +67,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void recvPongPacket(unsigned short port, char* packet);
     void recvLSPacket(unsigned short port, char* packet, unsigned short size);
     void recvDVPacket(char* packet, unsigned short size);
+    void updateDVTable();
     void verify(char* packet, unsigned short size);
     bool checkTopology();    
     //send packets

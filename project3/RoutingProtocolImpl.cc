@@ -127,6 +127,7 @@ void RoutingProtocolImpl::sendLSPacket(){
 }
 
 void RoutingProtocolImpl::sendDVPacket(unsigned short port_ID, unsigned short d_ID){
+	cout << "send DV Packet\n";
     unsigned short num_neighbors = (unsigned short) linkmap.size();
 	unsigned short size = 8 + num_neighbors * 4;
 
@@ -189,7 +190,7 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 	//calculate linkcost	
 	unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet + 5));
   	unsigned short linkcost = (short)(sys->time() - sendtime);
-  	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
+  	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 1));
   	linkcosts.insert(pair<unsigned short, unsigned short>(s_ID, linkcost));
   	//timeout
 	unsigned int expire_timeout = sys->time() + pongto;
@@ -210,6 +211,7 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 			break;
 		case P_DV:
 			//TODO
+			updateDVTable(); // update the dvtable when linkcosts change detected by pong packet
 			dvTime();
 			break;
 		
@@ -253,7 +255,10 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         	continue;
         auto it = dvtable.find(node_ID);
         if (it == dvtable.end())
-			fprintf(stderr, "Node does not exist\n");
+        {
+
+			fprintf(stderr, "Node %s does not exist\n", node_ID);
+        }
 		else
 		{
 			// d(A, Y) = d(A, V) + d(V, Y)
@@ -295,6 +300,39 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
 }
 
+// update dvtable when pong packet changes the linkcosts
+void RoutingProtocolImpl::updateDVTable()
+{
+	cout << "update dv table\n";
+	for (auto line: linkcosts)
+	{
+		unsigned short neighbor_node_ID = line.first;
+		unsigned short cost = line.second;
+		auto it = dvtable.find(neighbor_node_ID);
+		if (it != dvtable.end())
+		{
+			auto cost_hop = it->second;
+			unsigned short old_cost = cost_hop.first;
+			if (old_cost <= cost)
+				continue;
+			dvtable.erase(neighbor_node_ID);
+		}
+		// update the dvtable entry if the entry doesn't exist, or if cost < old_cost 
+		auto cost_hop = pair<unsigned short, unsigned short>(cost, neighbor_node_ID);
+		dvtable.insert(pair<unsigned short, pair<unsigned short, unsigned short>>(neighbor_node_ID, cost_hop));
+	}
+
+    cout << "---------------------------\n";
+    cout << "| DV Table of node " << this->router_id << endl;
+	for (auto line: dvtable)
+	{
+		cout << "| destination node " << line.first;
+		auto cost_hop = line.second;
+		cout << ", cost " << cost_hop.first << ", next hop " << cost_hop.second << endl;
+	}
+    cout << "---------------------------\n";
+}
+
 void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigned short size ){
  	unordered_map<unsigned short, unsigned short>::iterator it = routingtable.find(s_ID);
   	if (it != routingtable.end()) {
@@ -330,7 +368,7 @@ bool RoutingProtocolImpl::checkTopology(){
       			//ls_table.dijkstra(routing_table);
     		} else {
 			//TODO
-      			//dv_table.delete_dv(deleted_dst_ids, routing_table);
+      			//dvtable.delete_dv(deleted_dst_ids, routing_table);
     		}
   	}	
   	return ischange;
