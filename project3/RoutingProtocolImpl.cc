@@ -123,7 +123,7 @@ void RoutingProtocolImpl::sendPingPacket(int port){
 
 void RoutingProtocolImpl::sendLSPacket(){
   	/* flood packets to get global topology*/
-	unsigned short ls_pack_size = 12 + (linkmap.size() << 2);
+	unsigned short ls_pack_size = 12 + (linkmap.size() * 4);
   	for (unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin(); it != linkmap.end(); ++it) {
     		char* ls_packet = (char*)malloc(ls_pack_size);
     		ls->createLSPacket(ls_packet, ls_pack_size);
