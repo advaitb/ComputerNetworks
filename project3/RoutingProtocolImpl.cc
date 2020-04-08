@@ -41,7 +41,7 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
   
   setAlarmType(this, 0, (void*)this->ping); //initialize ping
   setAlarmType(this, checkalarm, (void*)this->update); 
-  
+
   switch(this->protocol){
 	case P_LS:
 		ls->setRouterID(this->router_id);
@@ -99,6 +99,14 @@ void RoutingProtocolImpl::lsTime(){
 
 void RoutingProtocolImpl::dvTime(){
 	//TODO
+	for (auto &link: linkmap)
+	{
+		unsigned short d_ID = link.first;
+		auto ltable = link.second;
+		unsigned short port_ID = ltable.port_ID;
+		sendDVPacket(port_ID, d_ID);
+	}
+	setAlarmType(this, lsalarm, (void*)this->linkstate);	
 }
 
 void RoutingProtocolImpl::updateTime(){
@@ -118,6 +126,30 @@ void RoutingProtocolImpl::sendLSPacket(){
 	//TODO
 }
 
+void RoutingProtocolImpl::sendDVPacket(unsigned short port_ID, unsigned short d_ID){
+    unsigned short num_neighbors = (unsigned short) linkmap.size();
+	unsigned short size = 8 + num_neighbors * 4;
+
+    char* dv_packet = (char*)malloc(size);
+    // Write header
+    *dv_packet = (char)DV;
+	*(unsigned short*)(dv_packet + 2) = (unsigned short)htons(size);
+	*(unsigned short*)(dv_packet + 4) = (unsigned short)htons(this->router_id);
+	*(unsigned short*)(dv_packet + 6) = (unsigned short)htons(d_ID);
+	// Write table (node ID - cost)
+	int i = 0;
+    for (auto line: dvtable)
+    {
+    	unsigned short node_ID = line.first;
+    	auto cost_hop = line.second;
+    	unsigned short cost = cost_hop.first;
+		*(unsigned short*)(dv_packet + 8 + i*4) = (unsigned short)htons(node_ID);
+		*(unsigned short*)(dv_packet + 10 + i*4) = (unsigned short)htons(cost);
+    	i += 1;
+    }
+
+	sys->send(port_ID, dv_packet, size);
+}
 
 
 void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
@@ -158,6 +190,7 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 	unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet + 5));
   	unsigned short linkcost = (short)(sys->time() - sendtime);
   	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 3));
+  	linkcosts.insert(pair<unsigned short, unsigned short>(s_ID, linkcost));
   	//timeout
 	unsigned int expire_timeout = sys->time() + pongto;
 	unordered_map<unsigned short, LinkTable>::iterator it = linkmap.find(s_ID);
@@ -177,6 +210,7 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 			break;
 		case P_DV:
 			//TODO
+			dvTime();
 			break;
 		
 	}
@@ -197,11 +231,12 @@ void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsign
 //      .......       |        .....        |
 //
 // A: this->router_id
-// V: s_ID
+// V: s_ID (a neighbor node)
 // Y: Node ID n
 // D(V, Y)= node_cost
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 		//TODO
+    bool isUpdated = false;
 	// Read packet
 	// unsigned short size = (unsigned short)ntohs(*(unsigned short*)(packet + 2)); // Is the param size the same as the size field in the packet??
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
@@ -210,31 +245,53 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     for (int i = 8; i < size; i += 4)
     {
     	unsigned short node_ID = (unsigned short)ntohs(*(unsigned short*)(packet + i));
-    	unsigned short node_cost = (unsigned short)ntohs(*(unsigned short*)(packet + i + 2));
+    	unsigned short cost_VY = (unsigned short)ntohs(*(unsigned short*)(packet + i + 2));
 
+        // Query the local DV table
+        // If V == A itself, it should be skipped
+        if (node_ID == this->router_id)
+        	continue;
         auto it = dvtable.find(node_ID);
         if (it == dvtable.end())
 			fprintf(stderr, "Node does not exist\n");
 		else
 		{
+			// d(A, Y) = d(A, V) + d(V, Y)
 			auto cost_hop = it->second;
-			float cost = cost_hop.first;
-			unsigned short nexthop = cost_hop.second;
-			cost = node_cost; // + c(A,V) //Need a table to store neighbors and costs?
-
+			unsigned short cost_AY = cost_hop.first;
+			unsigned short nexthop = cost_hop.second; // old V, may or may not be s_ID
+            auto lit = linkcosts.find(s_ID);
+            unsigned short cost_AV;
+            if (lit == linkcosts.end())
+				fprintf(stderr, "Neighbor Node does not exist\n");
+			else
+				cost_AV = lit->second;
+			unsigned short cost_AYV = cost_AV + cost_VY; // Need a table to store neighbors and costs?
+			if (cost_AYV < cost_AY) // When it's minimum
+			{
+                cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID); // update dvtable for dest Y with new cost and new hop V
+                isUpdated = true;
+            }
+            else if (cost_AYV > cost_AY && nexthop == s_ID) // when the next hop is the same, but cost increases
+            {
+                cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID);
+                isUpdated = true;
+            } // when the next hop is different and cost increases, nothing needs to be done
 		}
 
     }
+    free(packet);
 
-	// If c(A, V) changes by d       // This part should be handled in dvalarm??
+    if (isUpdated)
+    	dvTime();
+
+	// If c(A, V) changes by d       // Link cost change: This part should be handled in alarm??
 	// for all destinations Y through V, D(A, Y, V) += d
 
-	// Else if (update D(V,Y) received from V)
-	// D(A,Y,V) = c(A,V) + D(V,Y)
 
 	// If there is a new minimum for destination Y, send new message D(A,Y) to all neighbors
-	char* dv_reply_packet = (char*)malloc(1); // Need to know how many entries were updated
-	*dv_reply_packet = (char)DV;
+	// char* dv_reply_packet = (char*)malloc(1); // Need to know how many entries were updated
+	// *dv_reply_packet = (char)DV;
 
 }
 

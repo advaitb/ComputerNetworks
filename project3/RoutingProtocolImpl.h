@@ -73,6 +73,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //PONG sent in recvPingPacket
     void sendPingPacket(int port);
     void sendLSPacket();
+    void sendDVPacket(unsigned short port_ID, unsigned short d_ID);
     //Update Table
     void updateTable(unsigned short s_ID, char* packet, unsigned short size);
     
@@ -85,9 +86,13 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //RoutingTable
     unordered_map<unsigned short, unsigned short> routingtable;
 
+    // Link costs
+    // key: neighbor ID. value: cost
+    unordered_map<unsigned short, unsigned short> linkcosts;    
+
     // DV Table
-    // key: dest_ID, value: (cost, next_hop)
-    unordered_map<unsigned short, pair<float, unsigned short>> dvtable;
+    // key: dest_ID. value: (cost, next_hop)
+    unordered_map<unsigned short, pair<unsigned short, unsigned short>> dvtable;
   
   private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
