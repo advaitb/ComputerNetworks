@@ -1,11 +1,14 @@
 #include "LS_Protocol.h"
 
+
+//initialize the router to start sending LS Packets
 void LS_Protocol::setRouterID(unsigned short router_id)
 {
 	this->router_id = router_id;
 	this->seqnum = 0;
 };
 
+//modify link state according to deleted/changes ID's
 void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
 	for (set<unsigned short>::iterator it = changed_s_ID.begin(); it != changed_s_ID.end(); ++it){
 		vector<LS_Record*>::iterator rec_it = linkstate.begin();
@@ -23,6 +26,7 @@ void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
 	}
 }
 
+//destructor
 LS_Protocol::~LS_Protocol(){
 	vector<LS_Record*>::iterator lnkst_it = linkstate.begin();
 	while(lnkst_it != linkstate.end()){
@@ -98,6 +102,55 @@ LS_Record* LS_Protocol::returnLinkState(unsigned short s_ID){
     		}
 	}
 	return nullptr;
+}
+
+
+//calculate shortest path and feed it into the routing table
+void LS_Protocol::shortestPath(unordered_map<unsigned short, unsigned short>& routingtable){
+	//store hop and cost
+	unordered_map<unsigned short, pair<unsigned short, unsigned short> > hopcost;
+	//clear routing table
+	routingtable.clear();
+	for(vector<LS_Record*>::iterator it = linkstate.begin(); it != linkstate.end(); it++){
+		hopcost[(*it)->hop_id] = make_pair((*it)->linkcost,(*it)->hop_id);
+	}
+	//get minimum cost
+	while(!hopcost.empty()){
+    		unsigned short min_cost = INFINITY_COST; //infty defined in global.h
+		unsigned short temp_id;
+		unordered_map<unsigned short, pair<unsigned short, unsigned short> >::iterator hopit;
+		for(hopit = hopcost.begin(); hopit != hopcost.end(); hopit++){
+			if(hopit->second.first < min_cost){
+				min_cost = hopit->second.first;
+				temp_id = hopit->second.second;
+			}	
+		}
+		//routingtable
+		hopcost.erase(temp_id);
+		routingtable[temp_id] = temp_id;
+		unordered_map<unsigned short, vector<LS_Record*>*>::iterator recit = recordtable.find(temp_id);
+		if(recit!=recordtable.end()){
+			vector<LS_Record*>* rec_vec = recit->second;
+			for(vector<LS_Record*>::iterator vecit = rec_vec->begin(); vecit != rec_vec->end(); vecit++){
+				LS_Record* rec = *vecit;
+				unsigned short path_cost = min_cost +  rec->linkcost;
+				unordered_map<unsigned short, pair<unsigned short, unsigned short> >::iterator hopit_in;
+				hopit_in = hopcost.find(rec->hop_id);
+				if(hopit_in != hopcost.end()){
+					unsigned short tempcost = hopit_in->second.first;
+					if(path_cost < tempcost){
+						hopcost[rec->hop_id] = make_pair(path_cost, temp_id);
+					}
+					
+				} else {
+					unordered_map<unsigned short, unsigned short>::iterator rit = routingtable.find(rec->hop_id);
+					if(this->router_id != rec->hop_id && rit == routingtable.end()){
+						hopcost[rec->hop_id] = make_pair(path_cost,temp_id);
+					}
+				}		
+			}		
+		}
+	}
 }
 
 
