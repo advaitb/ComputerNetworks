@@ -84,6 +84,7 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
 }
 
 void RoutingProtocolImpl::pingTime(){
+	cout << "pingtime\n";
 	int i;
 	for(i=0;i<this->num_ports;i++){
 		sendPingPacket(i);
@@ -92,11 +93,13 @@ void RoutingProtocolImpl::pingTime(){
 }
 
 void RoutingProtocolImpl::lsTime(){
+	cout << "lstime\n";
 	sendLSPacket();
 	setAlarmType(this, lsalarm, (void*)this->linkstate);	
 }
 
 void RoutingProtocolImpl::dvTime(){
+	cout << "dvtime\n";
 	//TODO
 	for (auto &link: linkmap)
 	{
@@ -109,6 +112,7 @@ void RoutingProtocolImpl::dvTime(){
 }
 
 void RoutingProtocolImpl::updateTime(){
+	cout << "updatetime\n";
 	//TODO
 	bool ischanged = checkTopology();
 }
