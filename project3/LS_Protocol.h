@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <unordered_map>
 #include <vector>
+#include <set>
 
 struct LS_Record {
   unsigned int expire_timeout;
@@ -17,23 +18,27 @@ struct LS_Record {
 class LS_Protocol{
 
 	public:
-	~LS_Protocol();	
+	//destructor
+	~LS_Protocol();
+	//return, check, modify and check for toplogy changes
+	void modifyLinkState(set<unsigned short>& changed_s_ID); 
+	void changeTopology(unsigned short n_id);
+	bool checkLinkState(unsigned int time);
+	LS_Record* returnLinkState(unsigned short s_ID);
+	//update	
 	void setRouterID(unsigned short router_id);
 	void updateLS(char* packet, unsigned int timeout, unsigned int time, unsigned short size);
-	void updatePONG(unsigned short s_ID, unsigned short linkcost, unsigned int time);
+	bool updatePONG(unsigned short s_ID, unsigned int timeout, unsigned short linkcost, unsigned int time);
 	void shortestPath(unordered_map<unsigned short, unsigned short> &routingtable);
 	void createLSPacket(char* packet, unsigned short packet_size);
 	void increment();
 	bool checkSeqNum(char* packet);
-	LS_Record* checkLinkState(unsigned short s_ID);
-	void changeTopology(unsigned short n_id);
 	//id2seq map, recordtable and linkstate
 	unordered_map<unsigned short, unsigned int> id2seq;
 	unordered_map<unsigned short, vector<LS_Record*>*> recordtable;
 	vector<LS_Record*> linkstate;
 
 	private:
-		
 	unsigned short router_id;
 	unsigned int seqnum;
 

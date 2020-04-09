@@ -6,6 +6,23 @@ void LS_Protocol::setRouterID(unsigned short router_id)
 	this->seqnum = 0;
 };
 
+void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
+	for (set<unsigned short>::iterator it = changed_s_ID.begin(); it != changed_s_ID.end(); ++it){
+		vector<LS_Record*>::iterator rec_it = linkstate.begin();
+		while(rec_it != linkstate.end()){
+			LS_Record* rec = *rec_it;
+			if(rec->hop_id	== *it){
+				changeTopology(rec->hop_id);
+				rec_it = linkstate.erase(rec_it);
+				free(rec);
+				break;
+			} else {
+				++rec_it;
+			}
+		}
+	}
+}
+
 LS_Protocol::~LS_Protocol(){
 	vector<LS_Record*>::iterator lnkst_it = linkstate.begin();
 	while(lnkst_it != linkstate.end()){
@@ -27,21 +44,6 @@ LS_Protocol::~LS_Protocol(){
   	}	
 }
 
-void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
-	*(char*)packet = LS;
-  	*(unsigned short*)(packet + 2) = (unsigned short)htons(packet_size);
-  	*(unsigned short*)(packet + 4) = (unsigned short)htons(this->router_id);
-  	*(unsigned int*)(packet + 8) = (unsigned int)htonl(this->seqnum);
-  	/* get hop ID and linkcost from linkstate */
-  	int count = 0;
-  	for(vector<LS_Record*>::iterator it = linkstate.begin(); it != linkstate.end(); it++){
-    		int offset = 12 + (count << 2);
-    		*(unsigned short*)((char*)packet + offset) = (unsigned short)htons((*it)->hop_id);
-    		*(unsigned short*)((char*)packet + offset + 2) = (unsigned short)htons((*it)->linkcost);
-    		++count;
-  	}
-}
-
 void LS_Protocol::changeTopology(unsigned short n_ID){
 	unordered_map<unsigned short, vector<LS_Record*>*>::iterator it = recordtable.find(n_ID);
 	if(it == recordtable.end()) return;
@@ -56,8 +58,39 @@ void LS_Protocol::changeTopology(unsigned short n_ID){
 	delete rec_vec;
 }
 
+bool LS_Protocol::checkLinkState(unsigned int time){
+  	bool ischanged = false;
+  	vector<LS_Record*>::iterator it = linkstate.begin();
+  	while (it != linkstate.end()){
+    		if ((*it)->expire_timeout < time) {
+      			ischanged = true;
+      			LS_Record* rec = *it;
+      			changeTopology(rec->hop_id);
+      			it = linkstate.erase(it);
+      			free(rec);
+    		} else {
+      			++it;
+    		}
+  	}	
+  	return ischanged;
+}
 
-LS_Record* LS_Protocol::checkLinkState(unsigned short s_ID){
+void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
+	*(char*)packet = LS;
+  	*(unsigned short*)(packet + 2) = (unsigned short)htons(packet_size);
+  	*(unsigned short*)(packet + 4) = (unsigned short)htons(this->router_id);
+  	*(unsigned int*)(packet + 8) = (unsigned int)htonl(this->seqnum);
+  	/* get hop ID and linkcost from linkstate */
+  	int count = 0;
+  	for(vector<LS_Record*>::iterator it = linkstate.begin(); it != linkstate.end(); it++){
+    		int offset = 12 + (count * 4);
+    		*(unsigned short*)((char*)packet + offset) = (unsigned short)htons((*it)->hop_id);
+    		*(unsigned short*)((char*)packet + offset + 2) = (unsigned short)htons((*it)->linkcost);
+    		++count;
+  	}
+}
+
+LS_Record* LS_Protocol::returnLinkState(unsigned short s_ID){
 	for(vector<LS_Record*>::iterator iter = linkstate.begin(); iter != linkstate.end(); ++iter) {
     		LS_Record* rec  = *iter;
     		if (rec->hop_id == s_ID) {
@@ -67,12 +100,34 @@ LS_Record* LS_Protocol::checkLinkState(unsigned short s_ID){
 	return nullptr;
 }
 
+
+bool LS_Protocol::updatePONG(unsigned short s_ID, unsigned int timeout, unsigned short linkcost, unsigned int time){
+	bool ischanged = false;
+	LS_Record* rec = returnLinkState(s_ID);
+	if(rec != nullptr){
+		rec->expire_timeout = time + timeout;
+		if(linkcost!=rec->linkcost){
+			ischanged=true;
+			rec->linkcost = linkcost; 
+		}
+	}
+	else{ //New record add it top linkstate
+		ischanged = true;
+    		rec = static_cast<LS_Record*>(malloc(sizeof(LS_Record)));
+    		rec->hop_id = s_ID;
+    		rec->linkcost = linkcost;
+    		rec->expire_timeout = time + timeout;
+    		linkstate.push_back(rec);
+	}
+	return ischanged;
+}
+
 void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int time, unsigned short size){
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
   	unsigned int count = (size - 12) >> 2;
   	vector<LS_Record*>* ls_rec_vec = new vector<LS_Record*>;
   	for (unsigned int i = 0; i < count; ++i) {
-    		unsigned int offset = 12 + (i << 2);
+    		unsigned int offset = 12 + (i * 4);
     		unsigned short hop_id = (unsigned short)ntohs(*(unsigned short*)(packet + offset));
     		if (hop_id== this->router_id) {
       			continue;
@@ -83,7 +138,7 @@ void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int tim
     		ls_rec->linkcost = linkcost;
     		ls_rec_vec->push_back(ls_rec);
   	}
-  	LS_Record* my_hop_rec = checkLinkState(s_ID);
+  	LS_Record* my_hop_rec = returnLinkState(s_ID);
   	if (my_hop_rec != nullptr) {
     		my_hop_rec->expire_timeout = time + timeout;
   	}
