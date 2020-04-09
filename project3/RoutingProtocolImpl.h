@@ -74,7 +74,8 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //PONG sent in recvPingPacket
     void sendPingPacket(int port);
     void sendLSPacket();
-    void sendDVPacket(unsigned short port_ID, unsigned short d_ID);
+    void sendDVPacket();
+    void sendDVPacketHelper(unsigned short port_ID, unsigned short d_ID);
     //Update Table
     void updateTable(unsigned short s_ID, char* packet, unsigned short size);
     
