@@ -163,11 +163,11 @@ void RoutingProtocolImpl::sendLSPacket(){
 
 void RoutingProtocolImpl::sendDVPacketHelper(unsigned short port_ID, unsigned short d_ID){
 	// cout << "send DV Packet\n";
-    	unsigned short num_neighbors = (unsigned short) linkmap.size();
-	unsigned short size = 8 + num_neighbors * 4;
-    	char* dv_packet = (char*)malloc(size);
-    	// Write header
-    	*dv_packet = (char)DV;
+    unsigned short num_entries = (unsigned short) dvtable.size();
+	unsigned short size = 8 + num_entries * 4;
+	char* dv_packet = (char*)malloc(size);
+	// Write header
+	*dv_packet = (char)DV;
 	*(unsigned short*)(dv_packet + 2) = (unsigned short)htons(size);
 	*(unsigned short*)(dv_packet + 4) = (unsigned short)htons(this->router_id);
 	*(unsigned short*)(dv_packet + 6) = (unsigned short)htons(d_ID);
@@ -185,8 +185,8 @@ void RoutingProtocolImpl::sendDVPacketHelper(unsigned short port_ID, unsigned sh
 		}
 		*(unsigned short*)(dv_packet + 8 + i*4) = (unsigned short)htons(node_ID);
 		*(unsigned short*)(dv_packet + 10 + i*4) = (unsigned short)htons(cost);
-    		i += 1;
-    	}	
+    	i += 1;
+    }	
 	sys->send(port_ID, dv_packet, size);
 }
 
@@ -290,8 +290,8 @@ void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsign
 // Y: Node ID n
 // D(V, Y)= node_cost
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
-		//TODO
-    	bool isUpdated = false;
+	//TODO
+	bool isUpdated = false;
 	// Read packet
 	// unsigned short size = (unsigned short)ntohs(*(unsigned short*)(packet + 2)); // Is the param size the same as the size field in the packet??
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
@@ -361,9 +361,16 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 		}
 
     }
+	// cout << "this id " << this->router_id << " s_ID " << s_ID << endl;
+	// if (this->router_id == 3 && s_ID == 1)
+	// {
+	// 	printDVTable();
+	// 	for (auto node_ID : node_IDs)
+	// 		cout << "node ID "<<node_ID<<endl;
+	// }
 
     // Any line in A's dvtable should be removed if it has a destination Y via hop V, 
-    // and link_YV does not exist in the table received 
+    // and link_YV does not exist in the table received from V
     vector<unsigned short> toErase = {};
     for (auto &line: dvtable)
     {
@@ -374,6 +381,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     		// cout << "hop " << hop << " sid " << s_ID << endl;
     		if (std::find(node_IDs.begin(), node_IDs.end(), dest_ID) == node_IDs.end()) {
     			// cout << "toerase---------------------------------------------\n";
+    			// cout << "this id " << this->router_id << " dest_ID " << dest_ID << " hop " << hop << " s_ID " << s_ID << endl;
     			toErase.push_back(dest_ID);
     			isUpdated = true;
     		}
@@ -381,7 +389,10 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     }
 
     for (auto ID: toErase)
+    {
+    	// cout << "erase\n";
     	dvtable.erase(ID);
+    }
 
     free(packet);
 
@@ -489,7 +500,7 @@ bool RoutingProtocolImpl::checkTopology(){
 
 void RoutingProtocolImpl::printDVTable()
 {
-	cout << "dv table updated:\n";
+	// cout << "dv table updated:\n";
     // The following block of code prints the dvtable
     cout << "---------------------------\n";
     cout << "| DV Table of node " << this->router_id << endl;
