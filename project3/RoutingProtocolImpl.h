@@ -67,7 +67,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void recvPongPacket(unsigned short port, char* packet);
     void recvLSPacket(unsigned short port, char* packet, unsigned short size);
     void recvDVPacket(char* packet, unsigned short size);
-    void updateDVTable();
+    bool updateDVTable();
     void verify(char* packet, unsigned short size);
     bool checkTopology();    
     //send packets
@@ -78,6 +78,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //Update Table
     void updateTable(unsigned short s_ID, char* packet, unsigned short size);
     
+    void printDVTable();
     //protocol pointers
     DV_Protocol* dv;
     LS_Protocol* ls;

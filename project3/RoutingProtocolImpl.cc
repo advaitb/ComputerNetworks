@@ -2,6 +2,7 @@
 #include <string.h>
 #include "DV_Protocol.h"
 #include "LS_Protocol.h"
+#include "limits.h"
 
 #define PING_PACK_SIZE 9
 #define PONG_PACK_SIZE 9
@@ -144,6 +145,11 @@ void RoutingProtocolImpl::sendDVPacket(unsigned short port_ID, unsigned short d_
     	unsigned short node_ID = line.first;
     	auto cost_hop = line.second;
     	unsigned short cost = cost_hop.first;
+    	unsigned short hop = cost_hop.second;
+    	if (d_ID == hop) // Poison reverse
+		{
+			cost = USHRT_MAX;
+		}
 		*(unsigned short*)(dv_packet + 8 + i*4) = (unsigned short)htons(node_ID);
 		*(unsigned short*)(dv_packet + 10 + i*4) = (unsigned short)htons(cost);
     	i += 1;
@@ -211,8 +217,9 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
 			break;
 		case P_DV:
 			//TODO
-			updateDVTable(); // update the dvtable when linkcosts change detected by pong packet
-			dvTime();
+			bool isDVTableChanged = updateDVTable(); // update the dvtable when linkcosts change detected by pong packet
+			if (isDVTableChanged)
+				dvTime();
 			break;
 		
 	}
@@ -253,11 +260,23 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         // If V == A itself, it should be skipped
         if (node_ID == this->router_id)
         	continue;
+        // If D(V, Y) is infinite, it should be ignored
+        if (cost_VY == USHRT_MAX)
+        	continue;
         auto it = dvtable.find(node_ID);
         if (it == dvtable.end())
         {
-
-			fprintf(stderr, "Node %s does not exist\n", node_ID);
+        	// If A hasn't seen node Y before, add it to dvtable
+            auto lit = linkcosts.find(s_ID);
+            unsigned short cost_AV;
+            if (lit == linkcosts.end())
+				fprintf(stderr, "Neighbor Node does not exist\n");
+			else
+				cost_AV = lit->second;
+			unsigned short cost_AYV = cost_AV + cost_VY;
+			auto cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID);
+			dvtable.insert(pair<unsigned short, pair<unsigned short, unsigned short>>(node_ID, cost_hop));
+			isUpdated = true;
         }
 		else
 		{
@@ -288,7 +307,12 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     free(packet);
 
     if (isUpdated)
+    {
+    	printDVTable();
     	dvTime();
+    }
+    else
+    	cout << "No need to update dv table\n";
 
 	// If c(A, V) changes by d       // Link cost change: This part should be handled in alarm??
 	// for all destinations Y through V, D(A, Y, V) += d
@@ -300,10 +324,10 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
 }
 
-// update dvtable when pong packet changes the linkcosts
-void RoutingProtocolImpl::updateDVTable()
+// update dvtable, only used when pong packet changes the linkcosts
+bool RoutingProtocolImpl::updateDVTable()
 {
-	cout << "update dv table\n";
+	bool result = false;
 	for (auto line: linkcosts)
 	{
 		unsigned short neighbor_node_ID = line.first;
@@ -318,19 +342,16 @@ void RoutingProtocolImpl::updateDVTable()
 			dvtable.erase(neighbor_node_ID);
 		}
 		// update the dvtable entry if the entry doesn't exist, or if cost < old_cost 
+		result = true;
 		auto cost_hop = pair<unsigned short, unsigned short>(cost, neighbor_node_ID);
 		dvtable.insert(pair<unsigned short, pair<unsigned short, unsigned short>>(neighbor_node_ID, cost_hop));
 	}
 
-    cout << "---------------------------\n";
-    cout << "| DV Table of node " << this->router_id << endl;
-	for (auto line: dvtable)
-	{
-		cout << "| destination node " << line.first;
-		auto cost_hop = line.second;
-		cout << ", cost " << cost_hop.first << ", next hop " << cost_hop.second << endl;
-	}
-    cout << "---------------------------\n";
+    if (result)
+		printDVTable();
+	else
+    	cout << "No need to update dv table\n";
+    return result;
 }
 
 void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigned short size ){
@@ -372,6 +393,21 @@ bool RoutingProtocolImpl::checkTopology(){
     		}
   	}	
   	return ischange;
+}
+
+void RoutingProtocolImpl::printDVTable()
+{
+	cout << "dv table updated:\n";
+    // The following block of code prints the dvtable
+    cout << "---------------------------\n";
+    cout << "| DV Table of node " << this->router_id << endl;
+	for (auto line: dvtable)
+	{
+		cout << "| destination node " << line.first;
+		auto cost_hop = line.second;
+		cout << ", cost " << cost_hop.first << ", next hop " << cost_hop.second << endl;
+	}
+    cout << "---------------------------\n";
 }
 
 // add more of your own code
