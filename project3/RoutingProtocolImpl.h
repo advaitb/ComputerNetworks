@@ -79,6 +79,8 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //Update Table
     void updateTable(unsigned short s_ID, char* packet, unsigned short size);
     
+    // update the routing table when dvtable changes
+    void updateRoutingTableDV();
     void printDVTable();
     //protocol pointers
     DV_Protocol* dv;
@@ -87,6 +89,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     //Link information
     unordered_map<unsigned short,LinkTable> linkmap;
     //RoutingTable
+    // key: destination ID. value: next hop
     unordered_map<unsigned short, unsigned short> routingtable;
 
     // Link costs

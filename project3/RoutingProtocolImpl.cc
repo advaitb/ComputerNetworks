@@ -396,9 +396,12 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
     free(packet);
 
+
     if (isUpdated)
     {
         printDVTable();
+        // update the routing table accordingly
+        updateRoutingTableDV();
         sendDVPacket();
     }
     // else
@@ -448,10 +451,40 @@ bool RoutingProtocolImpl::updateDVTable()
         dvtable.erase(ID);
 
     if (result)
+    {
         printDVTable();
+        // update the routing table accordingly
+        updateRoutingTableDV();
+    }
     // else
         // cout << "No need to update dv table\n";
     return result;
+}
+
+void RoutingProtocolImpl::updateRoutingTableDV()
+{
+    for (auto &line : dvtable)
+    {
+        unsigned short dest_ID = line.first;
+        auto cost_hop = line.second;
+        unsigned short hop = cost_hop.second;
+        auto rit = routingtable.find(dest_ID);
+        if (rit != routingtable.end())
+            rit->second = hop;
+        else
+            routingtable.insert(pair<unsigned short, unsigned short>(dest_ID, hop));
+    }
+
+    vector<unsigned short> toErase = {};
+    for (auto &line : routingtable)
+    {
+        unsigned short dest_ID = line.first;
+        if (dvtable.find(dest_ID) == dvtable.end())
+            toErase.push_back(dest_ID);
+    }
+
+    for (auto dest_ID : toErase)
+        routingtable.erase(dest_ID);
 }
 
 void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigned short size ){
@@ -465,6 +498,8 @@ void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigne
             }else{
             free(packet);
         }   
+    } else {
+        free(packet);
     }
 }
 
