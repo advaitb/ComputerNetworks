@@ -51,8 +51,10 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
 
   switch(this->protocol){
     case P_LS:
-        ls = static_cast<LS_Protocol*>(malloc(sizeof(LS_Protocol)));
-        ls->setRouterID(this->router_id);
+        // ls = static_cast<LS_Protocol*>(malloc(sizeof(LS_Protocol)));
+        // ls->setRouterID(this->router_id);
+        ls = new LS_Protocol(this->router_id);
+        // ls = &lstemp;
         setAlarmType(this, lsalarm, (void*)this->linkstate);
         break;
     case P_DV:

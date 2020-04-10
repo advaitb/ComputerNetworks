@@ -6,6 +6,7 @@ void LS_Protocol::setRouterID(unsigned short router_id)
 {
 	this->router_id = router_id;
 	this->seqnum = 0;
+	this->linkstate = {};
 };
 
 //modify link state according to deleted/changes ID's
@@ -25,6 +26,12 @@ void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
 		}
 	}
 }
+
+LS_Protocol::LS_Protocol(unsigned short router_id)
+{
+	router_id = router_id;
+	seqnum = 0;
+};
 
 //destructor
 LS_Protocol::~LS_Protocol(){
@@ -95,13 +102,20 @@ void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
 }
 
 LS_Record* LS_Protocol::returnLinkState(unsigned short s_ID){
-	for(vector<LS_Record*>::iterator iter = linkstate.begin(); iter != linkstate.end(); ++iter) {
-    		LS_Record* rec  = *iter;
-    		if (rec->hop_id == s_ID) {
-      			return rec;
-    		}
-	}
-	return nullptr;
+	// for(vector<LS_Record*>::iterator iter = linkstate.begin(); iter != linkstate.end(); ++iter) {
+ //    		LS_Record* rec  = *iter;
+ //    		if (rec->hop_id == s_ID) {
+ //      			return rec;
+ //    		}
+	// }
+	// return nullptr;
+	cout << linkstate.size() << endl;
+    for (auto &ls_rec : linkstate)
+    {
+    	if (ls_rec->hop_id == s_ID)
+    		return ls_rec;
+    }
+    return nullptr;
 }
 
 
@@ -178,6 +192,16 @@ bool LS_Protocol::updatePONG(unsigned short s_ID, unsigned int timeout, unsigned
     		rec->expire_timeout = time + timeout;
 		cout<<"LSP::UpdatePONG rec variables done"<<endl;
 		linkstate.push_back(rec);
+		// if (linkstate.size() == 0){
+		// 	auto linkstat = vector<LS_Record*>({rec});
+		// 	// linkstat.push_back(rec);
+		// 	// linkstate = linkstat;
+		// }
+		// else
+		// {
+		// 	cout << "??\n";
+		// 	linkstate.push_back(rec);
+		// }
 		cout<<"LSP::UpdatePONG push back done"<<endl;
 	}
 	return ischanged;

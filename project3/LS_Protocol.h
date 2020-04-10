@@ -11,6 +11,20 @@ struct LS_Record {
   unsigned int expire_timeout;
   unsigned short hop_id;
   unsigned short linkcost;
+
+  LS_Record(unsigned int expire_timeout_, unsigned short hop_id_, unsigned short linkcost_)
+  {
+  	expire_timeout = expire_timeout_;
+  	hop_id = hop_id_;
+  	linkcost = linkcost_;
+  }
+
+  LS_Record(LS_Record *ls_rec)
+  {
+  	expire_timeout = ls_rec->expire_timeout;
+  	hop_id = ls_rec->hop_id;
+  	linkcost = ls_rec->linkcost;
+  }
 };
 
 
@@ -18,6 +32,7 @@ struct LS_Record {
 class LS_Protocol{
 
 	public:
+		LS_Protocol(unsigned short router_id);
 	//destructor
 	~LS_Protocol();
 	//return, check, modify and check for toplogy changes
