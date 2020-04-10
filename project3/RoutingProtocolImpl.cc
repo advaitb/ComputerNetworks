@@ -300,6 +300,14 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
     unsigned short d_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
 
+    // if s_ID is not a neighbor, discard this packet
+    auto lit = linkcosts.find(s_ID);
+    if (lit == linkcosts.end())
+    {
+        free(packet);
+        return;
+    }
+
     // Read node_ID - cost_VY table
     vector<unsigned short> node_IDs = {};
     vector<unsigned short> cost_VYs = {};
