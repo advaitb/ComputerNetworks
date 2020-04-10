@@ -156,21 +156,29 @@ void LS_Protocol::shortestPath(unordered_map<unsigned short, unsigned short>& ro
 
 bool LS_Protocol::updatePONG(unsigned short s_ID, unsigned int timeout, unsigned short linkcost, unsigned int time){
 	bool ischanged = false;
+	cout<<"LSP::UpdatePONG before returnLinkState"<<endl;
 	LS_Record* rec = returnLinkState(s_ID);
+	cout<<"LSP::UpdatePONG after returnLinkState"<<endl;
 	if(rec != nullptr){
 		rec->expire_timeout = time + timeout;
+		cout<<"LSP::UpdatePONG after set timeout"<<endl;
 		if(linkcost!=rec->linkcost){
 			ischanged=true;
 			rec->linkcost = linkcost; 
 		}
+	cout<<"LSP::UpdatePONG end of ifblock"<<endl;
 	}
 	else{ //New record add it top linkstate
+		cout<<"LSP::UpdatePONG we are in else"<<endl;
 		ischanged = true;
     		rec = static_cast<LS_Record*>(malloc(sizeof(LS_Record)));
-    		rec->hop_id = s_ID;
+		cout<<"LSP::UpdatePONG set rec"<<endl;
+		rec->hop_id = s_ID;
     		rec->linkcost = linkcost;
     		rec->expire_timeout = time + timeout;
-    		linkstate.push_back(rec);
+		cout<<"LSP::UpdatePONG rec variables done"<<endl;
+		linkstate.push_back(rec);
+		cout<<"LSP::UpdatePONG push back done"<<endl;
 	}
 	return ischanged;
 }

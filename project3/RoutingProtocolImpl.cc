@@ -152,6 +152,7 @@ void RoutingProtocolImpl::sendPingPacket(int port){
 
 void RoutingProtocolImpl::sendLSPacket(){
     /* flood packets to get global topology*/
+    cout<<"sendLSPacket"<<endl;
     unsigned short ls_pack_size = 12 + (linkmap.size() * 4);
     for (unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin(); it != linkmap.end(); ++it) {
             char* ls_packet = (char*)malloc(ls_pack_size);
@@ -246,7 +247,9 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
     }       
     switch(this->protocol){
         case P_LS:
+	    cout<<"recvPONG reached P_LS"<<endl;
             if(ls->updatePONG(s_ID, lsto, linkcost, sys->time())){
+		    cout<<"updatePONG worked"<<endl;
                     ls->shortestPath(routingtable);
                     sendLSPacket();
                 }
