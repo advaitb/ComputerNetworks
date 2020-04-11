@@ -225,22 +225,36 @@ void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int tim
     		ls_rec_vec->push_back(ls_rec);
   	}
   	LS_Record* my_hop_rec = returnLinkState(s_ID);
-  	if (my_hop_rec != nullptr) {
+  	cout<<"here we are in updateLS after returnLinkState"<<endl;
+	if (my_hop_rec != nullptr) {
+		cout<<"problem before assigning myhop_rec"<<endl;
     		my_hop_rec->expire_timeout = time + timeout;
+		cout<<"myhoprec successfully assigned"<<endl;
   	}
+	cout<<"pointer returned was null need to check below"<<endl;
   	unordered_map<unsigned short, vector<LS_Record*>*>::iterator it = recordtable.find(s_ID);
 	if(it == recordtable.end()){
+		cout<<"it==recordtable.end()"<<endl;
 		recordtable[s_ID] = ls_rec_vec;
+		cout<<"recordtable successfully updated"<<endl;
 	}else{
+		cout<<"else block because it alrady present in recordtable"<<endl;
 		vector<LS_Record*>* tempvec = it->second;
+		cout<<"can assign it->second to tempvec"<<endl;
 		vector<LS_Record*>::iterator tempit = tempvec->begin();
 		while(tempit != tempvec->end()){
+			cout<<"checking iteration loop"<<endl;
 			LS_Record* rec = *tempit;
+			cout<<"before tempit = tempvec->erase"<<endl;
 			tempit = tempvec->erase(tempit);
+			cout<<"Before free(rec)"<<endl;
 			free(rec);
+			cout<<"free(rec) worked"<<endl;
 		}
+		cout<<"about to delete tempvec"<<endl;
 		delete(tempvec);
-	}	
+	}
+	recordtable[s_ID] = ls_rec_vec;	
 }
 
 
