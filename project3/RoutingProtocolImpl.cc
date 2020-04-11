@@ -13,7 +13,7 @@ RoutingProtocolImpl::RoutingProtocolImpl(Node *n) : RoutingProtocol(n) {
   sys = n;
 }
 
-// deconstructor
+// deconstructor clear linkmap and dv or ls
 RoutingProtocolImpl::~RoutingProtocolImpl() {
   // add your own code (if needed)
     unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin();
@@ -34,27 +34,19 @@ void RoutingProtocolImpl::setAlarmType( RoutingProtocol *r, unsigned int duratio
 }
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
-  // set private variables
-  
+  // sanity check for protocol
   if( protocol_type != P_LS && protocol_type != P_DV) {
     fprintf(stderr, "Incorrect protocol initialization\n");
     exit(EXIT_FAILURE); 
   }
-
   this->num_ports = num_ports;
   this->router_id = router_id;
   this->protocol = protocol_type; //enum defined in global.h - imported in RoutingProtocol.h
-  
-  
   setAlarmType(this, 0, (void*)this->ping); //initialize ping
   setAlarmType(this, checkalarm, (void*)this->update); 
-
-  switch(this->protocol){
+  switch(this->protocol){//protocol initialization and setAlarm
     case P_LS:
-        // ls = static_cast<LS_Protocol*>(malloc(sizeof(LS_Protocol)));
-        // ls->setRouterID(this->router_id);
         ls = new LS_Protocol(this->router_id);
-        // ls = &lstemp;
         setAlarmType(this, lsalarm, (void*)this->linkstate);
         break;
     case P_DV:
@@ -64,7 +56,7 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
         break;
   }
 }
-
+//handle all alarms
 void RoutingProtocolImpl::handle_alarm(void *data) {
   char* alarmtype = reinterpret_cast<char*>(data);
   if (strcmp(alarmtype,this->ping) == 0) pingTime();
@@ -76,9 +68,8 @@ void RoutingProtocolImpl::handle_alarm(void *data) {
     exit(EXIT_FAILURE);
   }
 }
-
+//master recv that distributes it to other helper functions
 void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short size) {
-  // add your own code
   // need to free recv after processing
   // need to check what kind of packet has been received - there are 5 different kinds of packets!
   char type = *(char*)packet; //first byte contains the packet type
@@ -93,28 +84,24 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
   }
 }
 
+//need to ping an reset alarm
 void RoutingProtocolImpl::pingTime(){
-    // cout << "pingtime\n";
-    int i;
-    for(i=0;i<this->num_ports;i++){
+    for(int i=0;i<this->num_ports;i++){
         sendPingPacket(i);
     }
     setAlarmType(this, pingalarm, (void*)this->ping); 
 }
-
+//send ls packet and reset alarm
 void RoutingProtocolImpl::lsTime(){
-    // cout << "lstime\n";
     sendLSPacket();
     setAlarmType(this, lsalarm, (void*)this->linkstate);    
 }
-
+//send dv packet and reset alarm
 void RoutingProtocolImpl::dvTime(){
-    // cout << "dvtime\n";
-    //TODO
     sendDVPacket();
     setAlarmType(this, dvalarm, (void*)this->distancevector);   
 }
-
+//send DV
 void RoutingProtocolImpl::sendDVPacket()
 {
     for (auto &link: linkmap)
@@ -126,8 +113,8 @@ void RoutingProtocolImpl::sendDVPacket()
     }
 }
 
+//periodic check to see if any link is dead or alive
 void RoutingProtocolImpl::updateTime(){
-    // cout << "updatetime\n";
     bool ischanged = checkTopology();
     if (this->protocol == P_LS) {
             bool lschanged = ls->checkLinkState(sys->time());
@@ -142,7 +129,9 @@ void RoutingProtocolImpl::updateTime(){
     setAlarmType(this, checkalarm, (void*)this->update);
 }
 
-
+//create and send PING
+//leave packet + 6 empty in order to check PONG for PONG ID
+//NOTE: enum casted to char takes only 1 byte but the next byte is reserved
 void RoutingProtocolImpl::sendPingPacket(int port){
     char* ping_packet = (char*)malloc(PING_PACK_SIZE);
     *ping_packet = (char)PING;
@@ -151,7 +140,7 @@ void RoutingProtocolImpl::sendPingPacket(int port){
     *(unsigned int*)(ping_packet + 8) = (unsigned int)htonl(sys->time());
     sys->send(port, ping_packet, PING_PACK_SIZE);
 }
-
+//send LS
 void RoutingProtocolImpl::sendLSPacket(){
     /* flood packets to get global topology*/
     cout<<"sendLSPacket"<<endl;
@@ -165,7 +154,6 @@ void RoutingProtocolImpl::sendLSPacket(){
 }
 
 void RoutingProtocolImpl::sendDVPacketHelper(unsigned short port_ID, unsigned short d_ID){
-    // cout << "send DV Packet\n";
     unsigned short num_entries = (unsigned short) dvtable.size();
     unsigned short size = 8 + num_entries * 4;
     char* dv_packet = (char*)malloc(size);
@@ -201,6 +189,7 @@ void RoutingProtocolImpl::recvDataPacket(char* packet, unsigned short size){
         free(packet);
         return;
     }
+    //update table
     updateTable(s_ID, packet, size);
 }
 
@@ -210,17 +199,17 @@ void RoutingProtocolImpl::recvPingPacket(unsigned short port, char* packet, unsi
     if(packet_size != PING_PACK_SIZE){
         free(packet);
         return;
-    }
+    }//checked for size
     unsigned short recv_id = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
     unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet+8));       
     char* pong_packet = (char*)malloc(PONG_PACK_SIZE);
     *pong_packet = (char)PONG;  
     *(unsigned short*)(pong_packet + 2) = (unsigned short)htons(size);
     *(unsigned short*)(pong_packet + 4) = (unsigned short)htons(this->router_id);
-    *(unsigned short*)(pong_packet + 6) = (unsigned short)htons(recv_id);
+    *(unsigned short*)(pong_packet + 6) = (unsigned short)htons(recv_id);//add the corresponding id
     *(unsigned int*)(pong_packet + 8) = (unsigned int)htonl(sendtime);
-    free(packet);
-        sys->send(port, pong_packet, PONG_PACK_SIZE);
+    free(packet);//free packet
+    sys->send(port, pong_packet, PONG_PACK_SIZE);
 }
 
 void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
@@ -249,15 +238,12 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
     }       
     switch(this->protocol){
         case P_LS:
-	    cout<<"recvPONG reached P_LS"<<endl;
             if(ls->updatePONG(s_ID, lsto, linkcost, sys->time())){
-		    cout<<"updatePONG worked"<<endl;
                     ls->shortestPath(routingtable);
                     sendLSPacket();
                 }
             break;
         case P_DV:
-            //TODO
             bool isDVTableChanged = updateDVTable(); // update the dvtable when linkcosts change detected by pong packet
             if (isDVTableChanged)
                 sendDVPacket();
@@ -266,6 +252,15 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
     }
     free(packet);       
 }
+
+// LS Packet format:
+// 0      7|8       15|16        |        31|
+//   type  | reserved |         size        |
+//     source ID      |       dest ID       |
+//      Node ID 1     |        cost 1       |
+//      Node ID 2     |        cost 2       |
+//      .......       |        .....        |
+//
 void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsigned short size){
     //check fidelity and then update by flooding
     if (ls->checkSeqNum(packet)) {
@@ -295,7 +290,6 @@ void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsign
 // Y: Node ID n
 // D(V, Y)= node_cost
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
-    //TODO
     bool isUpdated = false;
     // Read packet
     // unsigned short size = (unsigned short)ntohs(*(unsigned short*)(packet + 2)); // Is the param size the same as the size field in the packet??
@@ -374,13 +368,6 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         }
 
     }
-    // cout << "this id " << this->router_id << " s_ID " << s_ID << endl;
-    // if (this->router_id == 3 && s_ID == 1)
-    // {
-    //  printDVTable();
-    //  for (auto node_ID : node_IDs)
-    //      cout << "node ID "<<node_ID<<endl;
-    // }
 
     // Any line in A's dvtable should be removed if it has a destination Y via hop V, 
     // and link_YV does not exist in the table received from V
@@ -391,10 +378,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         auto cost_hop = line.second;
         unsigned short hop = cost_hop.second;
         if (dest_ID != hop && hop == s_ID) {
-            // cout << "hop " << hop << " sid " << s_ID << endl;
             if (std::find(node_IDs.begin(), node_IDs.end(), dest_ID) == node_IDs.end()) {
-                // cout << "toerase---------------------------------------------\n";
-                // cout << "this id " << this->router_id << " dest_ID " << dest_ID << " hop " << hop << " s_ID " << s_ID << endl;
                 toErase.push_back(dest_ID);
                 isUpdated = true;
             }
@@ -403,10 +387,8 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
     for (auto ID: toErase)
     {
-        // cout << "erase\n";
         dvtable.erase(ID);
     }
-
     free(packet);
 
 
@@ -417,8 +399,6 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         updateRoutingTableDV();
         sendDVPacket();
     }
-    // else
-        // cout << "No need to update dv table\n";
 }
 
 // update dvtable, only used when the linkcosts is changed (either by PONG or linkdying/coming up)
@@ -454,8 +434,6 @@ bool RoutingProtocolImpl::updateDVTable()
         unsigned short neighbor_node_ID = cost_hop.second;
         if (linkcosts.find(neighbor_node_ID) == linkcosts.end())
         {
-            // dvtable.erase(node_ID);
-            // cout << "-------------- need to erase -------------------\n";
             toErase.push_back(node_ID);
             result = true;
         }
@@ -469,8 +447,6 @@ bool RoutingProtocolImpl::updateDVTable()
         // update the routing table accordingly
         updateRoutingTableDV();
     }
-    // else
-        // cout << "No need to update dv table\n";
     return result;
 }
 
@@ -487,7 +463,6 @@ void RoutingProtocolImpl::updateRoutingTableDV()
         else
             routingtable.insert(pair<unsigned short, unsigned short>(dest_ID, hop));
     }
-
     vector<unsigned short> toErase = {};
     for (auto &line : routingtable)
     {
@@ -495,7 +470,6 @@ void RoutingProtocolImpl::updateRoutingTableDV()
         if (dvtable.find(dest_ID) == dvtable.end())
             toErase.push_back(dest_ID);
     }
-
     for (auto dest_ID : toErase)
         routingtable.erase(dest_ID);
 }
@@ -505,7 +479,7 @@ void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigne
     if (it != routingtable.end()) {
             unsigned short hop = it->second;
             unordered_map<unsigned short, LinkTable>::iterator link_it = linkmap.find(hop);
-            if (link_it != linkmap.end()) {
+            if (link_it != linkmap.end()) {//routing table used for send on correct path
                 LinkTable lnk = link_it->second;
                 sys->send(lnk.port_ID, packet, size);
             }else{
@@ -515,17 +489,16 @@ void RoutingProtocolImpl::updateTable(unsigned short s_ID, char* packet, unsigne
         free(packet);
     }
 }
-
+//have links dropped or not responsive?
 bool RoutingProtocolImpl::checkTopology(){
     bool ischange = false;
     unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin();
     set<unsigned short> changed_s_ID;
     while (it != linkmap.end()) {
             LinkTable lnk= it->second;
-            if (sys->time() > lnk.expire_timeout) {
+            if (sys->time() > lnk.expire_timeout) {//issue
                 // Delete the entry in linkcosts table as well
                 linkcosts.erase(it->first);
-                //
                 ischange = true;
                 changed_s_ID.insert(it->first);
                 linkmap.erase(it++);
@@ -535,10 +508,9 @@ bool RoutingProtocolImpl::checkTopology(){
     }
     if(ischange){
             if (this->protocol == P_LS) {
-            ls->modifyLinkState(changed_s_ID);
-            ls->shortestPath(routingtable);             
+            	   ls->modifyLinkState(changed_s_ID);//what needs to be deleted?
+                   ls->shortestPath(routingtable);//recalibrate shortest path
             } else {
-            //TODO
                 if (updateDVTable())
                     sendDVPacket();
             }
@@ -548,7 +520,6 @@ bool RoutingProtocolImpl::checkTopology(){
 
 void RoutingProtocolImpl::printDVTable()
 {
-    // cout << "dv table updated:\n";
     // The following block of code prints the dvtable
     cout << "---------------------------\n";
     cout << "| DV Table of node " << this->router_id << endl;
