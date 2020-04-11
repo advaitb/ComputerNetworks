@@ -37,4 +37,7 @@
 
 [events]
 
+300.00 linkdying (3,4)
+600.00 linkcomingup (3,4)
+
 1500 end
