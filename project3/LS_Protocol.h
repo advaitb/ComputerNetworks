@@ -11,7 +11,8 @@ struct LS_Record {
   unsigned int expire_timeout;
   unsigned short hop_id;
   unsigned short linkcost;
-
+	
+  //constructors to fix segfaults!
   LS_Record(unsigned int expire_timeout_, unsigned short hop_id_, unsigned short linkcost_)
   {
   	expire_timeout = expire_timeout_;
@@ -32,7 +33,7 @@ struct LS_Record {
 class LS_Protocol{
 
 	public:
-		LS_Protocol(unsigned short router_id);
+	LS_Protocol(unsigned short router_id);
 	//destructor
 	~LS_Protocol();
 	//return, check, modify and check for toplogy changes
