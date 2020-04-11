@@ -1,6 +1,5 @@
 #include "RoutingProtocolImpl.h"
 #include <string.h>
-#include "DV_Protocol.h"
 #include "LS_Protocol.h"
 #include "limits.h"
 #include <algorithm>
@@ -23,8 +22,6 @@ RoutingProtocolImpl::~RoutingProtocolImpl() {
     }
     if(this->protocol == P_LS){
         free(ls);
-    }else {
-        free(dv);
     }
 }
 

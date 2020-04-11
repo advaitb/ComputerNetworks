@@ -7,7 +7,6 @@ OBJS =\
 	Link.o\
 	Node.o\
 	RoutingProtocolImpl.o\
-	DV_Protocol.o\
 	LS_Protocol.o\
 	Simulator.o
 
@@ -17,7 +16,6 @@ HEADRES =\
 	Link.h\
 	Node.h\
 	RoutingProtocol.h\
-	DV_Protocol.h\
 	LS_Protocol.h\
 	Simulator.h
 
@@ -34,8 +32,7 @@ Event.o: Event.h Link.h Node.h Simulator.h
 Link.o: Event.h Link.h Node.h Simulator.h
 Node.o: Event.h Link.h Node.h Simulator.h
 Simulator.o: Event.h Link.h Node.h RoutingProtocol.h Simulator.h 
-RoutingProtocolImpl.o: RoutingProtocolImpl.h DV_Protocol.h LS_Protocol.h
-DV_Protocol.o: DV_Protocol.h
+RoutingProtocolImpl.o: RoutingProtocolImpl.h LS_Protocol.h
 LS_Protocol.o: LS_Protocol.h
 clean:
 	rm -f *.o Simulator

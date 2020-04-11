@@ -4,7 +4,6 @@
 #include "RoutingProtocol.h"
 #include "Node.h"
 #include "LS_Protocol.h"
-#include "DV_Protocol.h"
 #include <unordered_map>
 #include <set>
 #define pingalarm 10000  //10s
@@ -83,7 +82,6 @@ class RoutingProtocolImpl : public RoutingProtocol {
     void updateRoutingTableDV();
     void printDVTable();
     //protocol pointers
-    DV_Protocol* dv;
     LS_Protocol* ls;
     
     //Link information
