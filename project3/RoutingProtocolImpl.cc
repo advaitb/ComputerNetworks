@@ -218,7 +218,9 @@ void RoutingProtocolImpl::recvPongPacket(unsigned short port, char* packet){
     unsigned int sendtime = (unsigned int)ntohl(*(unsigned int*)(packet + 8));
     unsigned short linkcost = (short)(sys->time() - sendtime);
     unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
-    linkcosts.insert(pair<unsigned short, unsigned short>(s_ID, linkcost));
+    cout << "s_ID " << s_ID << " linkcost " << linkcost << endl;
+    // linkcosts.insert(pair<unsigned short, unsigned short>(s_ID, linkcost));
+    linkcosts[s_ID] = linkcost;
     //timeout
     unsigned int expire_timeout = sys->time() + pongto;
     unordered_map<unsigned short, LinkTable>::iterator it = linkmap.find(s_ID);
@@ -326,6 +328,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
         auto it = dvtable.find(node_ID);
         if (it == dvtable.end())
         {
+            cout << "add to dvtable \n";
             // If A hasn't seen node Y before, add it to dvtable
             auto lit = linkcosts.find(s_ID);
             unsigned short cost_AV;
@@ -344,6 +347,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
             auto &cost_hop = it->second;
             unsigned short cost_AY = cost_hop.first;
             unsigned short nexthop = cost_hop.second; // old V, may or may not be s_ID
+            cout << "destination" << it->first << " cost_AY " << cost_AY << " next hop " << nexthop << endl;
             auto lit = linkcosts.find(s_ID);
             unsigned short cost_AV;
             if (lit == linkcosts.end())
@@ -353,10 +357,13 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
             unsigned short cost_AYV = cost_AV + cost_VY; // Need a table to store neighbors and costs?
             if (cost_AYV < cost_AY){//when it's minimum
                 // update dvtable for dest Y with new cost and new hop V
+                cout << "when it's minimum\n";
                 cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID);
                 isUpdated = true;
             }
             else if (cost_AYV > cost_AY && nexthop == s_ID){ // when the next hop is the same, but cost increases
+                cout << "cost_AV " << cost_AV << " cost vy " << cost_VY << endl;
+                cout << "next hop the same, but cost increases\n";
                 cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID);
                 isUpdated = true;
             } // when the next hop is different and cost increases, nothing needs to be done
@@ -389,7 +396,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
     if (isUpdated)
     {
-        // printDVTable();
+        printDVTable();
         // update the routing table accordingly
         updateRoutingTableDV();
         sendDVPacket();
@@ -399,6 +406,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 // update dvtable, only used when the linkcosts is changed (either by PONG or linkdying/coming up)
 bool RoutingProtocolImpl::updateDVTable()
 {
+    cout << "update dvtable\n";
     bool result = false;
     // Check if there're new lines in linkcosts table
     for (auto line: linkcosts)
@@ -410,14 +418,46 @@ bool RoutingProtocolImpl::updateDVTable()
         {
             auto cost_hop = it->second;
             unsigned short old_cost = cost_hop.first;
-            if (old_cost <= cost)
+            unsigned short hop = cost_hop.second;
+            // cout << "neighbor " << neighbor_node_ID << " old cost " << old_cost << " new cost " << cost << endl;
+            // if A goes to V and next hop is V, when linkcost change the dvtable should change
+            // if (old_cost == cost || hop != neighbor_node_ID)
+            if (hop != neighbor_node_ID)
+            {
+                // cout << "hop != neighbor\n";
                 continue;
+            }
+            else if (cost == old_cost)
+            {
+                // cout << "cost == old_cost\n";
+                continue;
+            }
             dvtable.erase(neighbor_node_ID);
         }
         // update the dvtable entry if the entry doesn't exist, or if cost < old_cost 
         result = true;
         auto cost_hop = pair<unsigned short, unsigned short>(cost, neighbor_node_ID);
         dvtable.insert(pair<unsigned short, pair<unsigned short, unsigned short>>(neighbor_node_ID, cost_hop));
+    }
+
+    // check if any linkcosts change make things better
+    for (auto &line : dvtable)
+    {
+        unsigned short dest_ID = line.first;
+        auto cost_hop = line.second;
+        auto lit = linkcosts.find(dest_ID);
+        if (lit != linkcosts.end()) // if dest is a neighbor
+        {
+            unsigned short linkcost = lit->second;
+            cout << "dest id " << dest_ID << " linkcost " << linkcost << endl;
+            if (linkcost < cost_hop.first) // if linkcost is less than the cost of current route
+            {
+                cout << "cost " << cost_hop.first << " hop " << cost_hop.second << endl;
+                result = true;
+                auto cost_hop = pair<unsigned short, unsigned short>(linkcost, dest_ID);
+                dvtable[dest_ID] = cost_hop;
+            }
+        }
     }
 
     // Check if there're lines removed (linkdying)
@@ -436,9 +476,21 @@ bool RoutingProtocolImpl::updateDVTable()
     for (auto ID: toErase)
         dvtable.erase(ID);
 
+    // // Check if there're lines changed (changedelay)
+    // for (auto line: dvtable)
+    // {
+    //     unsigned short node_ID = line.first;
+    //     auto cost_hop = line.second;
+    //     unsigned short neighbor_node_ID = cost_hop.second;
+    //     if (linkcosts.find(neighbor_node_ID) != linkcosts.end())
+    //     {
+
+    //     }
+    // }
+
     if (result)
     {
-        // printDVTable();
+        printDVTable();
         // update the routing table accordingly
         updateRoutingTableDV();
     }
