@@ -6,4 +6,4 @@ We developed four tests to validate the correctness of our implementation.
 
 3, bigtest1: This network contains 10 nodes and close to 30 links. This test shows that our implementation correctly handle large scale cases.
 
-4, bigtest2: The network topology is slightly modified from bigtest1, with additional probability of packet loss on all links. The PING/PONG packets and LS/DV packets can be lost, which makes the router think the network topology keeps changing. This test shows that our implementation behaves as expected where all the nodes are trying to adapt to the topology change.
+4, bigtest2: The network topology is slightly modified from bigtest1, with additional probability of packet loss on all links. Also we have simulated link(3,4) dying and comingup. The PING/PONG packets and LS/DV packets can be lost, which makes the router think the network topology keeps changing. This test shows that our implementation behaves as expected where all the nodes are trying to adapt to the topology change.
