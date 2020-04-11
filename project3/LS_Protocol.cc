@@ -7,6 +7,7 @@ void LS_Protocol::setRouterID(unsigned short router_id)
 	this->router_id = router_id;
 	this->seqnum = 0;
 	this->linkstate = {};
+	this->id2seq = {};
 };
 
 //modify link state according to deleted/changes ID's
@@ -248,6 +249,7 @@ void LS_Protocol::increment(){
 }
 
 bool LS_Protocol::checkSeqNum(char* ls_packet){
+	cout<<"here we are in seqnum"<<endl;
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(ls_packet + 4));
 	unsigned int seqNum = (unsigned int)ntohl(*(unsigned int*)(ls_packet + 8));
 	if (s_ID == this->router_id) {
@@ -260,3 +262,4 @@ bool LS_Protocol::checkSeqNum(char* ls_packet){
   	}
   	return false;
 }
+
