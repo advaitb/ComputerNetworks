@@ -50,8 +50,8 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
         setAlarmType(this, lsalarm, (void*)this->linkstate);
         break;
     case P_DV:
-        dv = static_cast<DV_Protocol*>(malloc(sizeof(DV_Protocol)));
-        dv->setRouterID(this->router_id);
+        // dv = static_cast<DV_Protocol*>(malloc(sizeof(DV_Protocol)));
+        // dv->setRouterID(this->router_id);
         setAlarmType(this, dvalarm, (void*)this->distancevector); 
         break;
   }
@@ -143,7 +143,6 @@ void RoutingProtocolImpl::sendPingPacket(int port){
 //send LS
 void RoutingProtocolImpl::sendLSPacket(){
     /* flood packets to get global topology*/
-    cout<<"sendLSPacket"<<endl;
     unsigned short ls_pack_size = 12 + (linkmap.size() * 4);
     for (unordered_map<unsigned short, LinkTable>::iterator it = linkmap.begin(); it != linkmap.end(); ++it) {
             char* ls_packet = (char*)malloc(ls_pack_size);
@@ -292,9 +291,7 @@ void RoutingProtocolImpl::recvLSPacket(unsigned short port, char* packet, unsign
 void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
     bool isUpdated = false;
     // Read packet
-    // unsigned short size = (unsigned short)ntohs(*(unsigned short*)(packet + 2)); // Is the param size the same as the size field in the packet??
     unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
-    unsigned short d_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
 
     // if s_ID is not a neighbor, discard this packet
     auto lit = linkcosts.find(s_ID);
@@ -358,7 +355,8 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
                 cost_AV = lit->second;
             unsigned short cost_AYV = cost_AV + cost_VY; // Need a table to store neighbors and costs?
             if (cost_AYV < cost_AY){//when it's minimum
-                cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID); // update dvtable for dest Y with new cost and new hop V
+                // update dvtable for dest Y with new cost and new hop V
+                cost_hop = pair<unsigned short, unsigned short>(cost_AYV, s_ID);
                 isUpdated = true;
             }
             else if (cost_AYV > cost_AY && nexthop == s_ID){ // when the next hop is the same, but cost increases
@@ -394,7 +392,7 @@ void RoutingProtocolImpl::recvDVPacket(char* packet, unsigned short size){
 
     if (isUpdated)
     {
-        printDVTable();
+        // printDVTable();
         // update the routing table accordingly
         updateRoutingTableDV();
         sendDVPacket();
@@ -443,13 +441,14 @@ bool RoutingProtocolImpl::updateDVTable()
 
     if (result)
     {
-        printDVTable();
+        // printDVTable();
         // update the routing table accordingly
         updateRoutingTableDV();
     }
     return result;
 }
 
+// Update the routing table when the dvtable changes
 void RoutingProtocolImpl::updateRoutingTableDV()
 {
     for (auto &line : dvtable)
@@ -518,6 +517,7 @@ bool RoutingProtocolImpl::checkTopology(){
     return ischange;
 }
 
+// A helper function that prints the dvtable
 void RoutingProtocolImpl::printDVTable()
 {
     // The following block of code prints the dvtable
