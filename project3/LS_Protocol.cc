@@ -1,5 +1,12 @@
 #include "LS_Protocol.h"
 
+//initialize - constructor
+LS_Protocol::LS_Protocol(unsigned short router_id)
+{
+	router_id = router_id;
+	seqnum = 0;
+};
+
 
 //initialize the router to start sending LS Packets
 void LS_Protocol::setRouterID(unsigned short router_id)
@@ -27,13 +34,6 @@ void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
 		}
 	}
 }
-
-//initialize
-LS_Protocol::LS_Protocol(unsigned short router_id)
-{
-	router_id = router_id;
-	seqnum = 0;
-};
 
 //destructor - delete linkstate and recordtable as they were dynamically allocated
 LS_Protocol::~LS_Protocol(){
