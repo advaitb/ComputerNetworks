@@ -1,0 +1,9 @@
+We developed four tests to validate the correctness of our implementation.
+
+1, test1: In this designed network, there exists a critical link (2,3) that is part of most of the best routes. This test contains events that force this link to die and come up, which would change the best routes. This demonstrate that our implementation can adapt to these changes.
+
+2, test2: In this network, the delay between two nodes is changed several times. It helps to test that our implementation can detect the delay change and switch routes to forward data packets. It also helps to test the poison reverse feature of DV is correctly implemented.
+
+3, bigtest1: This network contains 10 nodes and close to 30 links. This test shows that our implementation correctly handle large scale cases.
+
+4, bigtest2: The network topology is slightly modified from bigtest1, with additional probability of packet loss on all links. The PING/PONG packets and LS/DV packets can be lost, which makes the router think the network topology keeps changing. This test shows that our implementation behaves as expected where all the nodes are trying to adapt to the topology change.
