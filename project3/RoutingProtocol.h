@@ -17,6 +17,6 @@ class RoutingProtocol {
     virtual void handle_alarm(void *data) = 0;
     virtual void recv(unsigned short port, void *packet, unsigned short size) = 0;
 };
-
+//keep these functions untouched
 #endif
 
