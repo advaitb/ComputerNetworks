@@ -106,6 +106,7 @@ void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
   	}
 }
 
+//return the reference to the same router
 LS_Record* LS_Protocol::returnLinkState(unsigned short s_ID){
     for (auto &ls_rec : linkstate)
     {
