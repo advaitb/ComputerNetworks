@@ -28,13 +28,14 @@ void LS_Protocol::modifyLinkState(set<unsigned short>& changed_s_ID){
 	}
 }
 
+//initialize
 LS_Protocol::LS_Protocol(unsigned short router_id)
 {
 	router_id = router_id;
 	seqnum = 0;
 };
 
-//destructor
+//destructor - delete linkstate and recordtable as they were dynamically allocated
 LS_Protocol::~LS_Protocol(){
 	vector<LS_Record*>::iterator lnkst_it = linkstate.begin();
 	while(lnkst_it != linkstate.end()){
@@ -56,6 +57,7 @@ LS_Protocol::~LS_Protocol(){
   	}	
 }
 
+//have some links been deleted and not updated in the recordtable?
 void LS_Protocol::changeTopology(unsigned short n_ID){
 	unordered_map<unsigned short, vector<LS_Record*>*>::iterator it = recordtable.find(n_ID);
 	if(it == recordtable.end()) return;
@@ -70,6 +72,7 @@ void LS_Protocol::changeTopology(unsigned short n_ID){
 	delete rec_vec;
 }
 
+//check if any links are unresponsive?
 bool LS_Protocol::checkLinkState(unsigned int time){
   	bool ischanged = false;
   	vector<LS_Record*>::iterator it = linkstate.begin();
@@ -87,6 +90,7 @@ bool LS_Protocol::checkLinkState(unsigned int time){
   	return ischanged;
 }
 
+//create LS Packet
 void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
 	*(char*)packet = LS;
   	*(unsigned short*)(packet + 2) = (unsigned short)htons(packet_size);
@@ -103,14 +107,6 @@ void LS_Protocol::createLSPacket(char* packet, unsigned short packet_size){
 }
 
 LS_Record* LS_Protocol::returnLinkState(unsigned short s_ID){
-	// for(vector<LS_Record*>::iterator iter = linkstate.begin(); iter != linkstate.end(); ++iter) {
- //    		LS_Record* rec  = *iter;
- //    		if (rec->hop_id == s_ID) {
- //      			return rec;
- //    		}
-	// }
-	// return nullptr;
-	cout << linkstate.size() << endl;
     for (auto &ls_rec : linkstate)
     {
     	if (ls_rec->hop_id == s_ID)
@@ -140,7 +136,7 @@ void LS_Protocol::shortestPath(unordered_map<unsigned short, unsigned short>& ro
 				temp_id = hopit->second.second;
 			}	
 		}
-		//routingtable
+		//routingtable addition
 		hopcost.erase(temp_id);
 		routingtable[temp_id] = temp_id;
 		unordered_map<unsigned short, vector<LS_Record*>*>::iterator recit = recordtable.find(temp_id);
@@ -152,12 +148,14 @@ void LS_Protocol::shortestPath(unordered_map<unsigned short, unsigned short>& ro
 				unordered_map<unsigned short, pair<unsigned short, unsigned short> >::iterator hopit_in;
 				hopit_in = hopcost.find(rec->hop_id);
 				if(hopit_in != hopcost.end()){
+					//update path_cost
 					unsigned short tempcost = hopit_in->second.first;
 					if(path_cost < tempcost){
 						hopcost[rec->hop_id] = make_pair(path_cost, temp_id);
 					}
 					
 				} else {
+					//add calculate path as it is seen first
 					unordered_map<unsigned short, unsigned short>::iterator rit = routingtable.find(rec->hop_id);
 					if(this->router_id != rec->hop_id && rit == routingtable.end()){
 						hopcost[rec->hop_id] = make_pair(path_cost,temp_id);
@@ -171,43 +169,26 @@ void LS_Protocol::shortestPath(unordered_map<unsigned short, unsigned short>& ro
 
 bool LS_Protocol::updatePONG(unsigned short s_ID, unsigned int timeout, unsigned short linkcost, unsigned int time){
 	bool ischanged = false;
-	cout<<"LSP::UpdatePONG before returnLinkState"<<endl;
 	LS_Record* rec = returnLinkState(s_ID);
-	cout<<"LSP::UpdatePONG after returnLinkState"<<endl;
 	if(rec != nullptr){
 		rec->expire_timeout = time + timeout;
-		cout<<"LSP::UpdatePONG after set timeout"<<endl;
 		if(linkcost!=rec->linkcost){
 			ischanged=true;
 			rec->linkcost = linkcost; 
 		}
-	cout<<"LSP::UpdatePONG end of ifblock"<<endl;
 	}
 	else{ //New record add it top linkstate
-		cout<<"LSP::UpdatePONG we are in else"<<endl;
 		ischanged = true;
     		rec = static_cast<LS_Record*>(malloc(sizeof(LS_Record)));
-		cout<<"LSP::UpdatePONG set rec"<<endl;
 		rec->hop_id = s_ID;
     		rec->linkcost = linkcost;
     		rec->expire_timeout = time + timeout;
-		cout<<"LSP::UpdatePONG rec variables done"<<endl;
 		linkstate.push_back(rec);
-		// if (linkstate.size() == 0){
-		// 	auto linkstat = vector<LS_Record*>({rec});
-		// 	// linkstat.push_back(rec);
-		// 	// linkstate = linkstat;
-		// }
-		// else
-		// {
-		// 	cout << "??\n";
-		// 	linkstate.push_back(rec);
-		// }
-		cout<<"LSP::UpdatePONG push back done"<<endl;
 	}
 	return ischanged;
 }
 
+//ls alarm triggers update of the table upon receiving packet
 void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int time, unsigned short size){
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(packet + 4));
   	unsigned int count = (size - 12) >> 2;
@@ -216,6 +197,7 @@ void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int tim
     		unsigned int offset = 12 + (i * 4);
     		unsigned short hop_id = (unsigned short)ntohs(*(unsigned short*)(packet + offset));
     		if (hop_id== this->router_id) {
+			//same router ignore
       			continue;
     		}
     		unsigned short linkcost = (unsigned short)ntohs(*(unsigned short*)(packet + offset + 2));
@@ -223,47 +205,37 @@ void LS_Protocol::updateLS(char* packet, unsigned int timeout,  unsigned int tim
     		ls_rec->hop_id = hop_id;
     		ls_rec->linkcost = linkcost;
     		ls_rec_vec->push_back(ls_rec);
+		//added all new linkcosts
   	}
   	LS_Record* my_hop_rec = returnLinkState(s_ID);
-  	cout<<"here we are in updateLS after returnLinkState"<<endl;
 	if (my_hop_rec != nullptr) {
-		cout<<"problem before assigning myhop_rec"<<endl;
+		//new timeout set
     		my_hop_rec->expire_timeout = time + timeout;
-		cout<<"myhoprec successfully assigned"<<endl;
   	}
-	cout<<"pointer returned was null need to check below"<<endl;
   	unordered_map<unsigned short, vector<LS_Record*>*>::iterator it = recordtable.find(s_ID);
 	if(it == recordtable.end()){
-		cout<<"it==recordtable.end()"<<endl;
 		recordtable[s_ID] = ls_rec_vec;
-		cout<<"recordtable successfully updated"<<endl;
 	}else{
-		cout<<"else block because it alrady present in recordtable"<<endl;
+		//remove old entries related to s_ID
 		vector<LS_Record*>* tempvec = it->second;
-		cout<<"can assign it->second to tempvec"<<endl;
 		vector<LS_Record*>::iterator tempit = tempvec->begin();
 		while(tempit != tempvec->end()){
-			cout<<"checking iteration loop"<<endl;
 			LS_Record* rec = *tempit;
-			cout<<"before tempit = tempvec->erase"<<endl;
 			tempit = tempvec->erase(tempit);
-			cout<<"Before free(rec)"<<endl;
 			free(rec);
-			cout<<"free(rec) worked"<<endl;
 		}
-		cout<<"about to delete tempvec"<<endl;
 		delete(tempvec);
 	}
 	recordtable[s_ID] = ls_rec_vec;	
 }
 
-
+// seqnum needs to incremented
 void LS_Protocol::increment(){
 	this->seqnum++;
 }
 
+//check if we have seen an updated packet or a similar packet as before
 bool LS_Protocol::checkSeqNum(char* ls_packet){
-	cout<<"here we are in seqnum"<<endl;
 	unsigned short s_ID = (unsigned short)ntohs(*(unsigned short*)(ls_packet + 4));
 	unsigned int seqNum = (unsigned int)ntohl(*(unsigned int*)(ls_packet + 8));
 	if (s_ID == this->router_id) {
